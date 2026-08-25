@@ -2,21 +2,21 @@
 
 ## Status
 
-- Milestone: 0 — Scope, governance, and evaluation contract
-- Specification status: DRAFT — `DECISION REQUIRED` fields block approval
-- Evaluation owner: DECISION REQUIRED
-- Mathematics review lead: DECISION REQUIRED
-- Privacy approval: DECISION REQUIRED
+- Milestone: 0 — Internal MVP direction and deferred-gate register
+- Internal mocked interaction: NOT BLOCKED
+- Production-provider integration: DEFERRED — benchmark `DECISION REQUIRED` fields must be resolved before Milestone 6
+- Decision authority: Project owner
+- Mathematics review evidence: DECISION REQUIRED
+- Privacy review evidence: DECISION REQUIRED
 - Last updated: 2026-08-25
 
-This specification defines how candidate multimodal providers and model snapshots will be compared. It does not select a provider, approve student-data processing, or claim that a consumer chat product and its API behave identically.
+This specification defines how candidate multimodal providers and model snapshots will be compared. It does not select a provider, approve student-data processing, or claim that a consumer chat product and its API behave identically. Benchmark execution does not block the deterministic fake-provider interaction work in Milestones 1–5.
 
 ## Benchmark decisions
 
 | Decision | Approved value |
 |---|---|
 | Candidate providers and model snapshots | DECISION REQUIRED |
-| Evaluation dataset owner | DECISION REQUIRED |
 | Mathematics adjudication panel | DECISION REQUIRED |
 | Number of cases per corpus stratum | DECISION REQUIRED |
 | Number of repeated runs per case | DECISION REQUIRED |
@@ -26,8 +26,9 @@ This specification defines how candidate multimodal providers and model snapshot
 | Metric priority or trade-off rule | DECISION REQUIRED |
 | Maximum acceptable cost | DECISION REQUIRED |
 | Maximum acceptable latency | DECISION REQUIRED |
-| Tie-breaking and final selection authority | DECISION REQUIRED |
-| Whether benchmark execution/provider selection blocks Milestone 1 or only production-provider integration | DECISION REQUIRED |
+| Tie-breaking method | DECISION REQUIRED |
+| Final selection authority | Project owner |
+| Benchmark execution/provider selection gate | Production-provider integration in Milestone 6; does not block Milestone 1 |
 
 No provider may enter the benchmark until its data-handling terms have passed the applicable review in [`PRIVACY_AND_CONSENT_ACTION_LIST.md`](../privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md).
 
@@ -124,7 +125,7 @@ Run concurrency, timeouts, region, retry behavior for non-schema failures, sampl
 | Silent-correction rate | Cases where the provider changes a written mathematical error into a correct statement | DECISION REQUIRED; critical failures reported individually |
 | Warning usefulness | Precision/recall or reviewed usefulness of uncertainty warnings | DECISION REQUIRED |
 
-Automated string similarity alone is insufficient for mathematics. The evaluation owner must approve the normalization and semantic-error rubric.
+Automated string similarity alone is insufficient for mathematics. The project owner must confirm the normalization and semantic-error rubric using qualified mathematics review evidence.
 
 ## Evaluation and grading measures
 
@@ -204,11 +205,12 @@ data-handling review result
 known limitations and validity threats
 selected provider or no-selection decision
 selection rationale and rejected alternatives
-approvers and approval dates
+project-owner decision and date
+specialist review evidence
 ```
 
 Do not collapse materially different quality, safety, privacy, latency, and cost measures into an opaque score. Any weighting or trade-off rule must be approved before results are unblinded.
 
 Selected provider and model snapshot: DECISION REQUIRED.
 
-Final benchmark-specification approval: DECISION REQUIRED.
+Production-provider benchmark confirmation: DEFERRED until Milestone 6 preparation.

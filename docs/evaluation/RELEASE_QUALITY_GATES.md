@@ -2,13 +2,13 @@
 
 ## Status
 
-- Milestone: 0 — Scope, governance, and evaluation contract
-- Gate-set status: DRAFT — numeric and ownership decisions remain `DECISION REQUIRED`
-- Release owner: DECISION REQUIRED
-- Evaluation owner: DECISION REQUIRED
+- Milestone: 0 — Internal MVP direction and deferred-gate register
+- Internal implementation: NOT BLOCKED
+- External pilot gate set: DEFERRED — numeric and evidence decisions remain `DECISION REQUIRED`
+- Decision authority: Project owner
 - Last updated: 2026-08-25
 
-This document defines the evidence required to advance engineering milestones and begin or continue the closed pilot. It distinguishes requirements already fixed by the MVP plan from thresholds that accountable stakeholders must approve.
+This document defines the evidence required at later engineering, provider-integration, and external-pilot gates. It does not block internal product iteration with deterministic mocks and synthetic/non-personal fixtures. It distinguishes requirements already fixed by the MVP plan from thresholds that the project owner must confirm when their named gate becomes relevant.
 
 ## Gate rule
 
@@ -17,25 +17,25 @@ A gate passes only when it has:
 1. a stable metric and evaluation method;
 2. an approved threshold;
 3. a minimum sample size or coverage definition;
-4. a named owner and approver;
+4. a dated project-owner decision;
 5. versioned, reproducible evidence;
 6. no unresolved critical failure or undocumented exception.
 
-`DECISION REQUIRED` is a blocking state, not a provisional pass. An accepted exception must name its owner, rationale, scope, mitigation, expiry or review date, and rollback trigger.
+`DECISION REQUIRED` is a blocking state, not a provisional pass. An accepted exception must record the project owner's decision, rationale, scope, mitigation, expiry or review date, and rollback trigger.
 
-## Milestone 0 exit gates
+## Stage-gate register
 
-| Deliverable | Pass condition | Owner | Evidence | Status |
+| Deliverable | Pass condition | Evidence | Required before | Status |
 |---|---|---|---|---|
-| Supported exam list | Finite non-empty set and applicable cycles approved with content ownership | DECISION REQUIRED | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | DECISION REQUIRED |
-| Pilot cohort | Grade/age, count, location, language, invitation, consent applicability, and operation criteria approved | DECISION REQUIRED | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | DECISION REQUIRED |
-| Supported-device matrix | Required phones/tablets, OS/browser versions, viewports, and camera/upload paths approved | DECISION REQUIRED | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | DECISION REQUIRED |
-| AI benchmark specification | Corpus, protocol, metrics, thresholds, reviewers, and selection authority approved | DECISION REQUIRED | [`AI_PROVIDER_BENCHMARK.md`](AI_PROVIDER_BENCHMARK.md) | DECISION REQUIRED |
-| Privacy and consent action list | All blocking actions resolved or explicitly found not applicable by qualified reviewers | DECISION REQUIRED | [`PRIVACY_AND_CONSENT_ACTION_LIST.md`](../privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md) | DECISION REQUIRED |
-| Content provenance policy | Source/rights rules, owners, evidence system, publication, and withdrawal controls approved | DECISION REQUIRED | [`CONTENT_PROVENANCE_POLICY.md`](../content/CONTENT_PROVENANCE_POLICY.md) | DECISION REQUIRED |
-| Release-quality gates | Thresholds, sample definitions, owners, stop conditions, and approval process approved | DECISION REQUIRED | This document | DECISION REQUIRED |
+| Supported exam list | Finite non-empty set and applicable cycles confirmed with content review evidence | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | Real exam content import/publication in Milestone 2 | DEFERRED |
+| Pilot cohort | Grade/age, count, location, language, invitation, consent applicability, and operation criteria confirmed | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | External pilot in Milestone 12 | DEFERRED |
+| Internal development-device matrix | Browser emulation targets and limitations confirmed | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | Milestone 1 | APPROVED |
+| AI benchmark specification | Corpus, protocol, metrics, thresholds, reviewers, and selection method confirmed | [`AI_PROVIDER_BENCHMARK.md`](AI_PROVIDER_BENCHMARK.md) | Real-provider integration in Milestone 6 | DEFERRED |
+| Privacy and consent action list | All blocking actions resolved or explicitly found not applicable using qualified review evidence | [`PRIVACY_AND_CONSENT_ACTION_LIST.md`](../privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md) | Real minors' data or external pilot | DEFERRED |
+| Content provenance policy | Source/rights rules, evidence system, publication, and withdrawal controls confirmed | [`CONTENT_PROVENANCE_POLICY.md`](../content/CONTENT_PROVENANCE_POLICY.md) | Real third-party content import/publication | DEFERRED |
+| Release-quality gates | Thresholds, sample definitions, stop conditions, evidence, and confirmation process approved | This document | External pilot in Milestone 12 | DEFERRED |
 
-Milestone 1 is not authorized while any row remains unresolved.
+Milestone 1 is authorized with synthetic/non-personal fixtures and a deterministic fake provider. A deferred row blocks only the stage named in its `Required before` column.
 
 ## Requirements fixed by the MVP plan
 
@@ -61,44 +61,44 @@ These are pass/fail constraints and must not be weakened during threshold approv
 
 ## AI quality gates
 
-The benchmark method is defined in [`AI_PROVIDER_BENCHMARK.md`](AI_PROVIDER_BENCHMARK.md). The following thresholds must be approved before the benchmark is used for selection or release.
+The benchmark method is defined in [`AI_PROVIDER_BENCHMARK.md`](AI_PROVIDER_BENCHMARK.md). The following thresholds must be confirmed before the benchmark is used for provider selection or external release; they do not block mocked interaction development.
 
-| Gate | Metric and reporting | Threshold | Minimum evidence | Owner |
-|---|---|---|---|---|
-| Transcription schema validity | First-pass and post-single-retry valid rates | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Transcription correction burden | Correction completion, time, edit actions, text and math errors by stratum | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Silent mathematical correction | Critical-case rate and individual review | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Step segmentation | Agreement with adjudicated step boundaries | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Score agreement | Exact agreement and absolute rubric-score difference | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Root-error agreement | Agreement with adjudicated root error | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Dependent-error handling | Reviewed downstream over-penalization rate | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| False criticism | Valid-step false criticism rate, with severe cases listed | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Alternative-solution acceptance | Acceptance rate for adjudicated valid alternative methods | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Uncertainty routing | Safe uncertainty/manual-review behavior on ambiguous cases | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Feedback correctness | Expert-reviewed mathematical correctness and transcript support | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Hint quality | Correctness, usefulness, progressive disclosure, and harmful-hint rates | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Geometry-action validity | Schema-valid actions referencing approved scene IDs only | No invalid action may execute | DECISION REQUIRED | DECISION REQUIRED |
-| Provider latency | Median and upper percentiles for transcription, grading, and hints | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Provider reliability | Timeouts and terminal provider-error rates | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Provider cost | Cost per operation, attempt, session, and approved pilot projection | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Provider data handling | All applicable privacy/security actions approved | No unresolved blocking action | Approved review evidence | DECISION REQUIRED |
+| Gate | Metric and reporting | Threshold | Minimum evidence |
+|---|---|---|---|
+| Transcription schema validity | First-pass and post-single-retry valid rates | DECISION REQUIRED | DECISION REQUIRED |
+| Transcription correction burden | Correction completion, time, edit actions, text and math errors by stratum | DECISION REQUIRED | DECISION REQUIRED |
+| Silent mathematical correction | Critical-case rate and individual review | DECISION REQUIRED | DECISION REQUIRED |
+| Step segmentation | Agreement with adjudicated step boundaries | DECISION REQUIRED | DECISION REQUIRED |
+| Score agreement | Exact agreement and absolute rubric-score difference | DECISION REQUIRED | DECISION REQUIRED |
+| Root-error agreement | Agreement with adjudicated root error | DECISION REQUIRED | DECISION REQUIRED |
+| Dependent-error handling | Reviewed downstream over-penalization rate | DECISION REQUIRED | DECISION REQUIRED |
+| False criticism | Valid-step false criticism rate, with severe cases listed | DECISION REQUIRED | DECISION REQUIRED |
+| Alternative-solution acceptance | Acceptance rate for adjudicated valid alternative methods | DECISION REQUIRED | DECISION REQUIRED |
+| Uncertainty routing | Safe uncertainty/manual-review behavior on ambiguous cases | DECISION REQUIRED | DECISION REQUIRED |
+| Feedback correctness | Expert-reviewed mathematical correctness and transcript support | DECISION REQUIRED | DECISION REQUIRED |
+| Hint quality | Correctness, usefulness, progressive disclosure, and harmful-hint rates | DECISION REQUIRED | DECISION REQUIRED |
+| Geometry-action validity | Schema-valid actions referencing approved scene IDs only | No invalid action may execute | DECISION REQUIRED |
+| Provider latency | Median and upper percentiles for transcription, grading, and hints | DECISION REQUIRED | DECISION REQUIRED |
+| Provider reliability | Timeouts and terminal provider-error rates | DECISION REQUIRED | DECISION REQUIRED |
+| Provider cost | Cost per operation, attempt, session, and approved pilot projection | DECISION REQUIRED | DECISION REQUIRED |
+| Provider data handling | All applicable privacy/security actions approved | No unresolved blocking action | Approved review evidence |
 
 Results must be reported by corpus stratum and supported examination, not only as aggregate averages.
 
 ## Device and workflow gates
 
-| Gate | Metric | Threshold | Evidence | Owner |
-|---|---|---|---|---|
-| Invitation login | Successful login and safe failure/recovery on supported classes | DECISION REQUIRED | Browser tests and device report | DECISION REQUIRED |
-| Camera and upload reliability | Capture/upload completion, retry recovery, and existing-photo fallback | DECISION REQUIRED | Browser tests, device report, pilot telemetry | DECISION REQUIRED |
-| Math rendering | Render failures and raw-TeX leakage across the committed corpus | Zero raw-TeX leaks; other threshold DECISION REQUIRED | Math-render suite and device report | DECISION REQUIRED |
-| Visual math correction | Task completion without requiring raw LaTeX | DECISION REQUIRED | Usability protocol and device report | DECISION REQUIRED |
-| Geometry rendering | Determinism, constraint preservation, touch use, fallback, and accessibility | DECISION REQUIRED beyond fixed safety constraints | Geometry tests and device report | DECISION REQUIRED |
-| Responsive journey | Complete static and provider-backed journey on every supported class | DECISION REQUIRED | End-to-end tests and manual QA | DECISION REQUIRED |
-| Failure-state coverage | Loading, retryable, permanent, and uncertainty states are reachable and understandable | DECISION REQUIRED | Component/end-to-end tests and review | DECISION REQUIRED |
-| Accessibility | Approved target and conformance protocol | DECISION REQUIRED | Automated and manual report | DECISION REQUIRED |
+| Gate | Metric | Threshold | Evidence |
+|---|---|---|---|
+| Invitation login | Successful login and safe failure/recovery on supported classes | DECISION REQUIRED | Browser tests and device report |
+| Camera and upload reliability | Capture/upload completion, retry recovery, and existing-photo fallback | DECISION REQUIRED | Browser tests, device report, pilot telemetry |
+| Math rendering | Render failures and raw-TeX leakage across the committed corpus | Zero raw-TeX leaks; other threshold DECISION REQUIRED | Math-render suite and device report |
+| Visual math correction | Task completion without requiring raw LaTeX | DECISION REQUIRED | Usability protocol and device report |
+| Geometry rendering | Determinism, constraint preservation, touch use, fallback, and accessibility | DECISION REQUIRED beyond fixed safety constraints | Geometry tests and device report |
+| Responsive journey | Complete static and provider-backed journey on every supported class | DECISION REQUIRED | End-to-end tests and manual QA |
+| Failure-state coverage | Loading, retryable, permanent, and uncertainty states are reachable and understandable | DECISION REQUIRED | Component/end-to-end tests and review |
+| Accessibility | Approved target and conformance protocol | DECISION REQUIRED | Automated and manual report |
 
-The exact supported classes are blocking decisions in [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md).
+The internal browser-emulation classes are approved in [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md). Exact later emulator, simulator, and physical-device targets are selected before their named pre-pilot gates.
 
 ## Security, privacy, and content gates
 
@@ -138,7 +138,7 @@ The go/no-go rule must assess whether the structured coaching system demonstrate
 
 ## Severity and stop policy
 
-Severity definitions, allowed counts, escalation timing, and restart authority are DECISION REQUIRED. At minimum, the policy must explicitly address:
+Severity definitions, allowed counts, and escalation timing are DECISION REQUIRED. Restart authority remains with the project owner. At minimum, the policy must explicitly address:
 
 - student safety or privacy breach;
 - unauthorized access or data disclosure;
@@ -151,16 +151,10 @@ Severity definitions, allowed counts, escalation timing, and restart authority a
 - unsupported-device failure that prevents the core learning loop;
 - content-rights dispute or material mathematical error.
 
-## Approval record
+## External-pilot confirmation
 
-| Role | Named approver | Decision | Date | Evidence link |
-|---|---|---|---|---|
-| Product | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Evaluation | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Mathematics content | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Engineering | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Security | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Privacy/legal | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
-| Pilot operations | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED | DECISION REQUIRED |
+| Decision | Date | Evidence link | Exceptions or review date |
+|---|---|---|---|
+| DEFERRED | DECISION REQUIRED | DECISION REQUIRED | Revisit before Milestone 12 |
 
-Final release-gate approval: DECISION REQUIRED.
+External-pilot quality-gate confirmation: DEFERRED.

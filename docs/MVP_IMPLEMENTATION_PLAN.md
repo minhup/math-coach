@@ -106,9 +106,20 @@ Next combined plan
 
 ---
 
-## 3. Mandatory decisions before coding
+## 3. Decision timing
 
-No implementation agent may invent these values.
+No implementation agent may invent product values. However, decisions must block only the stage that actually needs them. Internal development may proceed with synthetic fixtures, mock exam records, deterministic fake AI, and non-personal test images.
+
+| Decision area | Must be resolved before | Does not block |
+|---|---|---|
+| Supported examination set | Importing or publishing real exam content in Milestone 2 | Milestone 1 foundation and mocked interaction work |
+| Pilot cohort and operations | Inviting external participants in Milestone 12 | Internal implementation and testing in Milestones 1–11 |
+| AI provider benchmark execution and selection | Real-provider integration in Milestone 6 | Foundation, schemas, math UI, geometry, and mocked vertical slice |
+| Legal, privacy, and consent review | Collecting real minors' data or starting an external pilot | Internal work using synthetic/non-personal fixtures |
+| Content provenance approval | Importing or publishing real third-party content | Schema and UI development using original synthetic fixtures |
+| Numeric release and pilot gates | Starting the external pilot | Internal product iteration and engineering checks |
+
+The project owner is the sole MVP product decision authority. Specialist legal, privacy, rights, security, or mathematics review is supporting evidence when the decision requires that expertise; it is not a separate product-governance layer.
 
 ### 3.1 Supported examination set
 
@@ -120,11 +131,11 @@ Example only:
 SUPPORTED_EXAMS = [PTNK, HCMC_Specialized]
 ```
 
-The team must decide the real list. A student may select any subset of the supported set.
+The project owner must decide the real list before real exam content is imported or published. A student may select any subset of the supported set. Until then, internal development must use clearly synthetic exam records and preserve the multi-exam model.
 
 ### 3.2 Pilot cohort
 
-The team must record:
+Before an external pilot, the project owner must record:
 
 ```text
 student grade/age range
@@ -135,6 +146,8 @@ parent/guardian consent requirement
 supported devices
 pilot start/end criteria
 ```
+
+This cohort decision does not block internal implementation.
 
 ### 3.3 AI provider benchmark
 
@@ -168,6 +181,8 @@ cost
 data-handling terms
 ```
 
+The specification may evolve while the mocked interaction experience is built. Benchmark execution and provider selection gate Milestone 6, not Milestone 1.
+
 ### 3.4 Legal and privacy review
 
 Before inviting minors, obtain appropriate review for:
@@ -182,7 +197,21 @@ research/model-improvement consent
 account deletion and data export
 ```
 
-This plan does not provide legal conclusions.
+This plan does not provide legal conclusions. This review gates real participant data and the external pilot; it does not gate internal development with synthetic/non-personal fixtures.
+
+### 3.5 Internal device-development matrix
+
+Internal phone and tablet development uses browser emulation first:
+
+```text
+compact phone: Chromium, 360 × 640 viewport
+Android phone: Playwright Pixel 7 descriptor
+iPhone: Playwright iPhone 13 WebKit descriptor
+tablet portrait: Playwright iPad Pro 11 WebKit descriptor
+tablet landscape: Playwright iPad Pro 11 landscape WebKit descriptor
+```
+
+Use Android Emulator later for Android browser, camera, permission, and upload behavior that browser emulation cannot represent faithfully. Apple iOS/iPadOS Simulator requires a macOS/Xcode environment and is therefore a pre-pilot validation path, not a blocker for Linux-based internal development. Physical-device testing is required before an external pilot, not before the first internal MVP.
 
 ---
 
@@ -1176,21 +1205,40 @@ GET    /internal/flagged-attempts
 
 ## 15. Milestones
 
-### Milestone 0 — Scope, governance, and evaluation contract
+Implementation priority across Milestones 1–5 is the core human–AI interaction:
+
+```text
+paper solution photo
+        ↓
+visible processing and recovery states
+        ↓
+structured transcript the student can correct visually
+        ↓
+explicit student confirmation
+        ↓
+step feedback, uncertainty, and next action
+        ↓
+progressive hint or retry
+```
+
+Build and review this flow incrementally with deterministic mocks. Do not postpone all UI/UX learning until provider integration.
+
+### Milestone 0 — Internal MVP direction and deferred-gate register
 
 Deliver:
 
 ```text
-supported exam list
-pilot cohort definition
-supported-device matrix
-AI benchmark specification
-privacy and consent action list
-content provenance policy
-release-quality gates
+core human–AI interaction priority
+single project-owner decision model
+decision timing and deferred-gate register
+emulator-first phone/tablet development matrix
+pre-pilot privacy and consent checklist
+pre-publication content provenance checklist
+provider benchmark specification
+release-quality gate framework
 ```
 
-Exit only when none of these are unresolved.
+Exit when the internal product direction, development-device matrix, and timing of every deferred decision are explicit. Unresolved external-pilot, provider-selection, content-publication, or release items do not block Milestone 1.
 
 ### Milestone 1 — Repository and engineering foundation
 
@@ -1205,9 +1253,10 @@ invite-only auth
 CI
 logging
 root development commands
+responsive interaction shell
 ```
 
-Exit when a pilot user can log in and upload a test image.
+Exit when an internal test user can log in, open the responsive interaction shell, and upload a synthetic or non-personal test image in the development device matrix.
 
 ### Milestone 2 — Versioned content and multi-exam schema
 
@@ -1281,7 +1330,7 @@ concept
 summary
 ```
 
-Exit when the entire journey works on phone and tablet.
+Exit when the entire journey works in the emulator-first phone/tablet development matrix. Physical-device and true iOS/iPadOS Simulator validation remain pre-pilot work.
 
 ### Milestone 6 — Multimodal transcription
 
@@ -1313,7 +1362,7 @@ uncertainty route
 gold evaluation report
 ```
 
-The team must define numeric release gates in Milestone 0. Do not invent them during implementation.
+The project owner must confirm numeric gates before an external pilot. Internal thresholds may evolve from measured benchmark and usability evidence; do not present provisional values as validated release claims.
 
 ### Milestone 8 — Learner-state engine
 
@@ -1383,7 +1432,10 @@ device test report
 security checklist
 privacy checklist
 incident procedure
+external-pilot decisions and evidence
 ```
+
+All privacy, consent, content-rights, device, security, retention, deletion/export, and pilot-operation items that were deferred during internal development must be resolved before this milestone exits.
 
 ### Milestone 12 — Closed pilot and go/no-go
 
@@ -1412,7 +1464,7 @@ Proceed only when the structured coaching system demonstrates clear value beyond
 ## 16. Critical path
 
 ```text
-M0 Scope/governance
+M0 Internal MVP direction
         ↓
 M1 Foundation
         ↓
@@ -1434,7 +1486,7 @@ M9 Multi-target coaching
                 ↓
 M10 Concepts + engagement
                 ↓
-M11 Hardening
+M11 Hardening + pre-pilot gates
                 ↓
 M12 Pilot
 ```

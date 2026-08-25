@@ -2,22 +2,22 @@
 
 ## Metadata
 
-- Status: ready-for-review
-- Owner: Codex implementation agent; stakeholder decision owners are `DECISION REQUIRED`
+- Status: in-progress
+- Owner: Project owner; implementation support by Codex
 - Branch: `docs/m0-scope-governance`
 - Base commit: `b8c884ef082e9966f3a14ae124720cbf4d7dbf42`
-- Related milestone: Milestone 0 — Scope, governance, and evaluation contract
+- Related milestone: Milestone 0 — Internal MVP direction and deferred-gate register
 - Related issue/ticket: None
 - Started: 2026-08-25
 - Last updated: 2026-08-25
 
 ## Context
 
-The repository contains the implementation plan and agent workflow documents but no application code, Milestone 0 decision records, active ChangePlans, or test tooling. The implementation plan prohibits agents from inventing the supported examination set, pilot cohort, provider benchmark outcome, legal conclusions, or release thresholds. Milestone 1 must not begin until every Milestone 0 exit item is resolved.
+The repository contains the implementation plan and agent workflow documents but no application code, Milestone 0 decision records, active ChangePlans, or test tooling. The implementation plan prohibits agents from inventing the supported examination set, pilot cohort, provider benchmark outcome, legal conclusions, or release thresholds. During review, the project owner established that all MVP product decisions are made by the project owner and that internal engineering should prioritize the human–AI interaction experience. Multi-role governance and external-pilot validation must not block building the internal MVP, although required safeguards still apply before real minors or their data enter the system.
 
 ## Goal
 
-Create the permanent Milestone 0 document set needed to collect, review, and approve the supported-exam scope, pilot definition, device support, AI benchmark, privacy and consent work, content provenance rules, and release-quality gates. Every unresolved stakeholder-owned value must be labeled `DECISION REQUIRED`.
+Create the permanent Milestone 0 decision records, center the immediate roadmap on the paper-photo-to-feedback human–AI interaction loop, and distinguish internal-build decisions from pre-pilot and release gates. Use the project owner as the sole MVP decision authority. Adopt a practical emulator-first phone/tablet test matrix that does not require owning a tablet.
 
 ## Non-goals
 
@@ -25,7 +25,10 @@ Create the permanent Milestone 0 document set needed to collect, review, and app
 - Scaffold the Next.js or FastAPI applications.
 - Add dependencies, CI, root development commands, schemas, migrations, infrastructure, or tests for application behavior.
 - Select or integrate an AI provider.
-- Declare the repository ready for Milestone 1 while blocking decisions remain.
+- Declare an external pilot ready while pre-pilot decisions remain.
+- Define multi-role product governance for a later public release.
+- Treat the project owner's decision authority as a substitute for qualified legal, privacy, rights, security, or mathematics evidence where that evidence is required.
+- Make external-pilot privacy, content-rights, or release validation block internal UI/UX implementation.
 
 ## User-visible behavior
 
@@ -38,24 +41,28 @@ None. This change adds project governance and evaluation documentation only.
 - The repository contained only `AGENTS.md`, `CODEX.md`, `PLANS.md`, `IMPLEMENTATION_HANDOVER_PROMPT.md`, and `docs/MVP_IMPLEMENTATION_PLAN.md`.
 - No `docs/changes/` files, application directories, test suites, root `Makefile`, package manifests, schemas, migrations, or CI configuration existed.
 - The MVP plan defines seven Milestone 0 deliverables and says the milestone exits only when none remain unresolved.
-- The supported exam set, pilot cohort, device matrix, numeric release thresholds, decision owners, and legal/privacy conclusions cannot be inferred safely from the repository.
+- The supported exam set, pilot cohort, device matrix, numeric release thresholds, and legal/privacy conclusions cannot be inferred safely from the repository.
 - No root validation command contract exists yet; that is a Milestone 1 deliverable.
+- On 2026-08-25, the project owner confirmed that all MVP decisions are made by the project owner and requested removal of separate decision-owner and approver assignments.
+- On 2026-08-25, the project owner directed the project to prioritize the human–AI interaction UI/UX and defer external-pilot governance and statistical validation until they are relevant.
+- The development environment is Linux x86_64 and currently has no browser, Playwright, Android Emulator, or Apple simulator installed.
+- Playwright supports repeatable mobile/tablet browser emulation on Linux; Android Emulator can be added for deeper Android checks; Apple's iOS/iPadOS Simulator requires Xcode on macOS and is unavailable in the current environment.
 
 ## Design
 
-Use a small set of permanent documents organized by accountable concern:
+Use a small set of permanent documents organized by concern:
 
 - a Milestone 0 index tracks the exit gates and links to evidence;
 - a pilot-scope record owns supported exams, cohort, devices, and pilot criteria;
 - evaluation documents define the provider benchmark and release gates;
-- a privacy action list tracks required review without making legal claims;
+- a privacy action list tracks required specialist evidence without making legal claims;
 - a content provenance policy defines the minimum publication controls.
 
-Each unresolved field uses the exact marker `DECISION REQUIRED`. A document may define required process or evidence from the approved MVP plan without pretending that stakeholder approval has occurred. The index remains the authoritative Milestone 0 readiness summary.
+Each unresolved field uses the exact marker `DECISION REQUIRED`. The project owner confirms every MVP product decision. The milestone index records the exact `Required before` stage for each gate so later safeguards remain visible without holding up internal product learning. A document may still require qualified review evidence without turning the reviewer into a separate decision authority or pretending that legal, rights, security, or mathematics validation has occurred.
 
 Alternatives rejected:
 
-- One large decision document would mix owners and make independent review difficult.
+- One large decision document would mix concerns and make focused review difficult.
 - Filling example exams or speculative thresholds would violate the implementation plan.
 - Starting Milestone 1 scaffolding in the same branch would mix governance and engineering-foundation work.
 
@@ -74,8 +81,9 @@ Owned by this branch:
 - `docs/evaluation/RELEASE_QUALITY_GATES.md` — release metrics, thresholds, evidence, and approval state.
 - `docs/privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md` — pre-pilot privacy and consent actions.
 - `docs/content/CONTENT_PROVENANCE_POLICY.md` — content rights, provenance, review, and versioning controls.
+- `docs/MVP_IMPLEMENTATION_PLAN.md` — milestone gating and critical-path wording updated to prioritize the internal interaction MVP.
 
-No existing file is modified except this living ChangePlan after its creation.
+The seven Milestone 0 documents and the permanent MVP plan are modified by the review-driven sequencing update. No application or tooling file is changed.
 
 ## API and schema changes
 
@@ -87,7 +95,7 @@ None.
 
 ## Security and privacy
 
-No student data, images, credentials, provider data, or runtime behavior are introduced. The privacy document will identify reviews and evidence required before collecting minors' data. Legal conclusions, retention periods, consent language, and accountable approvers remain `DECISION REQUIRED` unless already fixed by the approved MVP plan.
+No student data, images, credentials, provider data, or runtime behavior are introduced. Privacy/legal review no longer blocks internal implementation with synthetic fixtures, but remains mandatory before collecting real minors' data or inviting external pilot participants. Legal conclusions, retention periods, and consent language remain `DECISION REQUIRED` until that pre-pilot review.
 
 ## Test plan
 
@@ -95,6 +103,7 @@ There is no application or documentation test framework. Validate the documentat
 
 - confirm the expected files exist;
 - confirm every Milestone 0 deliverable is represented in the index;
+- confirm each deferred decision names the stage it blocks and does not block Milestone 1;
 - search for `DECISION REQUIRED` markers and verify every unresolved choice is explicit;
 - search for accidental placeholder claims such as an approved provider or supported exam example;
 - verify relative Markdown links in the new documents resolve;
@@ -108,14 +117,14 @@ Application unit, integration, API/schema, migration, frontend, browser, content
 1. Open `docs/milestone-0/README.md` and follow every link.
 2. Confirm all seven Milestone 0 deliverables have a document section and readiness state.
 3. Confirm unresolved product-owned values visibly say `DECISION REQUIRED`.
-4. Confirm no document claims Milestone 0 is complete or authorizes Milestone 1.
+4. Confirm the documents authorize internal Milestone 1 work while keeping real-content, provider, privacy, and external-pilot gates attached to their later stages.
 5. Compare the documents with sections 3, 15, and 17 of `docs/MVP_IMPLEMENTATION_PLAN.md`.
 
-Expected outcome: the complete decision surface is documented, no decision is fabricated, and stakeholders can see exactly what blocks Milestone 1.
+Expected outcome: the internal interaction MVP is authorized, no deferred product decision is fabricated, and each remaining gate states exactly which later stage it blocks.
 
 ## Rollout and rollback
 
-These documents take effect when merged. There is no runtime rollout, data migration, or compatibility concern. Roll back by reverting the documentation commits. Stakeholder decisions should be added through later reviewed changes that update the relevant document and Milestone 0 index together.
+These documents take effect when merged. There is no runtime rollout, data migration, or compatibility concern. Roll back by reverting the documentation commits. Project-owner decisions should be added through later reviewed changes that update the relevant document and Milestone 0 index together.
 
 ## Branch and commit plan
 
@@ -123,18 +132,19 @@ These documents take effect when merged. There is no runtime rollout, data migra
 2. `docs: define pilot scope and governance controls`
 3. `docs: specify AI benchmark and release gates`
 4. `docs: record Milestone 0 verification`
+5. `docs: prioritize internal interaction MVP`
 
 ## Conflict coordination
 
-This branch owns only the seven new documentation files listed above. No active ChangePlans or implementation branches were visible in the fetched repository. Possible future overlap is highest in `docs/evaluation/` and `docs/privacy/`; stakeholder decisions should build on these contracts after this branch merges. Integration order: merge this Milestone 0 baseline before branches that resolve individual gates or begin Milestone 1.
+This branch owns the seven new documentation files and `docs/MVP_IMPLEMENTATION_PLAN.md`. No active ChangePlans or implementation branches were visible in the fetched repository. The permanent plan is a shared file; future milestone branches must rebase after this branch and follow its revised gate timing. Integration order: merge this Milestone 0 baseline before branches that resolve individual gates or begin Milestone 1.
 
 ## Risks
 
 - Stakeholders may mistake a process specification for an approved decision. Mitigation: use explicit readiness states and `DECISION REQUIRED` markers.
 - Numeric gates could be invented for convenience. Mitigation: define metric semantics now but leave thresholds unresolved.
-- Legal or consent text could be treated as legal advice. Mitigation: maintain an action list and require named qualified approval.
+- Legal or consent text could be treated as legal advice or ignored because it is deferred. Mitigation: maintain the pre-pilot action list and require qualified supporting evidence before real minors' data is collected.
 - The benchmark could favor a provider through an unrepresentative dataset. Mitigation: define corpus strata, blinded review, and auditable per-case results.
-- Content could be imported without sufficient rights evidence. Mitigation: make provenance and publication review mandatory before content import.
+- Real third-party content could be imported without sufficient rights evidence. Mitigation: make provenance and publication review mandatory before that import.
 - Parallel work could create competing project contracts. Mitigation: declare owned paths and merge this baseline before dependent work.
 
 ## Progress
@@ -147,20 +157,23 @@ This branch owns only the seven new documentation files listed above. No active 
 - [x] Documentation updated
 - [x] Relevant checks pass
 - [x] Diff reviewed
-- [x] Branch rebased on current main
-- [x] Conflict resolution re-tested — not applicable; the rebase was already current and produced no conflicts
-- [x] Handoff summary written
+- [ ] Branch rebased on current main
+- [ ] Conflict resolution re-tested
+- [ ] Handoff summary written
 
 ## Decisions
 
 - 2026-08-25: Keep Milestone 0 documentation separate from Milestone 1 application scaffolding so this branch remains one coherent governance change.
-- 2026-08-25: Use `DECISION REQUIRED` for stakeholder-owned values that the repository does not establish.
-- 2026-08-25: Organize permanent documents by accountable concern and use the milestone index as the readiness summary.
+- 2026-08-25: Use `DECISION REQUIRED` for values that the repository does not establish.
+- 2026-08-25: Organize permanent documents by concern and use the milestone index as the readiness summary.
+- 2026-08-25: Following project-owner review, use the project owner as the sole MVP decision authority and defer multi-role governance until product-release preparation. Preserve specialist validation as evidence where required.
+- 2026-08-25: External-pilot governance and statistical validation do not block Milestone 1. Internal development uses synthetic fixtures and focuses first on the human–AI interaction loop.
+- 2026-08-25: Use Playwright device emulation as the default phone/tablet development matrix. Add Android Emulator checks later; defer true iOS/iPadOS Simulator checks until a macOS/Xcode environment is available.
 
 ## Discoveries
 
 - The repository is an initial documentation-only handover with no validation tooling.
-- Every Milestone 0 exit gate is unresolved in the current repository.
+- The initial plan treated every pilot/release decision as a Milestone 1 blocker; project-owner review established that this sequencing obscured the MVP's interaction-learning goal.
 - No application test suite, documentation linter, root `Makefile`, or root command contract exists yet; the root command contract belongs to Milestone 1.
 - The seven documents contain 23 relative Markdown file links, all of which resolve.
 - Refreshing `origin/main` before handoff did not introduce new commits or conflicts.
@@ -175,6 +188,7 @@ This branch owns only the seven new documentation files listed above. No active 
 
   ```bash
   expected_files=(
+    docs/MVP_IMPLEMENTATION_PLAN.md
     docs/changes/2026-08-25-m0-scope-governance.md
     docs/milestone-0/README.md
     docs/product/PILOT_SCOPE.md
@@ -183,18 +197,28 @@ This branch owns only the seven new documentation files listed above. No active 
     docs/privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md
     docs/content/CONTENT_PROVENANCE_POLICY.md
   )
-  decision_documents=("${expected_files[@]:1}")
+  decision_documents=(
+    docs/milestone-0/README.md
+    docs/product/PILOT_SCOPE.md
+    docs/evaluation/AI_PROVIDER_BENCHMARK.md
+    docs/evaluation/RELEASE_QUALITY_GATES.md
+    docs/privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md
+    docs/content/CONTENT_PROVENANCE_POLICY.md
+  )
   for expected_file in "${expected_files[@]}"; do
     test -f "$expected_file"
   done
   test "$(rg -l 'DECISION REQUIRED' "${expected_files[@]}" | wc -l)" -eq 7
-  test "$(rg -n '^\| (Supported exam list|Pilot cohort definition|Supported-device matrix|AI benchmark specification|Privacy and consent action list|Content provenance policy|Release-quality gates) \|' docs/milestone-0/README.md | wc -l)" -eq 7
+  test "$(rg -n '^\| (Supported exam list|Pilot cohort definition|Internal development-device matrix|AI benchmark specification|Privacy and consent action list|Content provenance policy|Release-quality gates) \|' docs/milestone-0/README.md | wc -l)" -eq 7
   if rg -n 'PTNK|HCMC_Specialized' "${decision_documents[@]}"; then
     exit 1
   fi
   ```
 
-  The first post-commit run failed only because the example-exam search included this ChangePlan's copy of the command. After correcting the scope to `decision_documents`, the result was seven expected files, seven files with explicit decision markers, seven indexed exit-gate rows, and zero copied example exam identifiers in the permanent decision documents.
+  The first post-commit run failed only because the example-exam search included this ChangePlan's copy of the command. After correcting the scope to `decision_documents`, the baseline result was seven expected files, seven files with explicit decision markers, seven indexed exit-gate rows, and zero copied example exam identifiers in the permanent decision documents.
+
+- The review-driven validation passed before commit with these results: eight expected and changed documentation files; seven files with explicit deferred decisions; seven stage-gate rows; zero legacy Milestone 1 blockers or multi-owner markers; both minor-pilot safety constraints preserved; two explicit Milestone 1 authorization statements; all approved emulator targets present; 23 relative Markdown links resolved; and `git diff --check origin/main` passed.
+- `git fetch origin --prune` immediately before the review-driven commit confirmed that `origin/main` remains at `b8c884e`.
 
 - Relative-link validation extracted every local `.md` link with `rg`, resolved it from the source document's directory, and asserted the target exists. Result: 23 links checked; all passed.
 - `sed -n '1,$p'` was run across all seven new documents for manual review against sections 3, 15, and 17 of the MVP plan.
@@ -203,4 +227,4 @@ This branch owns only the seven new documentation files listed above. No active 
 
 ## Result
 
-Created a documentation-only Milestone 0 baseline covering all seven required deliverables. The documents define the required records, evidence, controls, metrics, and approval process while marking every unsupported product or stakeholder choice as `DECISION REQUIRED`. Milestone 0 remains blocked and Milestone 1 is not authorized until the named owners resolve and approve those decisions.
+In progress: revising the permanent milestone plan and Milestone 0 records to authorize internal interaction-first implementation while deferring real-content, production-provider, privacy, and external-pilot gates to the stages that require them.

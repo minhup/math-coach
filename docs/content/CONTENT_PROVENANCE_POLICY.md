@@ -2,13 +2,14 @@
 
 ## Status and purpose
 
-- Milestone: 0 — Scope, governance, and evaluation contract
-- Policy status: baseline controls defined; accountable owners and source-policy decisions are `DECISION REQUIRED`
-- Content owner: DECISION REQUIRED
+- Milestone: 0 — Internal MVP direction and deferred-gate register
+- Internal implementation: NOT BLOCKED when using original synthetic fixtures
+- Real-content publication: DEFERRED — source-policy decisions are `DECISION REQUIRED`
+- Decision authority: Project owner
 - Rights reviewer: DECISION REQUIRED
 - Last updated: 2026-08-25
 
-This policy applies to every problem, solution, rubric, hint, concept, image, geometry scene, exam configuration, and derived content item considered for the MVP. Content must not be ingested, redistributed, or published without documented rights and provenance.
+This policy applies to every real problem, solution, rubric, hint, concept, image, geometry scene, exam configuration, and derived content item considered for import or publication. It does not block internal schema and UI development with clearly labeled original synthetic fixtures. Third-party content must not be ingested, redistributed, or published without documented rights and provenance.
 
 ## Publication rule
 
@@ -19,7 +20,7 @@ A content version may be released only when:
 3. required attribution and usage restrictions are captured;
 4. the content has passed mathematics, schema, rendering, geometry, and accessibility review where applicable;
 5. the released version is immutable and traceable to its review evidence;
-6. the content owner has approved publication.
+6. the project owner has confirmed publication after the required reviews.
 
 Runtime AI may select or manipulate approved content through validated contracts. It may not publish new content automatically.
 
@@ -53,7 +54,7 @@ The storage schema and file format for this record will be designed in Milestone
 
 ## Source eligibility
 
-The organization must approve a finite source and rights vocabulary before importing content.
+The project owner must approve a finite source and rights vocabulary before importing real third-party content.
 
 | Decision | Approved value |
 |---|---|
@@ -94,8 +95,8 @@ Whether AI-assisted content is allowed for each content type is DECISION REQUIRE
 | Concept | Mathematical accuracy, scope, rendering, accessibility |
 | Geometry scene | Source/rights, mathematical construction, schema/action validation, deterministic render, fallback image, accessibility description |
 | Image or media | Source/rights, attribution, metadata removal, accessibility text, storage policy |
-| Exam-skill weights | Expert owner, version, source note, consistency with the approved exam cycle |
-| Problem-exam relevance | Expert owner, finite relevance scale, rationale, supported exam cycles |
+| Exam-skill weights | Expert review evidence, version, source note, consistency with the approved exam cycle |
+| Problem-exam relevance | Expert review evidence, finite relevance scale, rationale, supported exam cycles |
 
 Reference solutions are non-exhaustive. Review must not encode one stored solution as the only valid mathematical method.
 
@@ -110,17 +111,17 @@ Reference solutions are non-exhaustive. Review must not encode one stored soluti
 
 The exact withdrawal authority, response times, and participant-notification rules are DECISION REQUIRED.
 
-## Roles and separation of duties
+## Review functions
 
-| Role | Responsibility | Named owner |
-|---|---|---|
-| Contributor | Prepares content and provenance evidence | DECISION REQUIRED |
-| Mathematics reviewer | Verifies correctness, alternatives, scoring, and pedagogy | DECISION REQUIRED |
-| Rights reviewer | Verifies permission, license, attribution, and restrictions | DECISION REQUIRED |
-| Publisher | Confirms all required reviews before changing publication status | DECISION REQUIRED |
-| Incident owner | Blocks or withdraws disputed or unsafe content | DECISION REQUIRED |
+| Function | Responsibility |
+|---|---|
+| Contribution | Prepare content and provenance evidence |
+| Mathematics review | Verify correctness, alternatives, scoring, and pedagogy |
+| Rights review | Verify permission, license, attribution, and restrictions |
+| Publication | Confirm all required reviews before changing publication status |
+| Incident handling | Block or withdraw disputed or unsafe content |
 
-Whether one person may hold more than one role, and for which content risk levels, is DECISION REQUIRED.
+The project owner may perform or commission these functions during the MVP. Each published item must retain the applicable review evidence. Multi-person approval governance is deferred until product-release preparation.
 
 ## Evidence storage and retention
 
@@ -134,15 +135,15 @@ Rights and approval evidence must be durable, access-controlled, and linked from
 | Treatment of expiring permissions | DECISION REQUIRED |
 | Audit/review cadence | DECISION REQUIRED |
 
-## Milestone 0 exit evidence
+## Pre-publication gate
 
-This policy satisfies its Milestone 0 gate only after:
+Before real third-party content is imported or published:
 
 - source and rights vocabularies are approved;
-- content and rights owners are named;
+- required mathematics and rights review evidence is available;
 - evidence storage and retention are approved;
-- publication and withdrawal authority are approved;
+- the project owner has confirmed publication and withdrawal rules;
 - at least one representative content package has been walked through the policy and gaps are recorded;
 - approval is dated and linked from the Milestone 0 index.
 
-Final content-provenance approval: DECISION REQUIRED.
+Real-content publication confirmation: DEFERRED.
