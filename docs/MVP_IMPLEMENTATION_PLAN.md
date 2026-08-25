@@ -114,7 +114,7 @@ No implementation agent may invent product values. However, decisions must block
 |---|---|---|
 | Supported examination set | Importing or publishing real exam content in Milestone 2 | Milestone 1 foundation and mocked interaction work |
 | Pilot cohort and operations | Inviting external participants in Milestone 12 | Internal implementation and testing in Milestones 1–11 |
-| AI provider benchmark execution and selection | Real-provider integration in Milestone 6 | Foundation, schemas, math UI, geometry, and mocked vertical slice |
+| AI provider benchmark and production-provider confirmation | Sending real participant data or starting an external pilot | Provider-adapter implementation and internal provider trials using synthetic/non-personal inputs |
 | Legal, privacy, and consent review | Collecting real minors' data or starting an external pilot | Internal work using synthetic/non-personal fixtures |
 | Content provenance approval | Importing or publishing real third-party content | Schema and UI development using original synthetic fixtures |
 | Numeric release and pilot gates | Starting the external pilot | Internal product iteration and engineering checks |
@@ -181,7 +181,7 @@ cost
 data-handling terms
 ```
 
-The specification may evolve while the mocked interaction experience is built. Benchmark execution and provider selection gate Milestone 6, not Milestone 1.
+The specification may evolve while the interaction experience is built. A development provider may be selected by the project owner and integrated behind the provider adapter in Milestone 6 using synthetic/non-personal inputs. Benchmark evidence, production-provider confirmation, and applicable data-handling approval gate real participant data and the external pilot, not application development.
 
 ### 3.4 Legal and privacy review
 

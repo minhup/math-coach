@@ -3,14 +3,14 @@
 ## Status
 
 - Milestone: 0 — Internal MVP direction and deferred-gate register
-- Internal mocked interaction: NOT BLOCKED
-- Production-provider integration: DEFERRED — benchmark `DECISION REQUIRED` fields must be resolved before Milestone 6
+- Internal provider integration: NOT BLOCKED when using synthetic/non-personal inputs
+- Production-provider and external-pilot confirmation: DEFERRED — benchmark `DECISION REQUIRED` fields remain
 - Decision authority: Project owner
 - Mathematics review evidence: DECISION REQUIRED
 - Privacy review evidence: DECISION REQUIRED
 - Last updated: 2026-08-25
 
-This specification defines how candidate multimodal providers and model snapshots will be compared. It does not select a provider, approve student-data processing, or claim that a consumer chat product and its API behave identically. Benchmark execution does not block the deterministic fake-provider interaction work in Milestones 1–5.
+This specification defines how candidate multimodal providers and model snapshots will be compared. It does not select a production provider, approve student-data processing, or claim that a consumer chat product and its API behave identically. Benchmark execution does not block deterministic fake-provider work or internal integration of a project-owner-selected development provider with synthetic/non-personal inputs.
 
 ## Benchmark decisions
 
@@ -28,9 +28,9 @@ This specification defines how candidate multimodal providers and model snapshot
 | Maximum acceptable latency | DECISION REQUIRED |
 | Tie-breaking method | DECISION REQUIRED |
 | Final selection authority | Project owner |
-| Benchmark execution/provider selection gate | Production-provider integration in Milestone 6; does not block Milestone 1 |
+| Benchmark execution/production-provider confirmation gate | Sending real participant data or starting an external pilot; does not block internal provider integration |
 
-No provider may enter the benchmark until its data-handling terms have passed the applicable review in [`PRIVACY_AND_CONSENT_ACTION_LIST.md`](../privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md).
+A provider may be evaluated internally with synthetic/non-personal inputs before its data-handling review is complete. It must not receive real participant data until its terms have passed the applicable review in [`PRIVACY_AND_CONSENT_ACTION_LIST.md`](../privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md).
 
 ## Questions the benchmark must answer
 
@@ -213,4 +213,4 @@ Do not collapse materially different quality, safety, privacy, latency, and cost
 
 Selected provider and model snapshot: DECISION REQUIRED.
 
-Production-provider benchmark confirmation: DEFERRED until Milestone 6 preparation.
+Production-provider benchmark confirmation: DEFERRED until preparation to use real participant data or start an external pilot.

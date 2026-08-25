@@ -8,7 +8,7 @@
 - Decision authority: Project owner
 - Last updated: 2026-08-25
 
-This document defines the evidence required at later engineering, provider-integration, and external-pilot gates. It does not block internal product iteration with deterministic mocks and synthetic/non-personal fixtures. It distinguishes requirements already fixed by the MVP plan from thresholds that the project owner must confirm when their named gate becomes relevant.
+This document defines the evidence required at later engineering and external-pilot gates. It does not block internal product iteration with deterministic mocks, synthetic/non-personal fixtures, or an internally selected development provider. It distinguishes requirements already fixed by the MVP plan from thresholds that the project owner must confirm when their named gate becomes relevant.
 
 ## Gate rule
 
@@ -30,12 +30,12 @@ A gate passes only when it has:
 | Supported exam list | Finite non-empty set and applicable cycles confirmed with content review evidence | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | Real exam content import/publication in Milestone 2 | DEFERRED |
 | Pilot cohort | Grade/age, count, location, language, invitation, consent applicability, and operation criteria confirmed | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | External pilot in Milestone 12 | DEFERRED |
 | Internal development-device matrix | Browser emulation targets and limitations confirmed | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | Milestone 1 | APPROVED |
-| AI benchmark specification | Corpus, protocol, metrics, thresholds, reviewers, and selection method confirmed | [`AI_PROVIDER_BENCHMARK.md`](AI_PROVIDER_BENCHMARK.md) | Real-provider integration in Milestone 6 | DEFERRED |
-| Privacy and consent action list | All blocking actions resolved or explicitly found not applicable using qualified review evidence | [`PRIVACY_AND_CONSENT_ACTION_LIST.md`](../privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md) | Real minors' data or external pilot | DEFERRED |
+| AI benchmark specification | Corpus, protocol, metrics, thresholds, reviewers, and production selection method confirmed | [`AI_PROVIDER_BENCHMARK.md`](AI_PROVIDER_BENCHMARK.md) | Real participant data or external pilot | DEFERRED |
+| Privacy and consent action list | All pre-pilot actions resolved or explicitly found not applicable using qualified review evidence | [`PRIVACY_AND_CONSENT_ACTION_LIST.md`](../privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md) | Real minors' data or external pilot | DEFERRED |
 | Content provenance policy | Source/rights rules, evidence system, publication, and withdrawal controls confirmed | [`CONTENT_PROVENANCE_POLICY.md`](../content/CONTENT_PROVENANCE_POLICY.md) | Real third-party content import/publication | DEFERRED |
 | Release-quality gates | Thresholds, sample definitions, stop conditions, evidence, and confirmation process approved | This document | External pilot in Milestone 12 | DEFERRED |
 
-Milestone 1 is authorized with synthetic/non-personal fixtures and a deterministic fake provider. A deferred row blocks only the stage named in its `Required before` column.
+Milestone 1 is authorized with synthetic/non-personal fixtures and a deterministic fake provider. Later internal provider-adapter trials may also use synthetic/non-personal inputs before the pre-pilot benchmark is confirmed. A deferred row blocks only the stage named in its `Required before` column.
 
 ## Requirements fixed by the MVP plan
 
@@ -61,7 +61,7 @@ These are pass/fail constraints and must not be weakened during threshold approv
 
 ## AI quality gates
 
-The benchmark method is defined in [`AI_PROVIDER_BENCHMARK.md`](AI_PROVIDER_BENCHMARK.md). The following thresholds must be confirmed before the benchmark is used for provider selection or external release; they do not block mocked interaction development.
+The benchmark method is defined in [`AI_PROVIDER_BENCHMARK.md`](AI_PROVIDER_BENCHMARK.md). The following thresholds must be confirmed before production-provider commitment or the external pilot; they do not block mocked interaction development or internal provider experiments using synthetic/non-personal inputs.
 
 | Gate | Metric and reporting | Threshold | Minimum evidence |
 |---|---|---|---|
@@ -81,7 +81,7 @@ The benchmark method is defined in [`AI_PROVIDER_BENCHMARK.md`](AI_PROVIDER_BENC
 | Provider latency | Median and upper percentiles for transcription, grading, and hints | DECISION REQUIRED | DECISION REQUIRED |
 | Provider reliability | Timeouts and terminal provider-error rates | DECISION REQUIRED | DECISION REQUIRED |
 | Provider cost | Cost per operation, attempt, session, and approved pilot projection | DECISION REQUIRED | DECISION REQUIRED |
-| Provider data handling | All applicable privacy/security actions approved | No unresolved blocking action | Approved review evidence |
+| Provider data handling | All applicable privacy/security actions approved | No unresolved pre-pilot action | Approved review evidence |
 
 Results must be reported by corpus stratum and supported examination, not only as aggregate averages.
 

@@ -134,6 +134,7 @@ These documents take effect when merged. There is no runtime rollout, data migra
 4. `docs: record Milestone 0 verification`
 5. `docs: prioritize internal interaction MVP`
 6. `docs: record interaction MVP verification`
+7. `docs: keep provider evaluation off the MVP critical path`
 
 ## Conflict coordination
 
@@ -170,6 +171,7 @@ This branch owns the seven new documentation files and `docs/MVP_IMPLEMENTATION_
 - 2026-08-25: Following project-owner review, use the project owner as the sole MVP decision authority and defer multi-role governance until product-release preparation. Preserve specialist validation as evidence where required.
 - 2026-08-25: External-pilot governance and statistical validation do not block Milestone 1. Internal development uses synthetic fixtures and focuses first on the human–AI interaction loop.
 - 2026-08-25: Use Playwright device emulation as the default phone/tablet development matrix. Add Android Emulator checks later; defer true iOS/iPadOS Simulator checks until a macOS/Xcode environment is available.
+- 2026-08-25: Provider benchmarking and privacy review do not block internal provider integration with synthetic/non-personal inputs. They gate real participant data, production-provider commitment, and the external pilot.
 
 ## Discoveries
 
@@ -221,13 +223,15 @@ This branch owns the seven new documentation files and `docs/MVP_IMPLEMENTATION_
 - The review-driven validation passed before commit with these results: eight expected and changed documentation files; seven files with explicit deferred decisions; seven stage-gate rows; zero legacy Milestone 1 blockers or multi-owner markers; both minor-pilot safety constraints preserved; two explicit Milestone 1 authorization statements; all approved emulator targets present; 23 relative Markdown links resolved; and `git diff --check origin/main` passed.
 - `git fetch origin --prune` immediately before the review-driven commit confirmed that `origin/main` remains at `b8c884e`.
 - After commit, `git fetch origin --prune && git rebase origin/main` reported that the branch was current and produced no conflicts. The complete review-driven validation then passed again against `origin/main...HEAD` with the same counts and a clean `git diff --check`.
+- After removing the remaining Milestone 6 benchmark blocker, the branch rebased cleanly again. Post-rebase validation found seven deferred-decision files, seven stage-gate rows, zero legacy blocker phrases, both participant-data safety constraints, two explicit Milestone 1 authorizations, four internal-provider authorization markers, 23 valid relative links, exactly eight changed documentation files, and a clean `git diff --check origin/main...HEAD`.
 
 - Relative-link validation extracted every local `.md` link with `rg`, resolved it from the source document's directory, and asserted the target exists. Result: 23 links checked; all passed.
 - `sed -n '1,$p'` was run across all seven new documents for manual review against sections 3, 15, and 17 of the MVP plan.
 - `git diff --name-status origin/main...HEAD` and `git diff --stat origin/main...HEAD` — reviewed seven added documentation files totaling 1,034 lines before the final ChangePlan update; no application, schema, migration, dependency, CI, infrastructure, or root-command file was changed.
 - The final branch diff is limited to the permanent MVP plan and seven Milestone 0 documents: eight files, 1,202 insertions, and 19 deletions before this closing ChangePlan update.
+- After the provider critical-path correction, the branch still changes the same eight documentation files: 1,207 insertions and 19 deletions before this final evidence update.
 - No application tests or root `make` commands were run because neither exists and this change introduces no application behavior.
 
 ## Result
 
-Revised the permanent MVP plan and Milestone 0 records to authorize an interaction-first internal build with synthetic/non-personal fixtures and a deterministic fake provider. The project owner is the sole MVP decision authority. Playwright phone/tablet emulation is approved for daily development; deeper Android, Apple, and physical-device checks are scheduled for later gates. Unresolved exam, provider, privacy, content-rights, release, and pilot-operation decisions remain explicit and block only the real-content, real-provider, real-data, or external-pilot stage that requires them. No application code or tooling was added.
+Revised the permanent MVP plan and Milestone 0 records to authorize an interaction-first internal build with synthetic/non-personal fixtures, a deterministic fake provider, and later internal provider trials. The project owner is the sole MVP decision authority. Playwright phone/tablet emulation is approved for daily development; deeper Android, Apple, and physical-device checks are scheduled for later gates. Unresolved exam, provider, privacy, content-rights, release, and pilot-operation decisions remain explicit and block only real-content publication, real participant data, production-provider commitment, or the external pilot. No application code or tooling was added.

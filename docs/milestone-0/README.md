@@ -30,7 +30,7 @@ step feedback and uncertainty
 progressive hint or retry
 ```
 
-Milestones 1–5 should make this loop feel clear, fast, trustworthy, and useful with deterministic mocks before real-provider integration.
+Milestones 1–5 should make this loop feel clear, fast, trustworthy, and useful with deterministic mocks. Milestone 6 may then integrate a development provider behind the adapter using synthetic/non-personal inputs without waiting for the pre-pilot benchmark decision.
 
 ## Exit-gate register
 
@@ -39,7 +39,7 @@ Milestones 1–5 should make this loop feel clear, fast, trustworthy, and useful
 | Supported exam list | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | DEFERRED | Importing or publishing real exam content in Milestone 2 |
 | Pilot cohort definition | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | DEFERRED | Inviting external participants in Milestone 12 |
 | Internal development-device matrix | [`PILOT_SCOPE.md`](../product/PILOT_SCOPE.md) | APPROVED | Milestone 1 implementation |
-| AI benchmark specification | [`AI_PROVIDER_BENCHMARK.md`](../evaluation/AI_PROVIDER_BENCHMARK.md) | DRAFTED; execution deferred | Real-provider integration in Milestone 6 |
+| AI benchmark specification | [`AI_PROVIDER_BENCHMARK.md`](../evaluation/AI_PROVIDER_BENCHMARK.md) | DRAFTED; production confirmation deferred | Sending real participant data or starting an external pilot |
 | Privacy and consent action list | [`PRIVACY_AND_CONSENT_ACTION_LIST.md`](../privacy/PRIVACY_AND_CONSENT_ACTION_LIST.md) | DEFERRED | Collecting real minors' data or starting an external pilot |
 | Content provenance policy | [`CONTENT_PROVENANCE_POLICY.md`](../content/CONTENT_PROVENANCE_POLICY.md) | BASELINE DRAFTED | Importing or publishing real third-party content |
 | Release-quality gates | [`RELEASE_QUALITY_GATES.md`](../evaluation/RELEASE_QUALITY_GATES.md) | FRAMEWORK DRAFTED | Starting an external pilot |
