@@ -1,0 +1,55 @@
+[project]
+name = "math-coach-api"
+version = "0.1.0"
+description = "FastAPI foundation for the Personalized Chuyen Toan Coach"
+requires-python = ">=3.12"
+dependencies = [
+  "alembic==1.19.1",
+  "asyncpg==0.31.0",
+  "fastapi==0.141.1",
+  "minio==7.2.20",
+  "pydantic==2.13.4",
+  "pydantic-settings==2.15.0",
+  "sqlalchemy[asyncio]==2.0.52",
+  "uvicorn[standard]==0.52.4",
+]
+
+[dependency-groups]
+dev = [
+  "httpx==0.28.1",
+  "mypy==2.3.1",
+  "pytest==9.1.1",
+  "pytest-asyncio==1.4.0",
+  "ruff==0.16.4",
+]
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+plugins = ["pydantic.mypy"]
+python_version = "3.12"
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+asyncio_mode = "auto"
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+  "integration: requires PostgreSQL and object storage",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.uv]
+package = false
