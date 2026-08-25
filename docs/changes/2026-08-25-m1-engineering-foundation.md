@@ -305,7 +305,8 @@ This is an internal development foundation with no production rollout or existin
 3. `d44b86f feat: add responsive interaction shell`
 4. `fc8ce07 chore: add root validation and CI workflow`
 5. `e7d5d50 docs: record Milestone 1 implementation`
-6. `docs: record final Milestone 1 verification`
+6. `5640b04 docs: record final Milestone 1 verification`
+7. `docs: record Milestone 1 setup verification`
 
 ## Conflict coordination
 
@@ -366,6 +367,7 @@ This branch owns all new root application configuration plus `apps/student-web/`
 - `docker info --format '{{.ServerVersion}}'` returned `29.6.2`; the Docker daemon is available.
 - `npm install` completed with zero reported audit vulnerabilities and generated the committed npm lockfile.
 - `uv sync --all-groups` generated the committed uv lockfile with the exact dependencies recorded above.
+- Final `make setup` validation passed: `npm ci` installed 497 packages with zero vulnerabilities, locked `uv sync` checked 48 packages, the pinned Playwright image was current, both Compose services were healthy, the migration was current, and invite seeding was idempotent. npm warns that ESLint 9 is outside its support window; ESLint 10 remains incompatible with the installed Next.js plugin peer ranges and is a recorded follow-up constraint.
 - `make test-unit` passed 15 frontend component/boundary tests and 14 backend unit tests. Frontend coverage was 91.92% statements, 88.09% branches, 95.12% functions, and 91.77% lines.
 - `make test-integration` applied upgrade → downgrade → upgrade → downgrade → upgrade against `math_coach_test`, then passed 7 API/PostgreSQL/MinIO integration tests.
 - `make api-contract-check` confirmed the committed OpenAPI document and generated TypeScript declarations reproduce exactly.
