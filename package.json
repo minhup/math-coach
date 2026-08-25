@@ -1,0 +1,32 @@
+{
+  "name": "math-coach",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "api:generate": "npm run generate --workspace @math-coach/api-client",
+    "build": "npm run build --workspaces --if-present",
+    "dev:web": "npm run dev --workspace @math-coach/student-web",
+    "format": "prettier --write --ignore-unknown --no-error-on-unmatched-pattern 'apps/**/*' 'packages/**/*' 'tests/**/*' '.github/**/*' package.json package-lock.json playwright.config.ts prettier.config.mjs compose.yaml README.md content/README.md docs/changes/2026-08-25-m1-engineering-foundation.md",
+    "format:check": "prettier --check --ignore-unknown --no-error-on-unmatched-pattern 'apps/**/*' 'packages/**/*' 'tests/**/*' '.github/**/*' package.json package-lock.json playwright.config.ts prettier.config.mjs compose.yaml README.md content/README.md docs/changes/2026-08-25-m1-engineering-foundation.md",
+    "lint": "npm run lint --workspaces --if-present",
+    "test:e2e": "playwright test",
+    "test:unit": "npm run test:unit --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.13.3",
+    "eslint": "9.39.5",
+    "jsdom": "29.1.1",
+    "openapi-typescript": "7.13.0",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3"
+  }
+}

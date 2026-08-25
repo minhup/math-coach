@@ -1,0 +1,9 @@
+.next
+.venv
+coverage
+node_modules
+packages/api-client/openapi.json
+packages/api-client/src/schema.d.ts
+playwright-report
+test-results
+uv.lock
