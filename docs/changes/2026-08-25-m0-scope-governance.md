@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: in-progress
+- Status: ready-for-review
 - Owner: Project owner; implementation support by Codex
 - Branch: `docs/m0-scope-governance`
 - Base commit: `b8c884ef082e9966f3a14ae124720cbf4d7dbf42`
@@ -133,6 +133,7 @@ These documents take effect when merged. There is no runtime rollout, data migra
 3. `docs: specify AI benchmark and release gates`
 4. `docs: record Milestone 0 verification`
 5. `docs: prioritize internal interaction MVP`
+6. `docs: record interaction MVP verification`
 
 ## Conflict coordination
 
@@ -157,9 +158,9 @@ This branch owns the seven new documentation files and `docs/MVP_IMPLEMENTATION_
 - [x] Documentation updated
 - [x] Relevant checks pass
 - [x] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested — no conflicts occurred; all documentation checks passed after rebase
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -219,12 +220,14 @@ This branch owns the seven new documentation files and `docs/MVP_IMPLEMENTATION_
 
 - The review-driven validation passed before commit with these results: eight expected and changed documentation files; seven files with explicit deferred decisions; seven stage-gate rows; zero legacy Milestone 1 blockers or multi-owner markers; both minor-pilot safety constraints preserved; two explicit Milestone 1 authorization statements; all approved emulator targets present; 23 relative Markdown links resolved; and `git diff --check origin/main` passed.
 - `git fetch origin --prune` immediately before the review-driven commit confirmed that `origin/main` remains at `b8c884e`.
+- After commit, `git fetch origin --prune && git rebase origin/main` reported that the branch was current and produced no conflicts. The complete review-driven validation then passed again against `origin/main...HEAD` with the same counts and a clean `git diff --check`.
 
 - Relative-link validation extracted every local `.md` link with `rg`, resolved it from the source document's directory, and asserted the target exists. Result: 23 links checked; all passed.
 - `sed -n '1,$p'` was run across all seven new documents for manual review against sections 3, 15, and 17 of the MVP plan.
 - `git diff --name-status origin/main...HEAD` and `git diff --stat origin/main...HEAD` — reviewed seven added documentation files totaling 1,034 lines before the final ChangePlan update; no application, schema, migration, dependency, CI, infrastructure, or root-command file was changed.
+- The final branch diff is limited to the permanent MVP plan and seven Milestone 0 documents: eight files, 1,202 insertions, and 19 deletions before this closing ChangePlan update.
 - No application tests or root `make` commands were run because neither exists and this change introduces no application behavior.
 
 ## Result
 
-In progress: revising the permanent milestone plan and Milestone 0 records to authorize internal interaction-first implementation while deferring real-content, production-provider, privacy, and external-pilot gates to the stages that require them.
+Revised the permanent MVP plan and Milestone 0 records to authorize an interaction-first internal build with synthetic/non-personal fixtures and a deterministic fake provider. The project owner is the sole MVP decision authority. Playwright phone/tablet emulation is approved for daily development; deeper Android, Apple, and physical-device checks are scheduled for later gates. Unresolved exam, provider, privacy, content-rights, release, and pilot-operation decisions remain explicit and block only the real-content, real-provider, real-data, or external-pilot stage that requires them. No application code or tooling was added.
