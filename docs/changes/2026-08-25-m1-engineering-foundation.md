@@ -3,7 +3,7 @@
 ## Metadata
 
 - Status: in-progress
-- Owner: Project owner; implementation by Codex
+- Owner: Project owner
 - Branch: `feat/m1-engineering-foundation`
 - Base commit: `94bb36c41263b6ea6e7b8a13185b001ed7a3f318`
 - Related milestone: Milestone 1 — Repository and engineering foundation
@@ -72,16 +72,16 @@ Use npm workspaces for TypeScript packages because npm is already installed and 
 
 Use current stable releases resolved on the implementation date and record the exact versions after lock generation. Required dependency groups and rationale:
 
-| Group | Need | License/size/alternatives |
-|---|---|---|
-| Next.js, React, React DOM | Product-plan web stack and App Router | MIT; framework-sized client/server dependency; a custom React/Vite stack would duplicate routing and server integration |
-| FastAPI, Pydantic, pydantic-settings, Uvicorn | Product-plan API and strict boundary validation | MIT/BSD; small-to-moderate Python runtime; Flask/Django would conflict with the approved FastAPI contract |
-| SQLAlchemy asyncio, asyncpg, Alembic | Typed persistence and migration contract | MIT/Apache-2.0; moderate server-only dependencies; raw SQL would duplicate transaction and migration plumbing |
-| MinIO Python SDK | S3-compatible bucket operations and signed URLs | Apache-2.0; server-only; boto3 is broader and larger than the MVP needs |
-| Ruff, mypy, pytest, pytest-asyncio, HTTPX | Python format, lint, types, unit/integration tests | permissive licenses; development-only |
-| TypeScript, ESLint, Prettier, Vitest, Testing Library | Frontend types, format, lint, and component tests | permissive licenses; development-only |
-| Playwright | Chromium/WebKit end-to-end and device emulation | Apache-2.0; large browser download justified by the approved device matrix |
-| openapi-typescript | Generated frontend contract from FastAPI OpenAPI | MIT; development-only; avoids incompatible hand-maintained duplicate request/response types |
+| Group                                                 | Need                                               | License/size/alternatives                                                                                               |
+| ----------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Next.js, React, React DOM                             | Product-plan web stack and App Router              | MIT; framework-sized client/server dependency; a custom React/Vite stack would duplicate routing and server integration |
+| FastAPI, Pydantic, pydantic-settings, Uvicorn         | Product-plan API and strict boundary validation    | MIT/BSD; small-to-moderate Python runtime; Flask/Django would conflict with the approved FastAPI contract               |
+| SQLAlchemy asyncio, asyncpg, Alembic                  | Typed persistence and migration contract           | MIT/Apache-2.0; moderate server-only dependencies; raw SQL would duplicate transaction and migration plumbing           |
+| MinIO Python SDK                                      | S3-compatible bucket operations and signed URLs    | Apache-2.0; server-only; boto3 is broader and larger than the MVP needs                                                 |
+| Ruff, mypy, pytest, pytest-asyncio, HTTPX             | Python format, lint, types, unit/integration tests | permissive licenses; development-only                                                                                   |
+| TypeScript, ESLint, Prettier, Vitest, Testing Library | Frontend types, format, lint, and component tests  | permissive licenses; development-only                                                                                   |
+| Playwright                                            | Chromium/WebKit end-to-end and device emulation    | Apache-2.0; large version-matched Docker image justified by the approved device matrix                                  |
+| openapi-typescript                                    | Generated frontend contract from FastAPI OpenAPI   | MIT; development-only; avoids incompatible hand-maintained duplicate request/response types                             |
 
 Do not add a component framework, CSS framework, state-management library, authentication framework, ORM wrapper, or generic monorepo orchestrator in this milestone.
 
@@ -165,6 +165,7 @@ Owned by this branch:
 - `Makefile` — required root command contract plus documented development helpers.
 - `compose.yaml`, `infra/postgres/init.sql` — PostgreSQL and S3-compatible local dependencies.
 - `package.json`, `package-lock.json`, root TypeScript/format/lint/Playwright configuration — npm workspace and shared frontend tooling.
+- `apps/student-web/AGENTS.md` and `CLAUDE.md` — version-generated Next.js agent guidance retained per the installed framework.
 - `apps/student-web/**` — Next.js shell, styles, API boundary, and component tests.
 - `services/api/**` — FastAPI app, auth, uploads, logging, database, migration, seed/export scripts, and tests.
 - `packages/api-client/**` — generated OpenAPI TypeScript declarations.
@@ -299,12 +300,11 @@ This is an internal development foundation with no production rollout or existin
 
 ## Branch and commit plan
 
-1. `docs: add Milestone 1 change plan`
-2. `chore: add root development foundation`
-3. `feat: add invite authentication and signed uploads`
-4. `feat: add responsive interaction shell`
-5. `test: cover Milestone 1 login and upload journey`
-6. `docs: record Milestone 1 workflow and verification`
+1. `e26052e docs: add Milestone 1 change plan`
+2. `75d2b80 feat: add invite authentication and signed uploads`
+3. `d44b86f feat: add responsive interaction shell`
+4. `fc8ce07 chore: add root validation and CI workflow`
+5. `docs: record Milestone 1 implementation and verification`
 
 ## Conflict coordination
 
@@ -315,7 +315,7 @@ This branch owns all new root application configuration plus `apps/student-web/`
 - The milestone breadth could create an oversized first commit. Mitigation: keep the planned commits independently testable and avoid later-domain behavior.
 - Browser-signed uploads may fail because of object-storage hostname or CORS differences. Mitigation: separate internal/public endpoints, configure explicit local CORS, and exercise the real PUT in browser tests.
 - Session-cookie behavior may differ through the Next.js proxy. Mitigation: use same-origin browser requests and verify cookie login/logout through Playwright.
-- WebKit system dependencies or browser downloads may be unavailable. Mitigation: install version-matched Playwright browsers in `make setup` and CI, record any environment failure exactly, and do not replace WebKit coverage with a false pass.
+- WebKit system dependencies may be unavailable on developer machines without administrator access. Mitigation: run Chromium and WebKit from Playwright's version-matched Docker image while the application servers run locally.
 - Generated OpenAPI types may drift. Mitigation: regenerate and compare them in `make check`.
 - Local development credentials may be mistaken for production configuration. Mitigation: conspicuous names, startup validation outside development, and README warnings.
 - Migration/integration tests could mutate a developer database. Mitigation: use a dedicated `math_coach_test` database created by the Compose initialization script.
@@ -325,11 +325,11 @@ This branch owns all new root application configuration plus `apps/student-web/`
 - [x] Repository inspected
 - [x] Plan reviewed
 - [x] Branch created from current main
-- [ ] Tests written or updated
-- [ ] Implementation complete
-- [ ] Documentation updated
-- [ ] Relevant checks pass
-- [ ] Diff reviewed
+- [x] Tests written or updated
+- [x] Implementation complete
+- [x] Documentation updated
+- [x] Relevant checks pass
+- [x] Diff reviewed
 - [ ] Branch rebased on current main
 - [ ] Conflict resolution re-tested
 - [ ] Handoff summary written
@@ -341,12 +341,21 @@ This branch owns all new root application configuration plus `apps/student-web/`
 - 2026-08-25: Use database-backed opaque sessions instead of JWTs so revocation is explicit and no client-held authorization state becomes authoritative.
 - 2026-08-25: Use a signed PUT followed by server-side completion verification so image bytes remain outside the API and PostgreSQL.
 - 2026-08-25: Keep the interaction shell application-owned and deterministic; do not add AI or pretend future transcript/feedback states are available.
+- 2026-08-25: Use the official Playwright `v1.62.1-noble` image for browser execution so the approved Chromium/WebKit matrix does not require workstation-level package installation.
 
 ## Discoveries
 
 - The current environment has Docker Compose as a Docker CLI plugin even though the legacy `docker-compose` executable is absent.
 - A host `psql` client is unnecessary because migration tooling uses asyncpg and database administration can run inside the PostgreSQL container.
 - The approved phone/tablet browser matrix requires both Chromium and WebKit binaries; no browser is preinstalled.
+- npm's current TypeScript 7 release is outside `openapi-typescript`'s declared TypeScript 5 peer range. Use TypeScript 5.9.3 and preserve peer-dependency enforcement instead of bypassing it.
+- ESLint 10 is outside several current `eslint-config-next` plugin peer ranges, and jsdom 30 requires Node 24.15 while the environment has Node 24.14. Pin ESLint 9.39.5 and jsdom 29.1.1 instead of accepting invalid or unsupported dependency trees.
+- Next.js 16 generates app-local `AGENTS.md` and `CLAUDE.md` guidance and requires agents to read the version-bundled documentation before edits. The generated files are retained; `next-env.d.ts` is generated but ignored as the bundled documentation directs.
+- The workstation cannot install Playwright's Linux browser libraries without an interactive sudo password. Browser execution therefore moved to the matching official Docker image; no emulation project was dropped.
+- Parallel browser startup against `next dev` produced transient 403 responses for Turbopack HMR chunks. End-to-end validation now builds once and uses `next start`, which validates the production artifact and removed the race.
+- The first browser upload attempt used `127.0.0.1`, which correctly failed the deliberately narrow MinIO CORS origin. The test base URL now uses the documented `http://localhost:3000` origin instead of broadening CORS.
+- Component testing exposed an invisible unsupported-file error caused by rendering the alert only inside the valid-preview branch. The alert now renders at the shared upload-panel boundary.
+- Visual QA exposed a descendant CSS selector overriding the header brand mark. Narrowing the selector to the tagline restored the ∑ mark across phone and tablet layouts.
 
 ## Verification evidence
 
@@ -354,8 +363,18 @@ This branch owns all new root application configuration plus `apps/student-web/`
 - `git status --short --branch` showed a clean `feat/m1-engineering-foundation` tracking `origin/main`.
 - Tool discovery recorded Node, npm, Python, uv, Docker, Docker Compose, Make, Git, and ripgrep versions in current-state findings.
 - `docker info --format '{{.ServerVersion}}'` returned `29.6.2`; the Docker daemon is available.
-- No implementation command has run yet. Commands and exact results will be appended during implementation.
+- `npm install` completed with zero reported audit vulnerabilities and generated the committed npm lockfile.
+- `uv sync --all-groups` generated the committed uv lockfile with the exact dependencies recorded above.
+- `make test-unit` passed 15 frontend component/boundary tests and 14 backend unit tests. Frontend coverage was 91.92% statements, 88.09% branches, 95.12% functions, and 91.77% lines.
+- `make test-integration` applied upgrade → downgrade → upgrade → downgrade → upgrade against `math_coach_test`, then passed 7 API/PostgreSQL/MinIO integration tests.
+- `make api-contract-check` confirmed the committed OpenAPI document and generated TypeScript declarations reproduce exactly.
+- `make content-validate` confirmed no publishable content package is present.
+- `make build` produced the optimized Next.js production build with `/` and `/_not-found` prerendered as static routes.
+- `make test-e2e` passed the authenticated 68-byte synthetic PNG upload and logout journey on all 5 projects: compact Chromium, Pixel 7 Chromium, iPhone 13 WebKit, and iPad Pro 11 WebKit portrait/landscape.
+- `VISUAL_QA=1 make test-e2e` captured all 5 successful layouts. Direct inspection of compact phone and iPad portrait/landscape confirmed readable hierarchy, usable controls, the corrected brand mark, success feedback, and no horizontal overflow.
+- `make check` passed the complete root command contract before commit: formatting, lint, TypeScript/Python types, generated contract, content gate, production build, unit, integration, migration, and browser checks.
+- `git diff --check` passed, and the complete 71-file implementation diff was reviewed before logical commits. The unrelated untracked `docs/vietnam_chuyen_toan_competitive_dataset.xlsx` was not inspected, modified, or staged.
 
 ## Result
 
-In progress. The repository and approved Milestone 1 scope have been inspected and recorded; implementation has not started.
+Implementation and pre-rebase verification are complete. Final status awaits the required rebase onto current `origin/main` and post-rebase `make check` rerun.
