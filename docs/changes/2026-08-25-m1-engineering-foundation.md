@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: in-progress
+- Status: complete
 - Owner: Project owner
 - Branch: `feat/m1-engineering-foundation`
 - Base commit: `94bb36c41263b6ea6e7b8a13185b001ed7a3f318`
@@ -304,7 +304,8 @@ This is an internal development foundation with no production rollout or existin
 2. `75d2b80 feat: add invite authentication and signed uploads`
 3. `d44b86f feat: add responsive interaction shell`
 4. `fc8ce07 chore: add root validation and CI workflow`
-5. `docs: record Milestone 1 implementation and verification`
+5. `e7d5d50 docs: record Milestone 1 implementation`
+6. `docs: record final Milestone 1 verification`
 
 ## Conflict coordination
 
@@ -330,9 +331,9 @@ This branch owns all new root application configuration plus `apps/student-web/`
 - [x] Documentation updated
 - [x] Relevant checks pass
 - [x] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -374,7 +375,9 @@ This branch owns all new root application configuration plus `apps/student-web/`
 - `VISUAL_QA=1 make test-e2e` captured all 5 successful layouts. Direct inspection of compact phone and iPad portrait/landscape confirmed readable hierarchy, usable controls, the corrected brand mark, success feedback, and no horizontal overflow.
 - `make check` passed the complete root command contract before commit: formatting, lint, TypeScript/Python types, generated contract, content gate, production build, unit, integration, migration, and browser checks.
 - `git diff --check` passed, and the complete 71-file implementation diff was reviewed before logical commits. The unrelated untracked `docs/vietnam_chuyen_toan_competitive_dataset.xlsx` was not inspected, modified, or staged.
+- The required final `git fetch origin --prune` confirmed `origin/main` remained at `94bb36c`; `git rebase origin/main` reported the branch was already up to date, with no conflicts.
+- The post-rebase `make check` passed again with the same production build, generated-contract/content results, 15 frontend tests, 14 backend unit tests, 7 integration tests with two complete migration downgrade/upgrade cycles, and 5 Playwright emulation projects.
 
 ## Result
 
-Implementation and pre-rebase verification are complete. Final status awaits the required rebase onto current `origin/main` and post-rebase `make check` rerun.
+Milestone 1 is complete. An internal learner can authenticate with a database-backed invite/session, open the responsive interaction shell, upload a synthetic image through a five-minute signed object-storage URL, receive server-verified completion, and sign out. The root command contract, reversible migration, generated API contract, structured logging, CI, explicit failure states, and approved phone/tablet emulation matrix are implemented and verified. No Milestone 2 domain model, real content, AI integration, or real student data was introduced.
