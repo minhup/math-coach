@@ -1,6 +1,512 @@
 {
   "components": {
     "schemas": {
+      "AnimateAction": {
+        "additionalProperties": false,
+        "properties": {
+          "animationId": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Animationid",
+            "type": "string"
+          },
+          "objectId": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Objectid",
+            "type": "string"
+          },
+          "type": {
+            "const": "animate",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "objectId",
+          "animationId"
+        ],
+        "title": "AnimateAction",
+        "type": "object"
+      },
+      "AskSelectAction": {
+        "additionalProperties": false,
+        "properties": {
+          "allowedObjectIds": {
+            "items": {
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Allowedobjectids",
+            "type": "array"
+          },
+          "correctObjectIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correctobjectids"
+          },
+          "prompt": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Prompt",
+            "type": "array"
+          },
+          "type": {
+            "const": "ask_select",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "prompt",
+          "allowedObjectIds"
+        ],
+        "title": "AskSelectAction",
+        "type": "object"
+      },
+      "AttemptCreateRequest": {
+        "properties": {
+          "problemVersionId": {
+            "format": "uuid",
+            "title": "Problemversionid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "problemVersionId"
+        ],
+        "title": "AttemptCreateRequest",
+        "type": "object"
+      },
+      "AttemptResponse": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "problemVersionId": {
+            "format": "uuid",
+            "title": "Problemversionid",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "submitted"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "studyProfileId": {
+            "format": "uuid",
+            "title": "Studyprofileid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "studyProfileId",
+          "problemVersionId",
+          "status",
+          "createdAt"
+        ],
+        "title": "AttemptResponse",
+        "type": "object"
+      },
+      "CalloutBlock": {
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Content",
+            "type": "array"
+          },
+          "id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "note",
+              "warning",
+              "hint",
+              "success"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "type": {
+            "const": "callout",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "kind",
+          "content"
+        ],
+        "title": "CalloutBlock",
+        "type": "object"
+      },
+      "ClearHighlightAction": {
+        "additionalProperties": false,
+        "properties": {
+          "objectIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objectids"
+          },
+          "type": {
+            "const": "clear_highlight",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "ClearHighlightAction",
+        "type": "object"
+      },
+      "ContentPreviewListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ContentPreviewSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ContentPreviewListResponse",
+        "type": "object"
+      },
+      "ContentPreviewResponse": {
+        "properties": {
+          "difficultyBand": {
+            "enum": [
+              "introductory",
+              "core",
+              "advanced",
+              "challenge"
+            ],
+            "title": "Difficultyband",
+            "type": "string"
+          },
+          "estimatedMinutes": {
+            "maximum": 180.0,
+            "minimum": 1.0,
+            "title": "Estimatedminutes",
+            "type": "integer"
+          },
+          "externalCode": {
+            "title": "Externalcode",
+            "type": "string"
+          },
+          "geometryScene": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GeometrySceneVersion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hints": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewHint"
+            },
+            "title": "Hints",
+            "type": "array"
+          },
+          "maximumScore": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Maximumscore",
+            "type": "string"
+          },
+          "problemId": {
+            "format": "uuid",
+            "title": "Problemid",
+            "type": "string"
+          },
+          "problemVersionId": {
+            "format": "uuid",
+            "title": "Problemversionid",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "referenceSolutions": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewReferenceSolution"
+            },
+            "title": "Referencesolutions",
+            "type": "array"
+          },
+          "rubric": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewRubricItem"
+            },
+            "title": "Rubric",
+            "type": "array"
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewSkillLink"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "statement": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "title": "Statement",
+            "type": "array"
+          },
+          "supportedExams": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewExamRelevance"
+            },
+            "title": "Supportedexams",
+            "type": "array"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "problemId",
+          "problemVersionId",
+          "externalCode",
+          "version",
+          "statement",
+          "maximumScore",
+          "difficultyBand",
+          "estimatedMinutes",
+          "supportedExams",
+          "skills",
+          "referenceSolutions",
+          "rubric",
+          "hints",
+          "geometryScene",
+          "provenance"
+        ],
+        "title": "ContentPreviewResponse",
+        "type": "object"
+      },
+      "ContentPreviewSummary": {
+        "properties": {
+          "externalCode": {
+            "title": "Externalcode",
+            "type": "string"
+          },
+          "problemId": {
+            "format": "uuid",
+            "title": "Problemid",
+            "type": "string"
+          },
+          "problemVersionId": {
+            "format": "uuid",
+            "title": "Problemversionid",
+            "type": "string"
+          },
+          "supportedExamCount": {
+            "title": "Supportedexamcount",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "problemId",
+          "problemVersionId",
+          "externalCode",
+          "version",
+          "supportedExamCount"
+        ],
+        "title": "ContentPreviewSummary",
+        "type": "object"
+      },
+      "DisplayMathBlock": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Id",
+            "type": "string"
+          },
+          "latex": {
+            "minLength": 1,
+            "title": "Latex",
+            "type": "string"
+          },
+          "type": {
+            "const": "display_math",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "latex"
+        ],
+        "title": "DisplayMathBlock",
+        "type": "object"
+      },
       "ErrorDetail": {
         "properties": {
           "code": {
@@ -42,6 +548,381 @@
         "title": "ErrorEnvelope",
         "type": "object"
       },
+      "ExamTargetCreateRequest": {
+        "properties": {
+          "examCycleId": {
+            "format": "uuid",
+            "title": "Examcycleid",
+            "type": "string"
+          },
+          "priorityRank": {
+            "minimum": 1.0,
+            "title": "Priorityrank",
+            "type": "integer"
+          },
+          "targetScore": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,9}0*$)\\d{0,6}\\.\\d{0,2}0*$)",
+                "type": "string"
+              }
+            ],
+            "title": "Targetscore"
+          }
+        },
+        "required": [
+          "examCycleId",
+          "targetScore",
+          "priorityRank"
+        ],
+        "title": "ExamTargetCreateRequest",
+        "type": "object"
+      },
+      "ExamTargetListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ExamTargetResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "ExamTargetListResponse",
+        "type": "object"
+      },
+      "ExamTargetPatchRequest": {
+        "properties": {
+          "priorityRank": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priorityrank"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "active",
+                  "completed",
+                  "archived"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "targetScore": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,9}0*$)\\d{0,6}\\.\\d{0,2}0*$)",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Targetscore"
+          }
+        },
+        "title": "ExamTargetPatchRequest",
+        "type": "object"
+      },
+      "ExamTargetResponse": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "examCode": {
+            "title": "Examcode",
+            "type": "string"
+          },
+          "examCycleId": {
+            "format": "uuid",
+            "title": "Examcycleid",
+            "type": "string"
+          },
+          "examDate": {
+            "format": "date",
+            "title": "Examdate",
+            "type": "string"
+          },
+          "examId": {
+            "format": "uuid",
+            "title": "Examid",
+            "type": "string"
+          },
+          "examName": {
+            "title": "Examname",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "priorityRank": {
+            "title": "Priorityrank",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "completed",
+              "archived"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "targetScore": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Targetscore",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "examCycleId",
+          "examId",
+          "examCode",
+          "examName",
+          "examDate",
+          "targetScore",
+          "priorityRank",
+          "status",
+          "createdAt"
+        ],
+        "title": "ExamTargetResponse",
+        "type": "object"
+      },
+      "FocusAction": {
+        "additionalProperties": false,
+        "properties": {
+          "objectIds": {
+            "items": {
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Objectids",
+            "type": "array"
+          },
+          "type": {
+            "const": "focus",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "objectIds"
+        ],
+        "title": "FocusAction",
+        "type": "object"
+      },
+      "GeometryBlock": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Id",
+            "type": "string"
+          },
+          "sceneVersionId": {
+            "format": "uuid",
+            "title": "Sceneversionid",
+            "type": "string"
+          },
+          "type": {
+            "const": "geometry",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "sceneVersionId"
+        ],
+        "title": "GeometryBlock",
+        "type": "object"
+      },
+      "GeometryObject": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "parents": {
+            "items": {
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "type": "string"
+            },
+            "title": "Parents",
+            "type": "array"
+          },
+          "type": {
+            "enum": [
+              "point",
+              "segment",
+              "line",
+              "ray",
+              "circle",
+              "arc",
+              "polygon",
+              "angle",
+              "midpoint",
+              "intersection",
+              "perpendicular",
+              "parallel",
+              "circumcircle",
+              "label"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X"
+          },
+          "y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "title": "GeometryObject",
+        "type": "object"
+      },
+      "GeometrySceneVersion": {
+        "additionalProperties": false,
+        "properties": {
+          "accessibilityDescription": {
+            "minLength": 1,
+            "title": "Accessibilitydescription",
+            "type": "string"
+          },
+          "animationIds": {
+            "items": {
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "type": "string"
+            },
+            "title": "Animationids",
+            "type": "array"
+          },
+          "fallbackImageAssetId": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Fallbackimageassetid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "initialVisibleObjectIds": {
+            "items": {
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Initialvisibleobjectids",
+            "type": "array"
+          },
+          "objects": {
+            "items": {
+              "$ref": "#/components/schemas/GeometryObject"
+            },
+            "minItems": 1,
+            "title": "Objects",
+            "type": "array"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/Provenance"
+          },
+          "version": {
+            "minimum": 1.0,
+            "title": "Version",
+            "type": "integer"
+          },
+          "viewport": {
+            "$ref": "#/components/schemas/Viewport"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "viewport",
+          "objects",
+          "initialVisibleObjectIds",
+          "animationIds",
+          "fallbackImageAssetId",
+          "accessibilityDescription",
+          "provenance"
+        ],
+        "title": "GeometrySceneVersion",
+        "type": "object"
+      },
       "HealthResponse": {
         "properties": {
           "status": {
@@ -54,6 +935,142 @@
           "status"
         ],
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "HideAction": {
+        "additionalProperties": false,
+        "properties": {
+          "objectIds": {
+            "items": {
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Objectids",
+            "type": "array"
+          },
+          "type": {
+            "const": "hide",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "objectIds"
+        ],
+        "title": "HideAction",
+        "type": "object"
+      },
+      "HighlightAction": {
+        "additionalProperties": false,
+        "properties": {
+          "objectIds": {
+            "items": {
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Objectids",
+            "type": "array"
+          },
+          "type": {
+            "const": "highlight",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "objectIds"
+        ],
+        "title": "HighlightAction",
+        "type": "object"
+      },
+      "ImageBlock": {
+        "additionalProperties": false,
+        "properties": {
+          "alt": {
+            "minLength": 1,
+            "title": "Alt",
+            "type": "string"
+          },
+          "assetId": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Assetid",
+            "type": "string"
+          },
+          "id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Id",
+            "type": "string"
+          },
+          "type": {
+            "const": "image",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "assetId",
+          "alt"
+        ],
+        "title": "ImageBlock",
+        "type": "object"
+      },
+      "InlineMathBlock": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Id",
+            "type": "string"
+          },
+          "latex": {
+            "minLength": 1,
+            "title": "Latex",
+            "type": "string"
+          },
+          "type": {
+            "const": "inline_math",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "latex"
+        ],
+        "title": "InlineMathBlock",
+        "type": "object"
+      },
+      "MathSpan": {
+        "additionalProperties": false,
+        "properties": {
+          "latex": {
+            "minLength": 1,
+            "title": "Latex",
+            "type": "string"
+          },
+          "type": {
+            "const": "math",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "latex"
+        ],
+        "title": "MathSpan",
         "type": "object"
       },
       "PilotLoginRequest": {
@@ -128,6 +1145,580 @@
         "title": "PresignUploadResponse",
         "type": "object"
       },
+      "PreviewExamRelevance": {
+        "properties": {
+          "cycleCode": {
+            "title": "Cyclecode",
+            "type": "string"
+          },
+          "examCode": {
+            "title": "Examcode",
+            "type": "string"
+          },
+          "examCycleId": {
+            "format": "uuid",
+            "title": "Examcycleid",
+            "type": "string"
+          },
+          "examDate": {
+            "format": "date",
+            "title": "Examdate",
+            "type": "string"
+          },
+          "examId": {
+            "format": "uuid",
+            "title": "Examid",
+            "type": "string"
+          },
+          "examName": {
+            "title": "Examname",
+            "type": "string"
+          },
+          "relevanceLevel": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Relevancelevel",
+            "type": "string"
+          },
+          "relevanceNote": {
+            "title": "Relevancenote",
+            "type": "string"
+          }
+        },
+        "required": [
+          "examCycleId",
+          "examId",
+          "examCode",
+          "examName",
+          "cycleCode",
+          "examDate",
+          "relevanceLevel",
+          "relevanceNote"
+        ],
+        "title": "PreviewExamRelevance",
+        "type": "object"
+      },
+      "PreviewHint": {
+        "properties": {
+          "conceptId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conceptid"
+          },
+          "content": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "title": "Content",
+            "type": "array"
+          },
+          "geometryActions": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "animate": "#/components/schemas/AnimateAction",
+                  "ask_select": "#/components/schemas/AskSelectAction",
+                  "clear_highlight": "#/components/schemas/ClearHighlightAction",
+                  "focus": "#/components/schemas/FocusAction",
+                  "hide": "#/components/schemas/HideAction",
+                  "highlight": "#/components/schemas/HighlightAction",
+                  "show": "#/components/schemas/ShowAction"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ShowAction"
+                },
+                {
+                  "$ref": "#/components/schemas/HideAction"
+                },
+                {
+                  "$ref": "#/components/schemas/HighlightAction"
+                },
+                {
+                  "$ref": "#/components/schemas/ClearHighlightAction"
+                },
+                {
+                  "$ref": "#/components/schemas/FocusAction"
+                },
+                {
+                  "$ref": "#/components/schemas/AnimateAction"
+                },
+                {
+                  "$ref": "#/components/schemas/AskSelectAction"
+                }
+              ]
+            },
+            "title": "Geometryactions",
+            "type": "array"
+          },
+          "hintLevel": {
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Hintlevel",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "revealsCompleteSolution": {
+            "title": "Revealscompletesolution",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "hintLevel",
+          "content",
+          "geometryActions",
+          "revealsCompleteSolution",
+          "conceptId"
+        ],
+        "title": "PreviewHint",
+        "type": "object"
+      },
+      "PreviewReferenceSolution": {
+        "properties": {
+          "content": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "title": "Content",
+            "type": "array"
+          },
+          "expertVerified": {
+            "const": true,
+            "title": "Expertverified",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "methodLabel": {
+            "title": "Methodlabel",
+            "type": "string"
+          },
+          "nonExhaustive": {
+            "const": true,
+            "title": "Nonexhaustive",
+            "type": "boolean"
+          },
+          "solutionCode": {
+            "title": "Solutioncode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "solutionCode",
+          "methodLabel",
+          "content",
+          "expertVerified",
+          "nonExhaustive"
+        ],
+        "title": "PreviewReferenceSolution",
+        "type": "object"
+      },
+      "PreviewRubricItem": {
+        "properties": {
+          "description": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "title": "Description",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "maximumScore": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Maximumscore",
+            "type": "string"
+          },
+          "orderIndex": {
+            "title": "Orderindex",
+            "type": "integer"
+          },
+          "rubricCode": {
+            "title": "Rubriccode",
+            "type": "string"
+          },
+          "skillId": {
+            "format": "uuid",
+            "title": "Skillid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "rubricCode",
+          "description",
+          "maximumScore",
+          "skillId",
+          "orderIndex"
+        ],
+        "title": "PreviewRubricItem",
+        "type": "object"
+      },
+      "PreviewSkillLink": {
+        "properties": {
+          "importance": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Importance",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "primary",
+              "secondary",
+              "prerequisite",
+              "diagnostic"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "skillCode": {
+            "title": "Skillcode",
+            "type": "string"
+          },
+          "skillId": {
+            "format": "uuid",
+            "title": "Skillid",
+            "type": "string"
+          },
+          "skillName": {
+            "title": "Skillname",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skillId",
+          "skillCode",
+          "skillName",
+          "role",
+          "importance"
+        ],
+        "title": "PreviewSkillLink",
+        "type": "object"
+      },
+      "Provenance": {
+        "additionalProperties": false,
+        "properties": {
+          "acquiredBy": {
+            "minLength": 1,
+            "title": "Acquiredby",
+            "type": "string"
+          },
+          "acquisitionDate": {
+            "format": "date",
+            "title": "Acquisitiondate",
+            "type": "string"
+          },
+          "adaptationDescription": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adaptationdescription"
+          },
+          "attributionText": {
+            "minLength": 1,
+            "title": "Attributiontext",
+            "type": "string"
+          },
+          "creator": {
+            "minLength": 1,
+            "title": "Creator",
+            "type": "string"
+          },
+          "derivativeOf": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Derivativeof",
+            "type": "array"
+          },
+          "mathematicsReviewedAt": {
+            "format": "date",
+            "title": "Mathematicsreviewedat",
+            "type": "string"
+          },
+          "mathematicsReviewer": {
+            "minLength": 1,
+            "title": "Mathematicsreviewer",
+            "type": "string"
+          },
+          "permittedUses": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Permitteduses",
+            "type": "array"
+          },
+          "publicationDate": {
+            "format": "date",
+            "title": "Publicationdate",
+            "type": "string"
+          },
+          "publicationStatus": {
+            "const": "synthetic_only",
+            "title": "Publicationstatus",
+            "type": "string"
+          },
+          "restrictions": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "title": "Restrictions",
+            "type": "array"
+          },
+          "rightsBasis": {
+            "const": "original_fixture",
+            "title": "Rightsbasis",
+            "type": "string"
+          },
+          "rightsEvidence": {
+            "minLength": 1,
+            "title": "Rightsevidence",
+            "type": "string"
+          },
+          "rightsReviewedAt": {
+            "format": "date",
+            "title": "Rightsreviewedat",
+            "type": "string"
+          },
+          "rightsReviewer": {
+            "minLength": 1,
+            "title": "Rightsreviewer",
+            "type": "string"
+          },
+          "sourceKind": {
+            "const": "original_synthetic",
+            "title": "Sourcekind",
+            "type": "string"
+          },
+          "sourceReference": {
+            "minLength": 1,
+            "title": "Sourcereference",
+            "type": "string"
+          },
+          "title": {
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "translationDescription": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Translationdescription"
+          }
+        },
+        "required": [
+          "sourceKind",
+          "title",
+          "creator",
+          "sourceReference",
+          "acquisitionDate",
+          "acquiredBy",
+          "rightsBasis",
+          "rightsEvidence",
+          "permittedUses",
+          "restrictions",
+          "attributionText",
+          "adaptationDescription",
+          "translationDescription",
+          "derivativeOf",
+          "mathematicsReviewer",
+          "mathematicsReviewedAt",
+          "rightsReviewer",
+          "rightsReviewedAt",
+          "publicationStatus",
+          "publicationDate"
+        ],
+        "title": "Provenance",
+        "type": "object"
+      },
+      "RichLineBlock": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Id",
+            "type": "string"
+          },
+          "spans": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "math": "#/components/schemas/MathSpan",
+                  "text": "#/components/schemas/TextSpan"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextSpan"
+                },
+                {
+                  "$ref": "#/components/schemas/MathSpan"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Spans",
+            "type": "array"
+          },
+          "type": {
+            "const": "rich_line",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "spans"
+        ],
+        "title": "RichLineBlock",
+        "type": "object"
+      },
       "SessionResponse": {
         "properties": {
           "expiresAt": {
@@ -144,6 +1735,203 @@
           "expiresAt"
         ],
         "title": "SessionResponse",
+        "type": "object"
+      },
+      "ShowAction": {
+        "additionalProperties": false,
+        "properties": {
+          "objectIds": {
+            "items": {
+              "minLength": 1,
+              "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Objectids",
+            "type": "array"
+          },
+          "type": {
+            "const": "show",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "objectIds"
+        ],
+        "title": "ShowAction",
+        "type": "object"
+      },
+      "StudyProfileCreateRequest": {
+        "properties": {
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "weeklyStudyMinutes": {
+            "maximum": 10080.0,
+            "minimum": 1.0,
+            "title": "Weeklystudyminutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "weeklyStudyMinutes"
+        ],
+        "title": "StudyProfileCreateRequest",
+        "type": "object"
+      },
+      "StudyProfilePatchRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "active",
+                  "archived"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "weeklyStudyMinutes": {
+            "anyOf": [
+              {
+                "maximum": 10080.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weeklystudyminutes"
+          }
+        },
+        "title": "StudyProfilePatchRequest",
+        "type": "object"
+      },
+      "StudyProfileResponse": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "studentExamTargets": {
+            "items": {
+              "$ref": "#/components/schemas/ExamTargetResponse"
+            },
+            "title": "Studentexamtargets",
+            "type": "array"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "title": "Updatedat",
+            "type": "string"
+          },
+          "weeklyStudyMinutes": {
+            "title": "Weeklystudyminutes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "weeklyStudyMinutes",
+          "status",
+          "studentExamTargets",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "StudyProfileResponse",
+        "type": "object"
+      },
+      "TextBlock": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "title": "Id",
+            "type": "string"
+          },
+          "text": {
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "const": "text",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "text"
+        ],
+        "title": "TextBlock",
+        "type": "object"
+      },
+      "TextSpan": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "const": "text",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "text"
+        ],
+        "title": "TextSpan",
         "type": "object"
       },
       "UploadResponse": {
@@ -214,6 +2002,35 @@
         ],
         "title": "UserResponse",
         "type": "object"
+      },
+      "Viewport": {
+        "additionalProperties": false,
+        "properties": {
+          "xMax": {
+            "title": "Xmax",
+            "type": "number"
+          },
+          "xMin": {
+            "title": "Xmin",
+            "type": "number"
+          },
+          "yMax": {
+            "title": "Ymax",
+            "type": "number"
+          },
+          "yMin": {
+            "title": "Ymin",
+            "type": "number"
+          }
+        },
+        "required": [
+          "xMin",
+          "xMax",
+          "yMin",
+          "yMax"
+        ],
+        "title": "Viewport",
+        "type": "object"
       }
     }
   },
@@ -223,6 +2040,190 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/attempts": {
+      "post": {
+        "operationId": "post_attempt_api_v1_attempts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttemptCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Post Attempt",
+        "tags": [
+          "attempts"
+        ]
+      }
+    },
+    "/api/v1/attempts/{attempt_id}": {
+      "get": {
+        "operationId": "get_attempt_api_v1_attempts__attempt_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Get Attempt",
+        "tags": [
+          "attempts"
+        ]
+      }
+    },
     "/api/v1/auth/logout": {
       "post": {
         "operationId": "logout_api_v1_auth_logout_post",
@@ -469,6 +2470,363 @@
         ]
       }
     },
+    "/api/v1/exam-targets": {
+      "get": {
+        "operationId": "read_exam_targets_api_v1_exam_targets_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamTargetListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Read Exam Targets",
+        "tags": [
+          "exam-targets"
+        ]
+      },
+      "post": {
+        "operationId": "post_exam_target_api_v1_exam_targets_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExamTargetCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamTargetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Post Exam Target",
+        "tags": [
+          "exam-targets"
+        ]
+      }
+    },
+    "/api/v1/exam-targets/{target_id}": {
+      "delete": {
+        "operationId": "delete_exam_target_api_v1_exam_targets__target_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Delete Exam Target",
+        "tags": [
+          "exam-targets"
+        ]
+      },
+      "patch": {
+        "operationId": "update_exam_target_api_v1_exam_targets__target_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "target_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Target Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExamTargetPatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamTargetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Update Exam Target",
+        "tags": [
+          "exam-targets"
+        ]
+      }
+    },
     "/api/v1/health": {
       "get": {
         "operationId": "health_api_v1_health_get",
@@ -547,6 +2905,439 @@
         "summary": "Health",
         "tags": [
           "system"
+        ]
+      }
+    },
+    "/api/v1/internal/content-preview": {
+      "get": {
+        "operationId": "get_content_previews_api_v1_internal_content_preview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentPreviewListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Get Content Previews",
+        "tags": [
+          "internal-content"
+        ]
+      }
+    },
+    "/api/v1/internal/content-preview/{problem_id}": {
+      "get": {
+        "operationId": "get_content_preview_api_v1_internal_content_preview__problem_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "problem_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Problem Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentPreviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Get Content Preview",
+        "tags": [
+          "internal-content"
+        ]
+      }
+    },
+    "/api/v1/study-profile": {
+      "get": {
+        "operationId": "read_study_profile_api_v1_study_profile_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Read Study Profile",
+        "tags": [
+          "study-profile"
+        ]
+      },
+      "patch": {
+        "operationId": "update_study_profile_api_v1_study_profile_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyProfilePatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Update Study Profile",
+        "tags": [
+          "study-profile"
+        ]
+      },
+      "post": {
+        "operationId": "post_study_profile_api_v1_study_profile_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudyProfileCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyProfileResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Post Study Profile",
+        "tags": [
+          "study-profile"
         ]
       }
     },

@@ -4,6 +4,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.attempts import attempt_response, create_attempt, owned_attempt
 from app.auth import (
     CurrentUser,
     clear_session_cookie,
@@ -14,14 +15,34 @@ from app.auth import (
     user_response,
 )
 from app.config import Settings, get_settings
+from app.content.preview import content_preview, list_content_previews
+from app.content.preview_schemas import ContentPreviewListResponse, ContentPreviewResponse
 from app.database import get_database_session
+from app.profiles import (
+    archive_target,
+    create_profile,
+    create_target,
+    get_profile,
+    list_targets,
+    patch_profile,
+    patch_target,
+)
 from app.schemas import (
+    AttemptCreateRequest,
+    AttemptResponse,
     ErrorEnvelope,
+    ExamTargetCreateRequest,
+    ExamTargetListResponse,
+    ExamTargetPatchRequest,
+    ExamTargetResponse,
     HealthResponse,
     PilotLoginRequest,
     PresignUploadRequest,
     PresignUploadResponse,
     SessionResponse,
+    StudyProfileCreateRequest,
+    StudyProfilePatchRequest,
+    StudyProfileResponse,
     UploadResponse,
     UserResponse,
 )
@@ -107,3 +128,131 @@ async def get_upload(
 ) -> UploadResponse:
     upload = await owned_upload(upload_id, user, database)
     return upload_response(upload)
+
+
+@router.get("/study-profile", response_model=StudyProfileResponse, tags=["study-profile"])
+async def read_study_profile(
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> StudyProfileResponse:
+    return await get_profile(user, database)
+
+
+@router.post(
+    "/study-profile",
+    response_model=StudyProfileResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["study-profile"],
+)
+async def post_study_profile(
+    payload: StudyProfileCreateRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> StudyProfileResponse:
+    return await create_profile(payload, user, database)
+
+
+@router.patch("/study-profile", response_model=StudyProfileResponse, tags=["study-profile"])
+async def update_study_profile(
+    payload: StudyProfilePatchRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> StudyProfileResponse:
+    return await patch_profile(payload, user, database)
+
+
+@router.get("/exam-targets", response_model=ExamTargetListResponse, tags=["exam-targets"])
+async def read_exam_targets(
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> ExamTargetListResponse:
+    return await list_targets(user, database)
+
+
+@router.post(
+    "/exam-targets",
+    response_model=ExamTargetResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["exam-targets"],
+)
+async def post_exam_target(
+    payload: ExamTargetCreateRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> ExamTargetResponse:
+    return await create_target(payload, user, database)
+
+
+@router.patch(
+    "/exam-targets/{target_id}",
+    response_model=ExamTargetResponse,
+    tags=["exam-targets"],
+)
+async def update_exam_target(
+    target_id: uuid.UUID,
+    payload: ExamTargetPatchRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> ExamTargetResponse:
+    return await patch_target(target_id, payload, user, database)
+
+
+@router.delete(
+    "/exam-targets/{target_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    tags=["exam-targets"],
+)
+async def delete_exam_target(
+    target_id: uuid.UUID,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> None:
+    await archive_target(target_id, user, database)
+
+
+@router.post(
+    "/attempts",
+    response_model=AttemptResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["attempts"],
+)
+async def post_attempt(
+    payload: AttemptCreateRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> AttemptResponse:
+    return await create_attempt(payload, user, database)
+
+
+@router.get("/attempts/{attempt_id}", response_model=AttemptResponse, tags=["attempts"])
+async def get_attempt(
+    attempt_id: uuid.UUID,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> AttemptResponse:
+    return attempt_response(await owned_attempt(attempt_id, user, database))
+
+
+@router.get(
+    "/internal/content-preview",
+    response_model=ContentPreviewListResponse,
+    tags=["internal-content"],
+)
+async def get_content_previews(
+    _user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> ContentPreviewListResponse:
+    return await list_content_previews(database)
+
+
+@router.get(
+    "/internal/content-preview/{problem_id}",
+    response_model=ContentPreviewResponse,
+    tags=["internal-content"],
+)
+async def get_content_preview(
+    problem_id: uuid.UUID,
+    _user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> ContentPreviewResponse:
+    return await content_preview(problem_id, database)

@@ -38,7 +38,8 @@ async def clear_persisted_test_data() -> None:
                     raise
         await database.execute(
             text(
-                "TRUNCATE solution_uploads, user_sessions, pilot_invites, users "
+                "TRUNCATE content_imports, exams, skills, geometry_scenes, concepts, problems, "
+                "study_profiles, solution_uploads, user_sessions, pilot_invites, users "
                 "RESTART IDENTITY CASCADE"
             )
         )

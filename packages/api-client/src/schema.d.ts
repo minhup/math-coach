@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/api/v1/attempts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Attempt */
+        post: operations["post_attempt_api_v1_attempts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attempts/{attempt_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Attempt */
+        get: operations["get_attempt_api_v1_attempts__attempt_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/logout": {
         parameters: {
             query?: never;
@@ -55,6 +89,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/exam-targets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Exam Targets */
+        get: operations["read_exam_targets_api_v1_exam_targets_get"];
+        put?: never;
+        /** Post Exam Target */
+        post: operations["post_exam_target_api_v1_exam_targets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exam-targets/{target_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Exam Target */
+        delete: operations["delete_exam_target_api_v1_exam_targets__target_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Exam Target */
+        patch: operations["update_exam_target_api_v1_exam_targets__target_id__patch"];
+        trace?: never;
+    };
     "/api/v1/health": {
         parameters: {
             query?: never;
@@ -70,6 +140,59 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/content-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Content Previews */
+        get: operations["get_content_previews_api_v1_internal_content_preview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/internal/content-preview/{problem_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Content Preview */
+        get: operations["get_content_preview_api_v1_internal_content_preview__problem_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/study-profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Study Profile */
+        get: operations["read_study_profile_api_v1_study_profile_get"];
+        put?: never;
+        /** Post Study Profile */
+        post: operations["post_study_profile_api_v1_study_profile_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Study Profile */
+        patch: operations["update_study_profile_api_v1_study_profile_patch"];
         trace?: never;
     };
     "/api/v1/uploads/presign": {
@@ -127,6 +250,171 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AnimateAction */
+        AnimateAction: {
+            /** Animationid */
+            animationId: string;
+            /** Objectid */
+            objectId: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "animate";
+        };
+        /** AskSelectAction */
+        AskSelectAction: {
+            /** Allowedobjectids */
+            allowedObjectIds: string[];
+            /** Correctobjectids */
+            correctObjectIds?: string[] | null;
+            /** Prompt */
+            prompt: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "ask_select";
+        };
+        /** AttemptCreateRequest */
+        AttemptCreateRequest: {
+            /**
+             * Problemversionid
+             * Format: uuid
+             */
+            problemVersionId: string;
+        };
+        /** AttemptResponse */
+        AttemptResponse: {
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Problemversionid
+             * Format: uuid
+             */
+            problemVersionId: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "submitted";
+            /**
+             * Studyprofileid
+             * Format: uuid
+             */
+            studyProfileId: string;
+        };
+        /** CalloutBlock */
+        CalloutBlock: {
+            /** Content */
+            content: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "note" | "warning" | "hint" | "success";
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "callout";
+        };
+        /** ClearHighlightAction */
+        ClearHighlightAction: {
+            /** Objectids */
+            objectIds?: string[] | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "clear_highlight";
+        };
+        /** ContentPreviewListResponse */
+        ContentPreviewListResponse: {
+            /** Items */
+            items: components["schemas"]["ContentPreviewSummary"][];
+        };
+        /** ContentPreviewResponse */
+        ContentPreviewResponse: {
+            /**
+             * Difficultyband
+             * @enum {string}
+             */
+            difficultyBand: "introductory" | "core" | "advanced" | "challenge";
+            /** Estimatedminutes */
+            estimatedMinutes: number;
+            /** Externalcode */
+            externalCode: string;
+            geometryScene: components["schemas"]["GeometrySceneVersion"] | null;
+            /** Hints */
+            hints: components["schemas"]["PreviewHint"][];
+            /** Maximumscore */
+            maximumScore: string;
+            /**
+             * Problemid
+             * Format: uuid
+             */
+            problemId: string;
+            /**
+             * Problemversionid
+             * Format: uuid
+             */
+            problemVersionId: string;
+            provenance: components["schemas"]["Provenance"];
+            /** Referencesolutions */
+            referenceSolutions: components["schemas"]["PreviewReferenceSolution"][];
+            /** Rubric */
+            rubric: components["schemas"]["PreviewRubricItem"][];
+            /** Skills */
+            skills: components["schemas"]["PreviewSkillLink"][];
+            /** Statement */
+            statement: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /** Supportedexams */
+            supportedExams: components["schemas"]["PreviewExamRelevance"][];
+            /** Version */
+            version: number;
+        };
+        /** ContentPreviewSummary */
+        ContentPreviewSummary: {
+            /** Externalcode */
+            externalCode: string;
+            /**
+             * Problemid
+             * Format: uuid
+             */
+            problemId: string;
+            /**
+             * Problemversionid
+             * Format: uuid
+             */
+            problemVersionId: string;
+            /** Supportedexamcount */
+            supportedExamCount: number;
+            /** Version */
+            version: number;
+        };
+        /** DisplayMathBlock */
+        DisplayMathBlock: {
+            /** Id */
+            id: string;
+            /** Latex */
+            latex: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "display_math";
+        };
         /** ErrorDetail */
         ErrorDetail: {
             /** Code */
@@ -140,6 +428,138 @@ export interface components {
         ErrorEnvelope: {
             error: components["schemas"]["ErrorDetail"];
         };
+        /** ExamTargetCreateRequest */
+        ExamTargetCreateRequest: {
+            /**
+             * Examcycleid
+             * Format: uuid
+             */
+            examCycleId: string;
+            /** Priorityrank */
+            priorityRank: number;
+            /** Targetscore */
+            targetScore: number | string;
+        };
+        /** ExamTargetListResponse */
+        ExamTargetListResponse: {
+            /** Items */
+            items: components["schemas"]["ExamTargetResponse"][];
+        };
+        /** ExamTargetPatchRequest */
+        ExamTargetPatchRequest: {
+            /** Priorityrank */
+            priorityRank?: number | null;
+            /** Status */
+            status?: ("active" | "completed" | "archived") | null;
+            /** Targetscore */
+            targetScore?: number | string | null;
+        };
+        /** ExamTargetResponse */
+        ExamTargetResponse: {
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Examcode */
+            examCode: string;
+            /**
+             * Examcycleid
+             * Format: uuid
+             */
+            examCycleId: string;
+            /**
+             * Examdate
+             * Format: date
+             */
+            examDate: string;
+            /**
+             * Examid
+             * Format: uuid
+             */
+            examId: string;
+            /** Examname */
+            examName: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Priorityrank */
+            priorityRank: number;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "completed" | "archived";
+            /** Targetscore */
+            targetScore: string;
+        };
+        /** FocusAction */
+        FocusAction: {
+            /** Objectids */
+            objectIds: string[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "focus";
+        };
+        /** GeometryBlock */
+        GeometryBlock: {
+            /** Id */
+            id: string;
+            /**
+             * Sceneversionid
+             * Format: uuid
+             */
+            sceneVersionId: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "geometry";
+        };
+        /** GeometryObject */
+        GeometryObject: {
+            /** Id */
+            id: string;
+            /** Label */
+            label?: string | null;
+            /** Parents */
+            parents?: string[];
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "point" | "segment" | "line" | "ray" | "circle" | "arc" | "polygon" | "angle" | "midpoint" | "intersection" | "perpendicular" | "parallel" | "circumcircle" | "label";
+            /** X */
+            x?: number | null;
+            /** Y */
+            y?: number | null;
+        };
+        /** GeometrySceneVersion */
+        GeometrySceneVersion: {
+            /** Accessibilitydescription */
+            accessibilityDescription: string;
+            /** Animationids */
+            animationIds: string[];
+            /** Fallbackimageassetid */
+            fallbackImageAssetId: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Initialvisibleobjectids */
+            initialVisibleObjectIds: string[];
+            /** Objects */
+            objects: components["schemas"]["GeometryObject"][];
+            provenance: components["schemas"]["Provenance"];
+            /** Version */
+            version: number;
+            viewport: components["schemas"]["Viewport"];
+        };
         /** HealthResponse */
         HealthResponse: {
             /**
@@ -147,6 +567,62 @@ export interface components {
              * @constant
              */
             status: "ok";
+        };
+        /** HideAction */
+        HideAction: {
+            /** Objectids */
+            objectIds: string[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "hide";
+        };
+        /** HighlightAction */
+        HighlightAction: {
+            /** Objectids */
+            objectIds: string[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "highlight";
+        };
+        /** ImageBlock */
+        ImageBlock: {
+            /** Alt */
+            alt: string;
+            /** Assetid */
+            assetId: string;
+            /** Id */
+            id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "image";
+        };
+        /** InlineMathBlock */
+        InlineMathBlock: {
+            /** Id */
+            id: string;
+            /** Latex */
+            latex: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "inline_math";
+        };
+        /** MathSpan */
+        MathSpan: {
+            /** Latex */
+            latex: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "math";
         };
         /** PilotLoginRequest */
         PilotLoginRequest: {
@@ -180,6 +656,195 @@ export interface components {
             /** Uploadurl */
             uploadUrl: string;
         };
+        /** PreviewExamRelevance */
+        PreviewExamRelevance: {
+            /** Cyclecode */
+            cycleCode: string;
+            /** Examcode */
+            examCode: string;
+            /**
+             * Examcycleid
+             * Format: uuid
+             */
+            examCycleId: string;
+            /**
+             * Examdate
+             * Format: date
+             */
+            examDate: string;
+            /**
+             * Examid
+             * Format: uuid
+             */
+            examId: string;
+            /** Examname */
+            examName: string;
+            /**
+             * Relevancelevel
+             * @enum {string}
+             */
+            relevanceLevel: "low" | "medium" | "high";
+            /** Relevancenote */
+            relevanceNote: string;
+        };
+        /** PreviewHint */
+        PreviewHint: {
+            /** Conceptid */
+            conceptId: string | null;
+            /** Content */
+            content: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /** Geometryactions */
+            geometryActions: (components["schemas"]["ShowAction"] | components["schemas"]["HideAction"] | components["schemas"]["HighlightAction"] | components["schemas"]["ClearHighlightAction"] | components["schemas"]["FocusAction"] | components["schemas"]["AnimateAction"] | components["schemas"]["AskSelectAction"])[];
+            /** Hintlevel */
+            hintLevel: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Revealscompletesolution */
+            revealsCompleteSolution: boolean;
+        };
+        /** PreviewReferenceSolution */
+        PreviewReferenceSolution: {
+            /** Content */
+            content: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /**
+             * Expertverified
+             * @constant
+             */
+            expertVerified: true;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Methodlabel */
+            methodLabel: string;
+            /**
+             * Nonexhaustive
+             * @constant
+             */
+            nonExhaustive: true;
+            /** Solutioncode */
+            solutionCode: string;
+        };
+        /** PreviewRubricItem */
+        PreviewRubricItem: {
+            /** Description */
+            description: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Maximumscore */
+            maximumScore: string;
+            /** Orderindex */
+            orderIndex: number;
+            /** Rubriccode */
+            rubricCode: string;
+            /**
+             * Skillid
+             * Format: uuid
+             */
+            skillId: string;
+        };
+        /** PreviewSkillLink */
+        PreviewSkillLink: {
+            /** Importance */
+            importance: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "primary" | "secondary" | "prerequisite" | "diagnostic";
+            /** Skillcode */
+            skillCode: string;
+            /**
+             * Skillid
+             * Format: uuid
+             */
+            skillId: string;
+            /** Skillname */
+            skillName: string;
+        };
+        /** Provenance */
+        Provenance: {
+            /** Acquiredby */
+            acquiredBy: string;
+            /**
+             * Acquisitiondate
+             * Format: date
+             */
+            acquisitionDate: string;
+            /** Adaptationdescription */
+            adaptationDescription: string | null;
+            /** Attributiontext */
+            attributionText: string;
+            /** Creator */
+            creator: string;
+            /** Derivativeof */
+            derivativeOf: string[];
+            /**
+             * Mathematicsreviewedat
+             * Format: date
+             */
+            mathematicsReviewedAt: string;
+            /** Mathematicsreviewer */
+            mathematicsReviewer: string;
+            /** Permitteduses */
+            permittedUses: string[];
+            /**
+             * Publicationdate
+             * Format: date
+             */
+            publicationDate: string;
+            /**
+             * Publicationstatus
+             * @constant
+             */
+            publicationStatus: "synthetic_only";
+            /** Restrictions */
+            restrictions: string[];
+            /**
+             * Rightsbasis
+             * @constant
+             */
+            rightsBasis: "original_fixture";
+            /** Rightsevidence */
+            rightsEvidence: string;
+            /**
+             * Rightsreviewedat
+             * Format: date
+             */
+            rightsReviewedAt: string;
+            /** Rightsreviewer */
+            rightsReviewer: string;
+            /**
+             * Sourcekind
+             * @constant
+             */
+            sourceKind: "original_synthetic";
+            /** Sourcereference */
+            sourceReference: string;
+            /** Title */
+            title: string;
+            /** Translationdescription */
+            translationDescription: string | null;
+        };
+        /** RichLineBlock */
+        RichLineBlock: {
+            /** Id */
+            id: string;
+            /** Spans */
+            spans: (components["schemas"]["TextSpan"] | components["schemas"]["MathSpan"])[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "rich_line";
+        };
         /** SessionResponse */
         SessionResponse: {
             /**
@@ -188,6 +853,83 @@ export interface components {
              */
             expiresAt: string;
             user: components["schemas"]["UserResponse"];
+        };
+        /** ShowAction */
+        ShowAction: {
+            /** Objectids */
+            objectIds: string[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "show";
+        };
+        /** StudyProfileCreateRequest */
+        StudyProfileCreateRequest: {
+            /** Name */
+            name: string;
+            /** Weeklystudyminutes */
+            weeklyStudyMinutes: number;
+        };
+        /** StudyProfilePatchRequest */
+        StudyProfilePatchRequest: {
+            /** Name */
+            name?: string | null;
+            /** Status */
+            status?: ("active" | "archived") | null;
+            /** Weeklystudyminutes */
+            weeklyStudyMinutes?: number | null;
+        };
+        /** StudyProfileResponse */
+        StudyProfileResponse: {
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            /** Studentexamtargets */
+            studentExamTargets: components["schemas"]["ExamTargetResponse"][];
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+            /** Weeklystudyminutes */
+            weeklyStudyMinutes: number;
+        };
+        /** TextBlock */
+        TextBlock: {
+            /** Id */
+            id: string;
+            /** Text */
+            text: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "text";
+        };
+        /** TextSpan */
+        TextSpan: {
+            /** Text */
+            text: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "text";
         };
         /** UploadResponse */
         UploadResponse: {
@@ -226,6 +968,17 @@ export interface components {
              */
             id: string;
         };
+        /** Viewport */
+        Viewport: {
+            /** Xmax */
+            xMax: number;
+            /** Xmin */
+            xMin: number;
+            /** Ymax */
+            yMax: number;
+            /** Ymin */
+            yMin: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -235,6 +988,160 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    post_attempt_api_v1_attempts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttemptCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttemptResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_attempt_api_v1_attempts__attempt_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttemptResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     logout_api_v1_auth_logout_post: {
         parameters: {
             query?: never;
@@ -459,6 +1366,312 @@ export interface operations {
             };
         };
     };
+    read_exam_targets_api_v1_exam_targets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExamTargetListResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    post_exam_target_api_v1_exam_targets_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExamTargetCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExamTargetResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    delete_exam_target_api_v1_exam_targets__target_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                target_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    update_exam_target_api_v1_exam_targets__target_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                target_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExamTargetPatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExamTargetResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     health_api_v1_health_get: {
         parameters: {
             query?: never;
@@ -475,6 +1688,386 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_content_previews_api_v1_internal_content_preview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContentPreviewListResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_content_preview_api_v1_internal_content_preview__problem_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                problem_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContentPreviewResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    read_study_profile_api_v1_study_profile_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyProfileResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    post_study_profile_api_v1_study_profile_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudyProfileCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyProfileResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    update_study_profile_api_v1_study_profile_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StudyProfilePatchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudyProfileResponse"];
                 };
             };
             /** @description Authentication failed or is required */
