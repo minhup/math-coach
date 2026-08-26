@@ -4,6 +4,7 @@ coverage
 node_modules
 packages/api-client/openapi.json
 packages/api-client/src/schema.d.ts
+packages/content-schema/content-package.schema.json
 playwright-report
 test-results
 uv.lock

@@ -1,0 +1,2110 @@
+{
+  "$defs": {
+    "AnimateAction": {
+      "additionalProperties": false,
+      "properties": {
+        "animationId": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Animationid",
+          "type": "string"
+        },
+        "objectId": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Objectid",
+          "type": "string"
+        },
+        "type": {
+          "const": "animate",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "objectId",
+        "animationId"
+      ],
+      "title": "AnimateAction",
+      "type": "object"
+    },
+    "AskSelectAction": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedObjectIds": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowedobjectids",
+          "type": "array"
+        },
+        "correctObjectIds": {
+          "anyOf": [
+            {
+              "items": {
+                "minLength": 1,
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Correctobjectids"
+        },
+        "prompt": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "callout": "#/$defs/CalloutBlock",
+                "display_math": "#/$defs/DisplayMathBlock",
+                "geometry": "#/$defs/GeometryBlock",
+                "image": "#/$defs/ImageBlock",
+                "inline_math": "#/$defs/InlineMathBlock",
+                "rich_line": "#/$defs/RichLineBlock",
+                "text": "#/$defs/TextBlock"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextBlock"
+              },
+              {
+                "$ref": "#/$defs/InlineMathBlock"
+              },
+              {
+                "$ref": "#/$defs/DisplayMathBlock"
+              },
+              {
+                "$ref": "#/$defs/RichLineBlock"
+              },
+              {
+                "$ref": "#/$defs/GeometryBlock"
+              },
+              {
+                "$ref": "#/$defs/ImageBlock"
+              },
+              {
+                "$ref": "#/$defs/CalloutBlock"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Prompt",
+          "type": "array"
+        },
+        "type": {
+          "const": "ask_select",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "prompt",
+        "allowedObjectIds"
+      ],
+      "title": "AskSelectAction",
+      "type": "object"
+    },
+    "CalloutBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "callout": "#/$defs/CalloutBlock",
+                "display_math": "#/$defs/DisplayMathBlock",
+                "geometry": "#/$defs/GeometryBlock",
+                "image": "#/$defs/ImageBlock",
+                "inline_math": "#/$defs/InlineMathBlock",
+                "rich_line": "#/$defs/RichLineBlock",
+                "text": "#/$defs/TextBlock"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextBlock"
+              },
+              {
+                "$ref": "#/$defs/InlineMathBlock"
+              },
+              {
+                "$ref": "#/$defs/DisplayMathBlock"
+              },
+              {
+                "$ref": "#/$defs/RichLineBlock"
+              },
+              {
+                "$ref": "#/$defs/GeometryBlock"
+              },
+              {
+                "$ref": "#/$defs/ImageBlock"
+              },
+              {
+                "$ref": "#/$defs/CalloutBlock"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Content",
+          "type": "array"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "note",
+            "warning",
+            "hint",
+            "success"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "type": {
+          "const": "callout",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "kind",
+        "content"
+      ],
+      "title": "CalloutBlock",
+      "type": "object"
+    },
+    "ClearHighlightAction": {
+      "additionalProperties": false,
+      "properties": {
+        "objectIds": {
+          "anyOf": [
+            {
+              "items": {
+                "minLength": 1,
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Objectids"
+        },
+        "type": {
+          "const": "clear_highlight",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ClearHighlightAction",
+      "type": "object"
+    },
+    "Concept": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "currentVersionId": {
+          "format": "uuid",
+          "title": "Currentversionid",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "const": "synthetic",
+          "title": "Status",
+          "type": "string"
+        },
+        "versions": {
+          "items": {
+            "$ref": "#/$defs/ConceptVersion"
+          },
+          "minItems": 1,
+          "title": "Versions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "name",
+        "currentVersionId",
+        "status",
+        "versions"
+      ],
+      "title": "Concept",
+      "type": "object"
+    },
+    "ConceptVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "callout": "#/$defs/CalloutBlock",
+                "display_math": "#/$defs/DisplayMathBlock",
+                "geometry": "#/$defs/GeometryBlock",
+                "image": "#/$defs/ImageBlock",
+                "inline_math": "#/$defs/InlineMathBlock",
+                "rich_line": "#/$defs/RichLineBlock",
+                "text": "#/$defs/TextBlock"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextBlock"
+              },
+              {
+                "$ref": "#/$defs/InlineMathBlock"
+              },
+              {
+                "$ref": "#/$defs/DisplayMathBlock"
+              },
+              {
+                "$ref": "#/$defs/RichLineBlock"
+              },
+              {
+                "$ref": "#/$defs/GeometryBlock"
+              },
+              {
+                "$ref": "#/$defs/ImageBlock"
+              },
+              {
+                "$ref": "#/$defs/CalloutBlock"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Content",
+          "type": "array"
+        },
+        "geometrySceneVersionId": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Geometrysceneversionid"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "content",
+        "geometrySceneVersionId",
+        "provenance"
+      ],
+      "title": "ConceptVersion",
+      "type": "object"
+    },
+    "DisplayMathBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "latex": {
+          "minLength": 1,
+          "title": "Latex",
+          "type": "string"
+        },
+        "type": {
+          "const": "display_math",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "latex"
+      ],
+      "title": "DisplayMathBlock",
+      "type": "object"
+    },
+    "Exam": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "region": {
+          "minLength": 1,
+          "title": "Region",
+          "type": "string"
+        },
+        "status": {
+          "const": "synthetic",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "name",
+        "region",
+        "status",
+        "provenance"
+      ],
+      "title": "Exam",
+      "type": "object"
+    },
+    "ExamCycle": {
+      "additionalProperties": false,
+      "properties": {
+        "contentVersion": {
+          "minimum": 1,
+          "title": "Contentversion",
+          "type": "integer"
+        },
+        "cycleCode": {
+          "minLength": 1,
+          "title": "Cyclecode",
+          "type": "string"
+        },
+        "examDate": {
+          "format": "date",
+          "title": "Examdate",
+          "type": "string"
+        },
+        "examId": {
+          "format": "uuid",
+          "title": "Examid",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "maximumScore": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,9}0*$)\\d{0,6}\\.\\d{0,2}0*$)",
+              "type": "string"
+            }
+          ],
+          "title": "Maximumscore"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "status": {
+          "const": "synthetic",
+          "title": "Status",
+          "type": "string"
+        },
+        "year": {
+          "maximum": 2200,
+          "minimum": 2000,
+          "title": "Year",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "examId",
+        "cycleCode",
+        "year",
+        "examDate",
+        "maximumScore",
+        "contentVersion",
+        "status",
+        "provenance"
+      ],
+      "title": "ExamCycle",
+      "type": "object"
+    },
+    "ExamSkillWeight": {
+      "additionalProperties": false,
+      "properties": {
+        "examCycleId": {
+          "format": "uuid",
+          "title": "Examcycleid",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "skillId": {
+          "format": "uuid",
+          "title": "Skillid",
+          "type": "string"
+        },
+        "sourceNote": {
+          "minLength": 1,
+          "title": "Sourcenote",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "maximum": 1.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,1}|(?=[\\d.]{1,7}0*$)\\d{0,1}\\.\\d{0,5}0*$)",
+              "type": "string"
+            }
+          ],
+          "title": "Weight"
+        }
+      },
+      "required": [
+        "id",
+        "examCycleId",
+        "skillId",
+        "weight",
+        "sourceNote",
+        "version",
+        "provenance"
+      ],
+      "title": "ExamSkillWeight",
+      "type": "object"
+    },
+    "FocusAction": {
+      "additionalProperties": false,
+      "properties": {
+        "objectIds": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Objectids",
+          "type": "array"
+        },
+        "type": {
+          "const": "focus",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "objectIds"
+      ],
+      "title": "FocusAction",
+      "type": "object"
+    },
+    "GeometryBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "sceneVersionId": {
+          "format": "uuid",
+          "title": "Sceneversionid",
+          "type": "string"
+        },
+        "type": {
+          "const": "geometry",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "sceneVersionId"
+      ],
+      "title": "GeometryBlock",
+      "type": "object"
+    },
+    "GeometryObject": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "parents": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "type": "string"
+          },
+          "title": "Parents",
+          "type": "array"
+        },
+        "type": {
+          "enum": [
+            "point",
+            "segment",
+            "line",
+            "ray",
+            "circle",
+            "arc",
+            "polygon",
+            "angle",
+            "midpoint",
+            "intersection",
+            "perpendicular",
+            "parallel",
+            "circumcircle",
+            "label"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "X"
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Y"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "title": "GeometryObject",
+      "type": "object"
+    },
+    "GeometryScene": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "currentVersionId": {
+          "format": "uuid",
+          "title": "Currentversionid",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "const": "synthetic",
+          "title": "Status",
+          "type": "string"
+        },
+        "versions": {
+          "items": {
+            "$ref": "#/$defs/GeometrySceneVersion"
+          },
+          "minItems": 1,
+          "title": "Versions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "name",
+        "currentVersionId",
+        "status",
+        "versions"
+      ],
+      "title": "GeometryScene",
+      "type": "object"
+    },
+    "GeometrySceneVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "accessibilityDescription": {
+          "minLength": 1,
+          "title": "Accessibilitydescription",
+          "type": "string"
+        },
+        "animationIds": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "type": "string"
+          },
+          "title": "Animationids",
+          "type": "array"
+        },
+        "fallbackImageAssetId": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Fallbackimageassetid",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "initialVisibleObjectIds": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Initialvisibleobjectids",
+          "type": "array"
+        },
+        "objects": {
+          "items": {
+            "$ref": "#/$defs/GeometryObject"
+          },
+          "minItems": 1,
+          "title": "Objects",
+          "type": "array"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "viewport": {
+          "$ref": "#/$defs/Viewport"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "viewport",
+        "objects",
+        "initialVisibleObjectIds",
+        "animationIds",
+        "fallbackImageAssetId",
+        "accessibilityDescription",
+        "provenance"
+      ],
+      "title": "GeometrySceneVersion",
+      "type": "object"
+    },
+    "HideAction": {
+      "additionalProperties": false,
+      "properties": {
+        "objectIds": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Objectids",
+          "type": "array"
+        },
+        "type": {
+          "const": "hide",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "objectIds"
+      ],
+      "title": "HideAction",
+      "type": "object"
+    },
+    "HighlightAction": {
+      "additionalProperties": false,
+      "properties": {
+        "objectIds": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Objectids",
+          "type": "array"
+        },
+        "type": {
+          "const": "highlight",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "objectIds"
+      ],
+      "title": "HighlightAction",
+      "type": "object"
+    },
+    "ImageBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "alt": {
+          "minLength": 1,
+          "title": "Alt",
+          "type": "string"
+        },
+        "assetId": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Assetid",
+          "type": "string"
+        },
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "image",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "assetId",
+        "alt"
+      ],
+      "title": "ImageBlock",
+      "type": "object"
+    },
+    "InlineMathBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "latex": {
+          "minLength": 1,
+          "title": "Latex",
+          "type": "string"
+        },
+        "type": {
+          "const": "inline_math",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "latex"
+      ],
+      "title": "InlineMathBlock",
+      "type": "object"
+    },
+    "MathSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "latex": {
+          "minLength": 1,
+          "title": "Latex",
+          "type": "string"
+        },
+        "type": {
+          "const": "math",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "latex"
+      ],
+      "title": "MathSpan",
+      "type": "object"
+    },
+    "Problem": {
+      "additionalProperties": false,
+      "properties": {
+        "currentVersionId": {
+          "format": "uuid",
+          "title": "Currentversionid",
+          "type": "string"
+        },
+        "externalCode": {
+          "minLength": 1,
+          "title": "Externalcode",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "originExamCycleId": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Originexamcycleid"
+        },
+        "problemNumber": {
+          "minLength": 1,
+          "title": "Problemnumber",
+          "type": "string"
+        },
+        "status": {
+          "const": "synthetic",
+          "title": "Status",
+          "type": "string"
+        },
+        "versions": {
+          "items": {
+            "$ref": "#/$defs/ProblemVersion"
+          },
+          "minItems": 1,
+          "title": "Versions",
+          "type": "array"
+        },
+        "year": {
+          "anyOf": [
+            {
+              "maximum": 2200,
+              "minimum": 2000,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Year"
+        }
+      },
+      "required": [
+        "id",
+        "externalCode",
+        "originExamCycleId",
+        "year",
+        "problemNumber",
+        "currentVersionId",
+        "status",
+        "versions"
+      ],
+      "title": "Problem",
+      "type": "object"
+    },
+    "ProblemExamRelevance": {
+      "additionalProperties": false,
+      "properties": {
+        "examCycleId": {
+          "format": "uuid",
+          "title": "Examcycleid",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "relevanceLevel": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Relevancelevel",
+          "type": "string"
+        },
+        "relevanceNote": {
+          "minLength": 1,
+          "title": "Relevancenote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "examCycleId",
+        "relevanceLevel",
+        "relevanceNote",
+        "provenance"
+      ],
+      "title": "ProblemExamRelevance",
+      "type": "object"
+    },
+    "ProblemHint": {
+      "additionalProperties": false,
+      "properties": {
+        "conceptId": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Conceptid"
+        },
+        "content": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "callout": "#/$defs/CalloutBlock",
+                "display_math": "#/$defs/DisplayMathBlock",
+                "geometry": "#/$defs/GeometryBlock",
+                "image": "#/$defs/ImageBlock",
+                "inline_math": "#/$defs/InlineMathBlock",
+                "rich_line": "#/$defs/RichLineBlock",
+                "text": "#/$defs/TextBlock"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextBlock"
+              },
+              {
+                "$ref": "#/$defs/InlineMathBlock"
+              },
+              {
+                "$ref": "#/$defs/DisplayMathBlock"
+              },
+              {
+                "$ref": "#/$defs/RichLineBlock"
+              },
+              {
+                "$ref": "#/$defs/GeometryBlock"
+              },
+              {
+                "$ref": "#/$defs/ImageBlock"
+              },
+              {
+                "$ref": "#/$defs/CalloutBlock"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Content",
+          "type": "array"
+        },
+        "geometryActions": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "animate": "#/$defs/AnimateAction",
+                "ask_select": "#/$defs/AskSelectAction",
+                "clear_highlight": "#/$defs/ClearHighlightAction",
+                "focus": "#/$defs/FocusAction",
+                "hide": "#/$defs/HideAction",
+                "highlight": "#/$defs/HighlightAction",
+                "show": "#/$defs/ShowAction"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ShowAction"
+              },
+              {
+                "$ref": "#/$defs/HideAction"
+              },
+              {
+                "$ref": "#/$defs/HighlightAction"
+              },
+              {
+                "$ref": "#/$defs/ClearHighlightAction"
+              },
+              {
+                "$ref": "#/$defs/FocusAction"
+              },
+              {
+                "$ref": "#/$defs/AnimateAction"
+              },
+              {
+                "$ref": "#/$defs/AskSelectAction"
+              }
+            ]
+          },
+          "title": "Geometryactions",
+          "type": "array"
+        },
+        "hintLevel": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Hintlevel",
+          "type": "integer"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "revealsCompleteSolution": {
+          "title": "Revealscompletesolution",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "hintLevel",
+        "content",
+        "geometryActions",
+        "revealsCompleteSolution",
+        "conceptId",
+        "provenance"
+      ],
+      "title": "ProblemHint",
+      "type": "object"
+    },
+    "ProblemSkillLink": {
+      "additionalProperties": false,
+      "properties": {
+        "importance": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "maximum": 1.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,1}|(?=[\\d.]{1,7}0*$)\\d{0,1}\\.\\d{0,5}0*$)",
+              "type": "string"
+            }
+          ],
+          "title": "Importance"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "role": {
+          "enum": [
+            "primary",
+            "secondary",
+            "prerequisite",
+            "diagnostic"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "skillId": {
+          "format": "uuid",
+          "title": "Skillid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "skillId",
+        "role",
+        "importance",
+        "provenance"
+      ],
+      "title": "ProblemSkillLink",
+      "type": "object"
+    },
+    "ProblemVersion": {
+      "additionalProperties": false,
+      "properties": {
+        "difficultyBand": {
+          "enum": [
+            "introductory",
+            "core",
+            "advanced",
+            "challenge"
+          ],
+          "title": "Difficultyband",
+          "type": "string"
+        },
+        "estimatedMinutes": {
+          "maximum": 180,
+          "minimum": 1,
+          "title": "Estimatedminutes",
+          "type": "integer"
+        },
+        "examRelevance": {
+          "items": {
+            "$ref": "#/$defs/ProblemExamRelevance"
+          },
+          "minItems": 1,
+          "title": "Examrelevance",
+          "type": "array"
+        },
+        "geometrySceneVersionId": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Geometrysceneversionid"
+        },
+        "hints": {
+          "items": {
+            "$ref": "#/$defs/ProblemHint"
+          },
+          "maxItems": 5,
+          "minItems": 5,
+          "title": "Hints",
+          "type": "array"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "maximumScore": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,9}0*$)\\d{0,6}\\.\\d{0,2}0*$)",
+              "type": "string"
+            }
+          ],
+          "title": "Maximumscore"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "referenceSolutions": {
+          "items": {
+            "$ref": "#/$defs/ReferenceSolution"
+          },
+          "minItems": 1,
+          "title": "Referencesolutions",
+          "type": "array"
+        },
+        "rubric": {
+          "items": {
+            "$ref": "#/$defs/RubricItem"
+          },
+          "minItems": 1,
+          "title": "Rubric",
+          "type": "array"
+        },
+        "skillLinks": {
+          "items": {
+            "$ref": "#/$defs/ProblemSkillLink"
+          },
+          "minItems": 1,
+          "title": "Skilllinks",
+          "type": "array"
+        },
+        "statement": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "callout": "#/$defs/CalloutBlock",
+                "display_math": "#/$defs/DisplayMathBlock",
+                "geometry": "#/$defs/GeometryBlock",
+                "image": "#/$defs/ImageBlock",
+                "inline_math": "#/$defs/InlineMathBlock",
+                "rich_line": "#/$defs/RichLineBlock",
+                "text": "#/$defs/TextBlock"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextBlock"
+              },
+              {
+                "$ref": "#/$defs/InlineMathBlock"
+              },
+              {
+                "$ref": "#/$defs/DisplayMathBlock"
+              },
+              {
+                "$ref": "#/$defs/RichLineBlock"
+              },
+              {
+                "$ref": "#/$defs/GeometryBlock"
+              },
+              {
+                "$ref": "#/$defs/ImageBlock"
+              },
+              {
+                "$ref": "#/$defs/CalloutBlock"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Statement",
+          "type": "array"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "statement",
+        "maximumScore",
+        "difficultyBand",
+        "estimatedMinutes",
+        "geometrySceneVersionId",
+        "examRelevance",
+        "skillLinks",
+        "referenceSolutions",
+        "rubric",
+        "hints",
+        "provenance"
+      ],
+      "title": "ProblemVersion",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "acquiredBy": {
+          "minLength": 1,
+          "title": "Acquiredby",
+          "type": "string"
+        },
+        "acquisitionDate": {
+          "format": "date",
+          "title": "Acquisitiondate",
+          "type": "string"
+        },
+        "adaptationDescription": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Adaptationdescription"
+        },
+        "attributionText": {
+          "minLength": 1,
+          "title": "Attributiontext",
+          "type": "string"
+        },
+        "creator": {
+          "minLength": 1,
+          "title": "Creator",
+          "type": "string"
+        },
+        "derivativeOf": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Derivativeof",
+          "type": "array"
+        },
+        "mathematicsReviewedAt": {
+          "format": "date",
+          "title": "Mathematicsreviewedat",
+          "type": "string"
+        },
+        "mathematicsReviewer": {
+          "minLength": 1,
+          "title": "Mathematicsreviewer",
+          "type": "string"
+        },
+        "permittedUses": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Permitteduses",
+          "type": "array"
+        },
+        "publicationDate": {
+          "format": "date",
+          "title": "Publicationdate",
+          "type": "string"
+        },
+        "publicationStatus": {
+          "const": "synthetic_only",
+          "title": "Publicationstatus",
+          "type": "string"
+        },
+        "restrictions": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Restrictions",
+          "type": "array"
+        },
+        "rightsBasis": {
+          "const": "original_fixture",
+          "title": "Rightsbasis",
+          "type": "string"
+        },
+        "rightsEvidence": {
+          "minLength": 1,
+          "title": "Rightsevidence",
+          "type": "string"
+        },
+        "rightsReviewedAt": {
+          "format": "date",
+          "title": "Rightsreviewedat",
+          "type": "string"
+        },
+        "rightsReviewer": {
+          "minLength": 1,
+          "title": "Rightsreviewer",
+          "type": "string"
+        },
+        "sourceKind": {
+          "const": "original_synthetic",
+          "title": "Sourcekind",
+          "type": "string"
+        },
+        "sourceReference": {
+          "minLength": 1,
+          "title": "Sourcereference",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "translationDescription": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Translationdescription"
+        }
+      },
+      "required": [
+        "sourceKind",
+        "title",
+        "creator",
+        "sourceReference",
+        "acquisitionDate",
+        "acquiredBy",
+        "rightsBasis",
+        "rightsEvidence",
+        "permittedUses",
+        "restrictions",
+        "attributionText",
+        "adaptationDescription",
+        "translationDescription",
+        "derivativeOf",
+        "mathematicsReviewer",
+        "mathematicsReviewedAt",
+        "rightsReviewer",
+        "rightsReviewedAt",
+        "publicationStatus",
+        "publicationDate"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "ReferenceSolution": {
+      "additionalProperties": false,
+      "properties": {
+        "content": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "callout": "#/$defs/CalloutBlock",
+                "display_math": "#/$defs/DisplayMathBlock",
+                "geometry": "#/$defs/GeometryBlock",
+                "image": "#/$defs/ImageBlock",
+                "inline_math": "#/$defs/InlineMathBlock",
+                "rich_line": "#/$defs/RichLineBlock",
+                "text": "#/$defs/TextBlock"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextBlock"
+              },
+              {
+                "$ref": "#/$defs/InlineMathBlock"
+              },
+              {
+                "$ref": "#/$defs/DisplayMathBlock"
+              },
+              {
+                "$ref": "#/$defs/RichLineBlock"
+              },
+              {
+                "$ref": "#/$defs/GeometryBlock"
+              },
+              {
+                "$ref": "#/$defs/ImageBlock"
+              },
+              {
+                "$ref": "#/$defs/CalloutBlock"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Content",
+          "type": "array"
+        },
+        "expertVerified": {
+          "const": true,
+          "title": "Expertverified",
+          "type": "boolean"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "methodLabel": {
+          "minLength": 1,
+          "title": "Methodlabel",
+          "type": "string"
+        },
+        "nonExhaustive": {
+          "const": true,
+          "title": "Nonexhaustive",
+          "type": "boolean"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "solutionCode": {
+          "minLength": 1,
+          "title": "Solutioncode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "solutionCode",
+        "content",
+        "methodLabel",
+        "expertVerified",
+        "nonExhaustive",
+        "provenance"
+      ],
+      "title": "ReferenceSolution",
+      "type": "object"
+    },
+    "RichLineBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "spans": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "math": "#/$defs/MathSpan",
+                "text": "#/$defs/TextSpan"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextSpan"
+              },
+              {
+                "$ref": "#/$defs/MathSpan"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Spans",
+          "type": "array"
+        },
+        "type": {
+          "const": "rich_line",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "spans"
+      ],
+      "title": "RichLineBlock",
+      "type": "object"
+    },
+    "RubricItem": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "callout": "#/$defs/CalloutBlock",
+                "display_math": "#/$defs/DisplayMathBlock",
+                "geometry": "#/$defs/GeometryBlock",
+                "image": "#/$defs/ImageBlock",
+                "inline_math": "#/$defs/InlineMathBlock",
+                "rich_line": "#/$defs/RichLineBlock",
+                "text": "#/$defs/TextBlock"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextBlock"
+              },
+              {
+                "$ref": "#/$defs/InlineMathBlock"
+              },
+              {
+                "$ref": "#/$defs/DisplayMathBlock"
+              },
+              {
+                "$ref": "#/$defs/RichLineBlock"
+              },
+              {
+                "$ref": "#/$defs/GeometryBlock"
+              },
+              {
+                "$ref": "#/$defs/ImageBlock"
+              },
+              {
+                "$ref": "#/$defs/CalloutBlock"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Description",
+          "type": "array"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "maximumScore": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0.0,
+              "type": "number"
+            },
+            {
+              "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,9}0*$)\\d{0,6}\\.\\d{0,2}0*$)",
+              "type": "string"
+            }
+          ],
+          "title": "Maximumscore"
+        },
+        "orderIndex": {
+          "minimum": 1,
+          "title": "Orderindex",
+          "type": "integer"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "rubricCode": {
+          "minLength": 1,
+          "title": "Rubriccode",
+          "type": "string"
+        },
+        "skillId": {
+          "format": "uuid",
+          "title": "Skillid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "rubricCode",
+        "description",
+        "maximumScore",
+        "skillId",
+        "orderIndex",
+        "provenance"
+      ],
+      "title": "RubricItem",
+      "type": "object"
+    },
+    "ShowAction": {
+      "additionalProperties": false,
+      "properties": {
+        "objectIds": {
+          "items": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Objectids",
+          "type": "array"
+        },
+        "type": {
+          "const": "show",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "objectIds"
+      ],
+      "title": "ShowAction",
+      "type": "object"
+    },
+    "Skill": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "minLength": 1,
+          "title": "Code",
+          "type": "string"
+        },
+        "description": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "callout": "#/$defs/CalloutBlock",
+                "display_math": "#/$defs/DisplayMathBlock",
+                "geometry": "#/$defs/GeometryBlock",
+                "image": "#/$defs/ImageBlock",
+                "inline_math": "#/$defs/InlineMathBlock",
+                "rich_line": "#/$defs/RichLineBlock",
+                "text": "#/$defs/TextBlock"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/TextBlock"
+              },
+              {
+                "$ref": "#/$defs/InlineMathBlock"
+              },
+              {
+                "$ref": "#/$defs/DisplayMathBlock"
+              },
+              {
+                "$ref": "#/$defs/RichLineBlock"
+              },
+              {
+                "$ref": "#/$defs/GeometryBlock"
+              },
+              {
+                "$ref": "#/$defs/ImageBlock"
+              },
+              {
+                "$ref": "#/$defs/CalloutBlock"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Description",
+          "type": "array"
+        },
+        "domain": {
+          "minLength": 1,
+          "title": "Domain",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "status": {
+          "const": "synthetic",
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "name",
+        "description",
+        "domain",
+        "status",
+        "provenance"
+      ],
+      "title": "Skill",
+      "type": "object"
+    },
+    "SkillRelationship": {
+      "additionalProperties": false,
+      "properties": {
+        "childSkillId": {
+          "format": "uuid",
+          "title": "Childskillid",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "parentSkillId": {
+          "format": "uuid",
+          "title": "Parentskillid",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "relationType": {
+          "enum": [
+            "prerequisite",
+            "related",
+            "subskill"
+          ],
+          "title": "Relationtype",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "parentSkillId",
+        "childSkillId",
+        "relationType",
+        "provenance"
+      ],
+      "title": "SkillRelationship",
+      "type": "object"
+    },
+    "TextBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "type": {
+          "const": "text",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "text"
+      ],
+      "title": "TextBlock",
+      "type": "object"
+    },
+    "TextSpan": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "type": {
+          "const": "text",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "text"
+      ],
+      "title": "TextSpan",
+      "type": "object"
+    },
+    "Viewport": {
+      "additionalProperties": false,
+      "properties": {
+        "xMax": {
+          "title": "Xmax",
+          "type": "number"
+        },
+        "xMin": {
+          "title": "Xmin",
+          "type": "number"
+        },
+        "yMax": {
+          "title": "Ymax",
+          "type": "number"
+        },
+        "yMin": {
+          "title": "Ymin",
+          "type": "number"
+        }
+      },
+      "required": [
+        "xMin",
+        "xMax",
+        "yMin",
+        "yMax"
+      ],
+      "title": "Viewport",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "concepts": {
+      "items": {
+        "$ref": "#/$defs/Concept"
+      },
+      "title": "Concepts",
+      "type": "array"
+    },
+    "examCycles": {
+      "items": {
+        "$ref": "#/$defs/ExamCycle"
+      },
+      "minItems": 1,
+      "title": "Examcycles",
+      "type": "array"
+    },
+    "examSkillWeights": {
+      "items": {
+        "$ref": "#/$defs/ExamSkillWeight"
+      },
+      "minItems": 1,
+      "title": "Examskillweights",
+      "type": "array"
+    },
+    "exams": {
+      "items": {
+        "$ref": "#/$defs/Exam"
+      },
+      "minItems": 1,
+      "title": "Exams",
+      "type": "array"
+    },
+    "geometryScenes": {
+      "items": {
+        "$ref": "#/$defs/GeometryScene"
+      },
+      "title": "Geometryscenes",
+      "type": "array"
+    },
+    "packageId": {
+      "format": "uuid",
+      "title": "Packageid",
+      "type": "string"
+    },
+    "packageVersion": {
+      "minimum": 1,
+      "title": "Packageversion",
+      "type": "integer"
+    },
+    "problems": {
+      "items": {
+        "$ref": "#/$defs/Problem"
+      },
+      "minItems": 1,
+      "title": "Problems",
+      "type": "array"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "publicationStatus": {
+      "const": "synthetic_only",
+      "title": "Publicationstatus",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "1.0.0",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "skillRelationships": {
+      "items": {
+        "$ref": "#/$defs/SkillRelationship"
+      },
+      "title": "Skillrelationships",
+      "type": "array"
+    },
+    "skills": {
+      "items": {
+        "$ref": "#/$defs/Skill"
+      },
+      "minItems": 1,
+      "title": "Skills",
+      "type": "array"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "packageId",
+    "packageVersion",
+    "title",
+    "publicationStatus",
+    "provenance",
+    "exams",
+    "examCycles",
+    "skills",
+    "skillRelationships",
+    "examSkillWeights",
+    "geometryScenes",
+    "concepts",
+    "problems"
+  ],
+  "title": "ContentPackage",
+  "type": "object"
+}
