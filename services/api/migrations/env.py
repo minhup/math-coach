@@ -2,7 +2,9 @@ import asyncio
 from logging.config import fileConfig
 
 from alembic import context
+from app import attempt_models, profile_models  # noqa: F401
 from app.config import get_settings
+from app.content import models as content_models  # noqa: F401
 from app.models import Base
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
