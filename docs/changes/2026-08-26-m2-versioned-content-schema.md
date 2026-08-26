@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: in-progress
+- Status: complete
 - Owner: Project owner
 - Branch: `feat/m2-versioned-content-schema`
 - Base commit: `88b77350948c5d190208457bf8c8bac5ca5952ee`
@@ -190,7 +190,8 @@ Planned and owned by this branch:
 - `docs/architecture/versioned-content-and-multi-exam.md` — permanent schema, import, immutability,
   provenance, API, and rollback documentation.
 - `README.md`, `content/README.md` — developer commands and synthetic package workflow.
-- `Makefile`, `package.json` — content schema/validation/import integration and formatting coverage.
+- `Makefile`, `package.json`, `.prettierignore` — content schema/validation/import integration,
+  formatting coverage, and generated-schema exclusion.
 - `services/api/pyproject.toml`, `services/api/uv.lock` — locked PyYAML dependency.
 - `services/api/app/models.py` — unchanged Milestone 1 base consumed by new model modules if no import
   registration change is required.
@@ -368,6 +369,10 @@ re-imported after re-upgrade. The migration cycle and retained foundation tables
 
 ## Manual QA
 
+Separate ad-hoc visual QA was not performed. The required phone/tablet interaction and overflow
+checks were exercised through the five-project Playwright journey using real local FastAPI,
+PostgreSQL, and object-storage services. The following remains the repeatable operator checklist:
+
 1. Run `make setup`; run `make seed` a second time and confirm it reports the synthetic package as
    already imported.
 2. Start `make dev-api` and `make dev-web` in separate terminals.
@@ -444,16 +449,16 @@ affected checks rerun rather than resolved by choosing one side blindly.
 ## Progress
 
 - [x] Repository inspected
-- [ ] Plan reviewed
+- [x] Plan reviewed
 - [x] Branch created from current main
-- [ ] Tests written or updated
-- [ ] Implementation complete
-- [ ] Documentation updated
-- [ ] Relevant checks pass
-- [ ] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Tests written or updated
+- [x] Implementation complete
+- [x] Documentation updated
+- [x] Relevant checks pass
+- [x] Diff reviewed
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -465,12 +470,28 @@ affected checks rerun rather than resolved by choosing one side blindly.
   Milestone 2 exit condition must survive later application-code paths.
 - 2026-08-26: Provide a small authenticated preview UI in addition to the specified preview API so
   internal reviewers can exercise the content contract without a general CMS.
+- 2026-08-26: Allow a new attempt to reference any retained immutable version of an available
+  synthetic problem, not only its current version. This preserves the exact version selected before
+  a current-version pointer advances.
 
 ## Discoveries
 
 - The unrelated untracked owner content visible before branch creation changed paths while the
   baseline was being inspected, indicating concurrent owner activity. This branch will continue to
   stage only explicit owned files.
+- The shared worktree was switched twice to `chore/bootstrap-chuyen-toan-corpus` during implementation.
+  The Milestone 2 branch pointer was restored without modifying or staging that work.
+- Schema tests exposed that exam-skill totals must be grouped by cycle and weight version; summing
+  every version together would make a valid second configuration impossible. Validation now checks
+  each `(exam_cycle_id, version)` independently.
+- Attempt regression coverage exposed that requiring the stable problem's current pointer during
+  attempt creation would reject a version opened immediately before publication of a replacement.
+  Exact retained versions are now accepted and remain protected by restrictive foreign keys and
+  immutable triggers.
+- The broad root `scripts/` check sees concurrently created untracked corpus tooling in the shared
+  worktree. Those files are outside this ChangePlan and were not formatted, inspected beyond command
+  diagnostics, or staged. The final root gate was therefore run from a clean detached worktree at the
+  rebased Milestone 2 commit so it evaluated exactly this branch.
 
 ## Verification evidence
 
@@ -483,7 +504,46 @@ affected checks rerun rather than resolved by choosing one side blindly.
   Next.js production build, 15 frontend unit/component tests, 14 backend unit tests, two full
   migration downgrade/upgrade cycles, 7 API/PostgreSQL/MinIO integration tests, and 5 Playwright
   browser projects.
+- Test-driven schema work recorded expected failures before the implementation for prerequisite
+  cycles, a second exam-skill-weight version, duplicate geometry version numbers, duplicate skill
+  relationship keys, malformed nested preview content, and attempt creation against a retained prior
+  problem version. The corresponding focused suites are green.
+- `make content-validate` passed for the committed synthetic YAML package and current generated JSON
+  Schema. Its deterministic canonical hash is
+  `59f9572fb526842cbdddf438db2468c8d578a637fe814102f5bfbb95118ce7db`.
+- `make api-contract-check` passed after regenerating the OpenAPI document and TypeScript declarations.
+- `make seed` run twice reported `imported` and then `already_imported` for package
+  `10000000-0000-4000-8000-000000000001` version 1 with the same canonical hash.
+- `make test-unit` passed: 24 frontend tests with 89.64% statement, 88.81% branch, 93.02%
+  function, and 89.38% line coverage; 25 backend unit tests passed, including 11 strict package
+  schema/loader tests.
+- `make test-integration` passed after two complete `downgrade base -> upgrade head` cycles: all 19
+  PostgreSQL/MinIO/API integration tests passed, including 12 Milestone 2 cases.
+- `make test-e2e` passed all 5 compact phone, Pixel 7, iPhone 13, iPad portrait, and iPad landscape
+  projects. The journey covered login, synthetic upload, authenticated preview, both supported exams,
+  non-exhaustive solution wording, scene accessibility text, no horizontal overflow, and sign-out.
+- `make build` passed and prerendered `/` plus `/internal/content-preview` under Next.js 16.3.2.
+- `git fetch origin --prune` immediately before handoff confirmed `origin/main` remained
+  `88b77350948c5d190208457bf8c8bac5ca5952ee`. `git rebase origin/main` reported the branch was already
+  up to date; there were no conflicts.
+- Post-rebase `make check` passed in a clean detached worktree at `0771f86`. It repeated formatting,
+  lint, TypeScript/mypy, OpenAPI drift, content-schema/package validation, production build, all 49
+  unit tests, two migration cycles plus all 19 integration tests, and all 5 browser projects.
 
 ## Result
 
-Implementation has not started. The proposed design and owned-file set are recorded above for review.
+Milestone 2 is implemented on `feat/m2-versioned-content-schema` with only original synthetic content.
+The database now expresses a user-owned study profile with an array of active exam-cycle targets,
+shared exams/skills and versioned weights, immutable concept/problem/geometry content, multi-exam
+problem relevance, solutions, rubrics, progressive hints, and restrictive attempt-version references.
+
+Package schema `1.0.0` rejects duplicate keys, unknown fields, unsafe/executable geometry, invalid
+graphs/references, inconsistent weights/scoring/hints, exhaustive solution claims, and non-synthetic
+provenance before persistence. The deterministic importer is idempotent and rolls a complete package
+back on any conflict; PostgreSQL independently prevents modification or deletion of attempt-referenced
+content versions.
+
+Authenticated profile/target/attempt and internal preview APIs are included in generated OpenAPI and
+TypeScript contracts. The responsive preview renders typed blocks and curated scene metadata without
+HTML injection or executable geometry. Real-exam selection and real-content rights/provenance remain
+`DECISION REQUIRED`; no real or unrelated dataset was imported.
