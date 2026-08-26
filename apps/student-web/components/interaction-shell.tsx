@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import { ApiError, logout, type User } from "../lib/api";
 import { UploadWorkspace } from "./upload-workspace";
@@ -49,6 +50,9 @@ export function InteractionShell({ initialUser, onSignedOut }: InteractionShellP
                 <strong>{initialUser.displayName}</strong>
                 <span>Internal learner</span>
               </div>
+              <Link className="text-button preview-link-button" href="/internal/content-preview">
+                Content preview
+              </Link>
               <button className="text-button" disabled={signingOut} onClick={signOut} type="button">
                 {signingOut ? "Signing out…" : "Sign out"}
               </button>

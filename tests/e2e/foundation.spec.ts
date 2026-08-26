@@ -30,6 +30,13 @@ test("internal learner signs in and completes a synthetic image upload", async (
   await uploadButton.click();
   await expect(page.getByText("Image received and verified")).toBeVisible();
 
+  await page.getByRole("link", { name: "Content preview" }).click();
+  await expect(page.getByRole("heading", { name: "SYN-M2-GEO-001" })).toBeVisible();
+  await expect(page.getByText("SYN-AURORA-2027")).toBeVisible();
+  await expect(page.getByText("SYN-HARBOR-2027")).toBeVisible();
+  await expect(page.getByText("Reference solutions are non-exhaustive.")).toBeVisible();
+  await expect(page.getByText(/A coordinate triangle with A at zero/)).toBeVisible();
+
   const horizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
   );
@@ -42,6 +49,7 @@ test("internal learner signs in and completes a synthetic image upload", async (
     });
   }
 
+  await page.getByRole("link", { name: "Back to workspace" }).click();
   const signOut = page.getByRole("button", { name: "Sign out" });
   await signOut.scrollIntoViewIfNeeded();
   await expect(signOut).toBeEnabled();
