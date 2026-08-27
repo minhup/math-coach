@@ -21,3 +21,15 @@ make seed
 Imports run in deterministic path order and one transaction per package. Re-importing identical
 package bytes is a no-op. Reusing a package ID/version for different validated content or conflicting
 with an immutable database row fails without leaving partial content.
+
+The committed synthetic corpus is incremental:
+
+- `synthetic-m2-foundations-v1` owns the shared invented exams, cycles, skills, first scene, and
+  first problem.
+- `synthetic-m4-geometry-v1` reuses those explicit multi-exam and shared-skill identities while
+  adding a new immutable all-primitives scene/problem with every approved typed action.
+
+Every released scene version's `fallbackImageAssetId` resolves to a repository-owned SVG at
+`apps/student-web/public/fixtures/<asset-id>.svg`. Content integration tests enforce that
+convention. SVG files are application assets, not content fields: packages cannot provide SVG,
+HTML, Markdown, scripts, functions, expressions, or event handlers.

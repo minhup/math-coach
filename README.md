@@ -1,6 +1,6 @@
 # Math Coach
 
-Math Coach is an interaction-first MVP for helping students move from a photographed paper solution to a confirmed transcript and useful mathematical feedback. Milestones 1 through 3 supply the internal engineering foundation, invite login, responsive phone/tablet shell, verified synthetic-image upload, multi-exam study-profile contracts, strictly validated versioned synthetic content, controlled mathematical rendering, and a synthetic visual-correction spike. AI transcription, grading, learner state, and student-facing practice arrive in later milestones.
+Math Coach is an interaction-first MVP for helping students move from a photographed paper solution to a confirmed transcript and useful mathematical feedback. Milestones 1 through 4 supply the internal engineering foundation, invite login, responsive phone/tablet shell, verified synthetic-image upload, multi-exam study-profile contracts, strictly validated versioned synthetic content, controlled mathematical rendering, a synthetic visual-correction spike, and the curated interactive geometry engine. AI transcription, grading, learner state, and student-facing practice arrive in later milestones.
 
 Use synthetic or non-personal images only. The local credentials are development defaults, not production configuration.
 
@@ -20,6 +20,15 @@ only after confirmation in a later milestone. The spike does not run OCR, grade,
 [the mathematical rendering and transcript-state architecture](docs/architecture/math-rendering-and-transcript-state.md)
 and [the five-project device report](docs/evaluation/m3-math-rendering-device-report.md).
 
+Milestone 4 validates parent-derived geometry graphs and typed actions at the authoritative Pydantic
+boundary and again before the browser dynamically imports JSXGraph. The shared renderer supports
+the approved point, line/curve, polygon/angle, dependent-construction, and text primitives; only
+explicit free points move. It preserves derived midpoint, intersection, perpendicular, parallel,
+and circumcircle relationships, enforces selection allowlists, and falls back to a repository-owned
+static image on invalid data or renderer failure. See
+[the interactive geometry architecture](docs/architecture/interactive-geometry-engine.md) and
+[the five-project geometry report](docs/evaluation/m4-geometry-device-report.md).
+
 ## Local setup
 
 Prerequisites are Node 20.9 or newer, npm, Python 3.12, uv, Docker with Compose, and Make.
@@ -37,7 +46,11 @@ make dev-api
 make dev-web
 ```
 
-Open `http://localhost:3000`. After signing in, use **Correction spike** to open the authenticated synthetic Milestone 3 route. MinIO's local console is at `http://localhost:9001`. Stop infrastructure without deleting its volumes with `make services-down`.
+Open `http://localhost:3000`. After signing in, use **Correction spike** for the synthetic
+Milestone 3 editor, **Geometry spike** for the all-primitives Milestone 4 surface, or **Content
+preview** for the typed versioned-package path. MinIO's local console is at
+`http://localhost:9001`. Stop infrastructure without deleting its volumes with
+`make services-down`.
 
 ## Root command contract
 
@@ -68,6 +81,20 @@ npx playwright test tests/e2e/math-correction.spec.ts
 
 The Playwright command runs the same correction regression in all five configured phone/tablet
 projects.
+
+Focused Milestone 4 checks can be run with:
+
+```bash
+cd apps/student-web
+npx vitest run features/geometry components/geometry --coverage=false
+cd ../..
+make content-validate
+./scripts/run_e2e.sh tests/e2e/geometry.spec.ts
+```
+
+The E2E helper accepts optional Playwright paths and preserves the default full-suite behavior when
+called without arguments. `PLAYWRIGHT_WEB_PORT` and `PLAYWRIGHT_API_PORT` may select isolated
+ports for a parallel worktree; the defaults remain 3000 and 8000.
 
 ## Repository map
 

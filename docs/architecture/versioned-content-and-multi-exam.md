@@ -70,14 +70,18 @@ selection prompts use the discriminated `ContentBlock` union:
 Arbitrary Markdown and HTML are not package fields and are rejected as unknown data. Preview code
 switches on the generated union and never injects HTML. Milestone 3 routes preview mathematics through
 the [controlled KaTeX and visual-correction boundary](math-rendering-and-transcript-state.md).
-Interactive geometry rendering remains a later milestone.
+Milestone 4 resolves geometry blocks through the current versioned scene in the preview response and
+passes them through the
+[strict interactive-geometry boundary](interactive-geometry-engine.md). Missing or invalid scene
+references produce a concise unavailable state rather than partially rendering untrusted content.
 
 Geometry scene versions are declarative JSON. Their finite object vocabulary contains IDs,
-construction parents, free-point coordinates, labels, viewport, initial visibility, approved
-animation IDs, an accessibility description, and a static fallback asset ID. Hint actions use a
-separate finite union for show, hide, highlight, focus, clear, animate, and select operations. The
-validator rejects unknown parents, cycles, unknown visibility/action targets, unknown animations,
-and executable fields. JavaScript or other generated geometry code is never evaluated.
+construction parents, free-point coordinates, explicit drag/select capabilities, intersection
+branches, labels, viewport, initial visibility, approved animation IDs, an accessibility
+description, and a static fallback asset ID. Hint actions use a separate finite union for show,
+hide, highlight, focus, clear, animate, and select operations. The validator rejects unknown
+parents, cycles, malformed parent/type combinations, unknown visibility/action targets, unknown
+animations, and executable fields. JavaScript or other generated geometry code is never evaluated.
 
 Reference solutions must declare both expert verification and `nonExhaustive: true`. They are
 examples, not an exhaustive list of valid mathematical reasoning. Rubric scores must total the
@@ -145,8 +149,11 @@ make migrate
 make seed
 ```
 
-`make seed` seeds the local invite, validates/imports each synthetic package, and may be run again
-safely. Content seeding refuses to run when the application environment is production.
+`make seed` seeds the local invite, validates/imports the M2 foundation and incremental M4 geometry
+packages in lexical order, and may be run again safely. Both packages share the same two explicit
+synthetic exam cycles and shared skills; the M4 package adds new immutable scene/problem records
+rather than creating exam-specific learner state. Content seeding refuses to run when the
+application environment is production.
 
 ## API and authorization
 

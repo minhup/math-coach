@@ -1125,7 +1125,9 @@ drag permitted free points
 tap/select known objects
 show/hide
 highlight
-move configured sliders
+clear highlight
+focus
+run an approved point animation
 answer visual-selection questions
 ```
 
@@ -1139,7 +1141,9 @@ unknown parents
 construction cycles
 unknown action targets
 unsupported object types
+malformed viewports or object properties
 missing accessibility descriptions
+missing fallback assets
 ```
 
 Every scene must have a fallback image and description.
@@ -1318,6 +1322,19 @@ representative fixtures
 ```
 
 Exit when scenes render deterministically and preserve constraints.
+
+Implemented on 2026-08-27 with the existing versioned Milestone 2 contract and exact
+JSXGraph 1.13.2. The approved primitive set is point, segment, line, ray, circle, arc, polygon,
+angle, midpoint, intersection, perpendicular, parallel, circumcircle, and label. Pydantic and the
+frontend boundary reject malformed graphs and action targets before rendering; construction order
+is parent-derived and deterministic. Only explicitly permitted free points are draggable, while
+dependent constructions remain derived. Typed show, hide, highlight, clear-highlight, focus,
+animate, and ask-select actions operate only on existing curated IDs. Every released synthetic
+scene includes a description and repository-owned static fallback. The authenticated synthetic
+spike and typed content preview use the shared renderer. The production browser regression passes
+all five configured phone/tablet projects without horizontal overflow. See
+[the interactive geometry architecture](architecture/interactive-geometry-engine.md) and
+[device report](evaluation/m4-geometry-device-report.md).
 
 ### Milestone 5 — Static end-to-end student slice
 
