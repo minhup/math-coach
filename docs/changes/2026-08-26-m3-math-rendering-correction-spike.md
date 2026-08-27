@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: in-progress
+- Status: complete
 - Owner: Codex implementation; project owner approval
 - Branch: `feat/m3-math-rendering-correction-spike`
 - Base commit: `3753cd94bbc83ddeb284870600db9809524f0a82`
@@ -187,8 +187,8 @@ visual and never exposes a raw source field.
 
 Explicit formula deletion and boundary Backspace/Delete identify the adjacent math token, prevent
 the browser mutation, and open an accessible modal confirmation. Confirming invokes the pure
-delete/merge operation and restores a text caret; cancelling restores focus without changing typed
-state. Deletion within a non-empty MathLive expression remains ordinary formula editing, while
+delete/merge operation and restores a text caret; cancelling preserves typed state. Deletion within
+a non-empty MathLive expression remains ordinary formula editing, while
 Backspace/Delete on an empty active formula requests token deletion. Drag-and-drop is unnecessary.
 
 Confirmation synchronizes all known text runs, calls the pure flat serializer, and renders a
@@ -198,7 +198,7 @@ confirmation copy or user-facing labels.
 
 ### Simulated OCR fixture and responsive route
 
-The deterministic fixture is explicitly described as simulated OCR output. It contains six flat
+The deterministic fixture is explicitly described as simulated OCR output. It contains seven flat
 blocks in source order and still includes one deliberately malformed formula to exercise correction.
 The synthetic SVG removes artificial step numbering and describes a continuous solution. It remains
 original non-personal data and does not imply real OCR.
@@ -449,14 +449,14 @@ conflict must be documented and followed by affected focused tests and `make che
 - [x] Repository inspected
 - [x] Plan reviewed
 - [x] Branch created from current main
-- [ ] Tests written or updated
-- [ ] Implementation complete
-- [ ] Documentation updated
-- [ ] Relevant checks pass
-- [ ] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Tests written or updated
+- [x] Implementation complete
+- [x] Documentation updated
+- [x] Relevant checks pass
+- [x] Diff reviewed
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -479,6 +479,9 @@ conflict must be documented and followed by affected focused tests and `make che
   insertion/deletion remains a pure typed-state operation rather than accepting edited DOM markup.
 - 2026-08-27: Require an application confirmation dialog for every whole-formula deletion. Ordinary
   deletion within non-empty MathLive content remains visual expression editing.
+- 2026-08-27: Initial deletion-dialog focus goes to the safe **Keep formula** action. Escape cancels
+  deletion without mutation; keyboard and touch users never need to accept the destructive action
+  merely to dismiss the dialog.
 
 ## Discoveries
 
@@ -487,10 +490,17 @@ conflict must be documented and followed by affected focused tests and `make che
   the callback seam can prove typed order without exposing those details to a learner.
 - The generated API client has no transcription result. Flattening this frontend-local spike does
   not create generated-contract drift or a compatibility obligation.
-- A production Next.js rewrite is compiled into the build. The first isolated `make check` browser
-  harness reused a build compiled for host port 8000 inside Docker, so all ten browser cases reached
-  the recovery page. Rebuilding in the isolated container with its reachable API proxy corrected the
-  harness; the unchanged product suite then passed all ten cases. No temporary harness file remains.
+- The first real-browser inline run exposed reversed character input because React reconciliation
+  reset the native caret after each keystroke. Keeping live text in the canonical ref without
+  rerendering the editable host fixed the product behavior; structural edits and confirmation still
+  commit a validated state.
+- A production Next.js rewrite is compiled into the build, and object-storage CORS expects the
+  standard localhost web origin. The first current isolated `make check` attempt used ports
+  3101/8100: all five correction cases passed, but all five unrelated foundation uploads correctly
+  failed at the signed storage request. The passing harness ran the branch frontend at port 3000
+  inside the Playwright container, proxied its branch API on host port 8100 and host storage on
+  container port 9000, then restored the tracked runner byte-for-byte. No temporary harness file or
+  test artifact remains.
 
 ## Verification evidence
 
@@ -500,43 +510,51 @@ conflict must be documented and followed by affected focused tests and `make che
 - Required root/local instructions, the MVP plan, prior complete ChangePlan, rendering/transcript
   architecture, device report, correction source/tests, package/validation configuration, relevant
   generated contracts, and repository-local Next.js Server/Client and CSS guides were read.
-- Baseline focused Vitest result: 5 files and 37 tests passed in 941 ms.
-- TDD red/green evidence: flat confirmation first failed against schema `1.0.0`; validation first
-  accepted a blank attempt; pure operation imports were absent; the editor first dereferenced
-  `transcript.steps`; click-to-edit, contextual controls, content-only confirmation, and clarified
-  route copy each failed before their implementation. Focused suites passed after each slice.
+- Baseline for the second clarification: 3 focused files and 13 tests passed in 946 ms.
+- Earlier flat-state TDD first failed against schema `1.0.0`, the old step exports/UI, and the old
+  technical confirmation. For this refinement, formula-at-caret and formula-delete operation imports
+  failed before implementation; MathLive focus behavior failed before `focusOnReady`; the continuous
+  DOM/native-input/formula workflow assertions failed against block rows; and safe dialog focus
+  failed while focus remained on the destructive trigger. Each slice reached focused green before
+  the next.
 - Final focused renderer/editor/transcript command:
   `npx vitest run features/transcription/transcript-state.test.ts
 components/transcription/transcript-editor.test.tsx
 components/transcription/correction-spike-app.test.tsx components/math/mathlive-editor.test.tsx
 components/math/math-renderer.test.tsx components/content-preview.test.tsx --coverage=false` — 6
-  files and 37 tests passed in 994 ms after the final rebase freshness check.
-- `npm run test:unit --workspace @math-coach/student-web -- --coverage` — 11 files and 59 tests
-  passed; coverage was 90.36% statements, 86.92% branches, 92% functions, and 90.20% lines.
-- `make format-check lint typecheck api-contract-check content-validate build test-unit
-test-integration` — passed: Prettier/Ruff format checks, ESLint/Ruff lint, web/API TypeScript plus
-  mypy over 30 source files, generated API drift check, one validated content package with hash
-  `59f9572fb526842cbdddf438db2468c8d578a637fe814102f5bfbb95118ce7db`, Next.js production build,
-  59 frontend unit tests, 25 backend unit tests, migration downgrade/upgrade twice, and 19
-  integration tests.
+  files and 44 tests passed in 1.06 seconds before final verification and in 952 ms after the rebase
+  freshness check.
+- `make lint` and `make typecheck` passed independently during refactor. ESLint caught ref access in
+  the first initializer; lazy validated state initialization corrected it without changing behavior.
 - `make check` — passed after the isolated browser harness was corrected. It repeated every
-  non-destructive gate above and ran 10 Playwright cases across the five configured projects in 7.3
-  seconds. Foundation/correction timings were compact Chromium 1.0/1.5 s, Pixel 7 Chromium 1.3/1.7
-  s, iPhone 13 WebKit 4.6/5.5 s, iPad portrait WebKit 3.9/6.0 s, and iPad landscape WebKit 2.8/5.0 s.
-- Dedicated production-build correction visual run — 5 passed in 6.6 seconds: compact Chromium 1.2
-  s, Pixel 7 Chromium 1.7 s, iPhone 13 WebKit 5.1 s, iPad portrait WebKit 5.3 s, and iPad landscape
-  WebKit 5.9 s.
-- Full-page screenshots for all five projects were inspected at original detail. Phone tabs,
-  tablet split layout, one paper-like document, click-to-edit math, contextual controls,
-  content-only confirmation, and horizontal containment were correct. Long phone formulas remained
-  locally contained without document/page overflow. Temporary configs, proxies, traces,
-  screenshots, and test results were removed; the shared checkout and its corpus/data work were not
-  touched.
+  required gate and ran 10 Playwright cases across the five configured projects in 8.5 seconds.
+  Prettier/Ruff formatting, ESLint/Ruff lint, TypeScript/mypy over 30 API source files, generated API
+  drift, content validation, production build, 66 frontend tests, 25 backend tests, two complete
+  migration downgrade/upgrade cycles, 19 integration tests, and all browser cases passed. Frontend
+  coverage was 87.39% statements, 81.31% branches, 89.72% functions, and 87.65% lines. The content
+  package hash remained
+  `59f9572fb526842cbdddf438db2468c8d578a637fe814102f5bfbb95118ce7db`. Foundation/correction
+  timings were compact Chromium 1.0/1.8 s, Pixel 7 Chromium 1.3/1.9 s, iPhone 13 WebKit 4.7/6.4 s,
+  iPad portrait WebKit 3.8/7.2 s, and iPad landscape WebKit 2.8/6.2 s.
+- Dedicated production-build correction visual run — 5 passed in 8.4 seconds: compact Chromium 1.8
+  s, Pixel 7 Chromium 3.0 s, iPhone 13 WebKit 7.1 s, iPad portrait WebKit 6.9 s, and iPad landscape
+  WebKit 7.7 s.
+- Active-MathLive, delete-dialog, and final full-page screenshots for all five projects were
+  inspected at original detail. Phone tabs, tablet split layout, one paper-like native-caret
+  document, inline activation/insertion, safe-action dialog focus, contextual controls, content-only
+  confirmation, and horizontal containment were correct. Long phone content remained locally
+  contained without document/page overflow. Temporary configs, proxies, traces, screenshots, and
+  test results were removed; the shared checkout and its corpus/data work were not touched.
 - `git diff --check origin/main...HEAD`, the complete file-by-file diff review, and searches for
   correction-stage step exports/fields plus executable/unsafe HTML paths completed without an
   implementation finding. Intentional negative test and documentation references are retained.
 
 ## Result
 
-In progress for the inline-caret clarification. The prior flat correction revision and its evidence
-remain recorded above; no inline implementation or revised device result is claimed yet.
+The clarified Milestone 3 correction phase is complete on the same feature branch. It now presents
+the canonical flat typed block array as one Word-like inline document with native text caret input,
+exact-caret visual formula insertion, click-to-edit MathLive, controlled idle KaTeX, and confirmed
+whole-formula deletion. Confirmation serializes exactly the reviewed ordered text/math content and
+shows no technical structure. All renderer safety constraints remain, the five-project responsive
+matrix has no horizontal overflow, and reasoning-step detection remains explicitly deferred. No
+real OCR, grading, persistence, API/schema/database change, or added dependency is included.
