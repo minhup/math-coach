@@ -10,7 +10,8 @@ GeometrySceneVersion extends the Milestone 2 contract without changing content s
 1.0.0. Every scene contains:
 
 - an immutable UUID and positive version;
-- a finite viewport with strictly increasing x and y bounds;
+- a finite, strictly numeric viewport with increasing x and y bounds; strings and booleans are not
+  coerced into coordinates;
 - unique stable object IDs and explicit parent IDs;
 - unique initially visible object IDs and approved animation IDs;
 - a non-empty accessibility description;
@@ -64,7 +65,8 @@ types. It passes already-created parent objects rather than source strings. Labe
 application-owned coordinate closures with parsing and MathJax disabled; no content-provided
 function is possible. The board disables pan, wheel zoom, navigation controls, and remote resources.
 A setup or update exception frees the partial board and replaces it with a concise accessible
-fallback.
+fallback. Teardown preserves JSXGraph's required method receiver and contains third-party cleanup
+errors so leaving a scene cannot break application navigation.
 
 ## Typed actions and interaction state
 

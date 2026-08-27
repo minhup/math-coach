@@ -133,12 +133,13 @@ origin/main` exited successfully. Milestone 3 is therefore present at the exact 
 - Registry metadata on 2026-08-27 reports `jsxgraph@1.13.2`, published seven days earlier, with
   built-in TypeScript declarations, package exports, one self-reference dependency satisfied by the
   same installed package, Node `>=20.19.0`, dual MIT/LGPL-3.0-or-later licensing, a 10,982,285-byte
-  tarball, and 78,187,672 unpacked bytes. Actual locked installation, production bundle, and audit
-  evidence remain to be measured after approval.
+  tarball, and 78,187,672 unpacked bytes. The exact lock installs to 76 MiB on this filesystem; the
+  dynamically loaded production chunk is 1,151,137 bytes (262,447 bytes with gzip), and the final
+  production-only npm audit reports zero vulnerabilities.
 - The final Milestone 3 `make check` evidence on `origin/main` passed formatting, lint, type checks,
   generated-contract drift, content validation, production build, 66 frontend tests, 25 backend
-  tests, two complete migration cycles, 19 integration tests, and all 10 browser cases. This branch
-  has not claimed a fresh baseline run before the requested design checkpoint.
+  tests, two complete migration cycles, 19 integration tests, and all 10 browser cases. A fresh
+  pre-change baseline `make check` on this isolated branch reproduced those passing counts.
 
 ## Design
 
@@ -189,7 +190,7 @@ midpoint                  two point-like parents
 intersection              two line/circle-like parents + branch index
 perpendicular | parallel  line-like parent + point-like parent
 circumcircle              three point-like parents
-label                     one non-label geometry parent + plain label text
+label                     one point-like parent + plain label text
 ```
 
 Line-like includes line, segment, ray, perpendicular, and parallel. Circle-like includes circle and
@@ -267,9 +268,9 @@ clearly synthetic, uses all approved primitives, declares objects out of depende
 one draggable point plus locked/constructed controls, and supplies all actions and ask-select
 outcomes. It calls no new API and stores nothing.
 
-### Proposed public test seams and TDD slices
+### Approved public test seams and TDD slices
 
-The following proposed seams require project-owner confirmation before the first test is written:
+The project owner confirmed these seams before the first test was written:
 
 1. `GeometrySceneVersion`/`ContentPackage` Pydantic validation and generated OpenAPI/TypeScript
    output at the backend contract boundary.
@@ -313,7 +314,8 @@ Proposed and owned by this branch:
 - `docs/evaluation/m4-geometry-device-report.md` — committed exact regression/device results.
 - `README.md` and `content/README.md` — internal route, focused commands, incremental synthetic
   package, and fallback-asset convention.
-- `package.json` — include owned Milestone 4 documentation in formatting checks.
+- `package.json` — include owned Milestone 4 documentation in formatting checks and align the Node
+  engine with the locked renderer's `>=20.19` requirement.
 - `package-lock.json` and `apps/student-web/package.json` — exact `jsxgraph@1.13.2` production lock.
 - `services/api/app/content/schemas.py` — finite/object-specific scene and action validation.
 - `services/api/tests/fixtures/geometry.py` — reusable original synthetic all-primitives scene and
@@ -353,17 +355,21 @@ Proposed and owned by this branch:
   typed geometry content and operate preview actions without regressing math/multi-exam content.
 - `apps/student-web/components/interaction-shell.tsx` and its existing app test — authenticated
   navigation to the geometry spike.
-- `apps/student-web/app/layout.tsx` — import the locked local JSXGraph stylesheet through the
-  supported App Router path if installation confirms the package export.
 - `apps/student-web/app/globals.css` — contained board, fallback, action, selection, phone, tablet,
-  focus, touch-target, and reduced-motion styles.
+  focus, touch-target, reduced-motion, and minimal JSXGraph integration styles. Package inspection
+  proved the dependency stylesheet subpath is not exported, so `app/layout.tsx` remains unchanged.
 - `tests/e2e/geometry.spec.ts` — unchanged five-project browser regression.
+- `tests/e2e/foundation.spec.ts` — scope the existing content-preview description assertion after
+  the typed geometry block correctly introduces a second visible copy inside the live scene.
 - `playwright.config.ts` — allow isolated worktrees to select non-conflicting local web/API ports
   while retaining the existing defaults and five device projects. The first real-browser red run
   discovered live Milestone 3 servers owned by another worktree on ports 3000/8000; those processes
   remain untouched.
 - `scripts/run_e2e.sh` — pass the same optional isolated ports through production-server and
   container execution so the root E2E/check contract can run without stopping another worktree.
+- `apps/student-web/next.config.ts` — derive the production API rewrite from the optional isolated
+  Playwright API port when an explicit `API_PROXY_TARGET` is absent. The first full-root run proved
+  the runtime server target alone cannot change a rewrite already captured by `next build`.
 
 `services/api/app/content/preview.py`, `preview_schemas.py`, database models/migrations,
 `vitest.config.ts` and existing correction code are not expected to change.
@@ -424,16 +430,16 @@ Add exactly `jsxgraph@1.13.2` as a direct production dependency of `@math-coach/
 - License: dual `(MIT OR LGPL-3.0-or-later)`; this project will use the MIT option and retain package
   notices through the lock/source distribution.
 - Registry size: 10,982,285-byte tarball and 78,187,672 unpacked bytes before filesystem overhead.
-  The package includes extensive source/docs, so installed size is not browser transfer size. The
-  final plan will record actual `node_modules` size and production route chunks.
+  The package includes extensive source/docs, so installed size is not browser transfer size. It
+  occupies 76 MiB in `node_modules`; the dynamically loaded production JavaScript chunk is
+  1,151,137 bytes and 262,447 bytes when gzipped.
 - Security: geometry content never reaches a parser/interpreter; the app uses only `initBoard`, the
   finite `board.create` switch, element attributes/events, and `freeBoard`. `npm audit --omit=dev`,
-  exact-lock inspection, executable-path searches, and renderer failure tests are required before
-  handoff. The official changelog notes recent source-output hardening; no safety claim relies on it.
-- Compatibility: package metadata requires Node `>=20.19.0`, which is stricter than the repository's
-  current `>=20.9` declaration. The installed CI/runtime Node version will be verified before lock;
-  if current supported tooling does not meet it, implementation will stop and this dependency
-  decision will return for review rather than silently weakening the lock.
+  exact-lock inspection, executable-path searches, and renderer failure tests all pass. The final
+  production-only audit reports zero vulnerabilities. The official changelog notes recent
+  source-output hardening; no safety claim relies on it.
+- Compatibility: package metadata requires Node `>=20.19.0`. The root engine/setup contract now
+  states `>=20.19`; verification used Node `24.14.0`.
 - Alternatives rejected: GeoGebra embeds introduce an external product/runtime and broader authoring
   surface; a custom SVG/canvas engine would reimplement mathematical constraints and accessibility;
   generic canvas frameworks are expressly prohibited; `jsxgraph-react` adds an unnecessary wrapper
@@ -661,19 +667,19 @@ tests and `make check` must then be rerun.
 - New default fields could alter immutable hashes. Mitigation: exclude inactive compatibility fields
   from canonical serialization and regression-test the original M2 scene/item hash.
 - The user requested a pre-implementation checkpoint and the TDD skill requires agreed seams.
-  Mitigation: stop after this ChangePlan/proposed file set; write no test or implementation until the
-  project owner confirms the seams and scope.
+  Mitigation: implementation began only after the project owner confirmed the recorded seams and
+  file set with “process it.”
 
 ## Progress
 
 - [x] Repository inspected
 - [x] Plan reviewed
 - [x] Branch created from current main
-- [ ] Tests written or updated
-- [ ] Implementation complete
-- [ ] Documentation updated
+- [x] Tests written or updated
+- [x] Implementation complete
+- [x] Documentation updated
 - [ ] Relevant checks pass
-- [ ] Diff reviewed
+- [x] Diff reviewed
 - [ ] Branch rebased on current main
 - [ ] Conflict resolution re-tested
 - [ ] Handoff summary written
@@ -684,9 +690,9 @@ tests and `make check` must then be rerun.
   with “process it”; implementation may proceed through the recorded red-green slices.
 - 2026-08-27: Use the existing FastAPI/Pydantic geometry contract as authoritative and regenerate
   all downstream artifacts. A second frontend-owned canonical schema is rejected.
-- 2026-08-27: Use JSXGraph `1.13.2` provisionally because the repository architecture selects
-  JSXGraph and current official registry/docs identify this release. Final lock awaits checkpoint
-  approval plus local Node compatibility and audit verification.
+- 2026-08-27: Lock JSXGraph `1.13.2` exactly because the repository architecture selects JSXGraph,
+  current official registry/docs identify this release, Node `24.14.0` satisfies its engine, and the
+  production-only audit reports zero vulnerabilities.
 - 2026-08-27: Keep the database unchanged because scenes/actions are already immutable versioned
   JSONB. Add new content identities instead of modifying old immutable versions.
 - 2026-08-27: Use stable-ID topological order with lexical ready-queue tie breaking so declaration
@@ -699,6 +705,16 @@ tests and `make check` must then be rerun.
   pointer/touch events; SVG internals are not the only accessible interaction path.
 - 2026-08-27: Add an incremental synthetic M4 content package rather than rewriting the released M2
   package or importing real content.
+- 2026-08-27: Raise the repository Node engine/setup contract from `>=20.9` to `>=20.19` rather than
+  advertise a version rejected by the locked JSXGraph package.
+- 2026-08-27: Use application-owned minimal JSXGraph integration styles because the package export
+  map does not expose its stylesheet as a supported Next.js subpath.
+- 2026-08-27: Keep Playwright's normal ports as defaults while allowing explicit isolated web/API
+  ports. The shared Milestone 3 servers and dirty checkout remain untouched.
+- 2026-08-27: Treat viewport and coordinate numbers as strict finite values at Pydantic and browser
+  boundaries; numeric strings and booleans are malformed rather than coercible curated data.
+- 2026-08-27: Bind JSXGraph teardown to its receiver and contain third-party cleanup exceptions so
+  leaving a live preview cannot replace the workspace with a Next.js error boundary.
 
 ## Discoveries
 
@@ -714,6 +730,14 @@ tests and `make check` must then be rerun.
 - JSXGraph natively provides the required midpoint, intersection, perpendicular, parallel, and
   circumcircle dependencies, so constraint preservation should remain within the selected engine
   rather than a second custom geometry solver.
+- JSXGraph's stylesheet path is not exported by `jsxgraph@1.13.2`; unsupported package-subpath
+  imports fail the Next.js build. The board needs only a small set of application-owned styles.
+- JSXGraph's `freeBoard` uses its `JXG.JSXGraph` receiver internally. Storing the bare method passed
+  unit mocks but failed real client navigation; a receiver-sensitive regression now protects the
+  bound teardown path.
+- JSXGraph creates one hidden empty `foreignObject` as internal board infrastructure. The safety
+  contract rejects scene-provided SVG/markup before rendering; it does not ban locked renderer-owned
+  SVG nodes.
 
 ## Verification evidence
 
@@ -732,12 +756,21 @@ origin/main` created a clean isolated branch/worktree at the exact base.
 - `npm view jsxgraph@1.13.2 ... --json` and `npm pack --dry-run --json jsxgraph@1.13.2` produced the
   version, license, engine, dependency, tarball, and unpacked-size evidence recorded above without
   changing repository files.
-- No test, dependency install, generated file, implementation file, or baseline result is claimed
-  before the requested checkpoint.
+- The pre-change `make check` baseline passed with 66 frontend tests, 25 backend unit tests, 19
+  integration tests, two full migration cycles, and 10 E2E cases.
+- Focused red-green commands exercised each contract, ordering, reducer, component, integration,
+  and browser slice. The final receiver-sensitive board test passes 5/5; strict backend geometry
+  tests pass 42/42; and the strengthened real-renderer geometry spec passes all five projects in
+  5.4 seconds.
+- `npm audit --omit=dev` reports zero vulnerabilities; `du -sh node_modules/jsxgraph` reports 76 MiB;
+  the matching production chunk measures 1,151,137 bytes and 262,447 bytes with gzip.
+- A pre-final isolated `make check` completed formatting, lint, type checks, contract/content drift,
+  production build, 120 frontend tests, 65 backend unit tests, 23 integration tests, two migration
+  cycles, and 15 E2E cases. The subsequent strict-number and expanded browser assertions require the
+  final post-rebase root rerun before handoff.
 
 ## Result
 
-Proposed only. Repository inspection, prerequisite confirmation, branch isolation, current contract
-analysis, dependency research, public test seams, file ownership, regression matrix, and acceptance
-criteria are recorded. Implementation is intentionally paused for project-owner confirmation of the
-proposed files and seams.
+Implementation, permanent documentation, synthetic fixtures, and focused regression/device
+verification are complete. Final root verification, the required fetch/rebase, conflict audit, and
+handoff evidence remain before this plan can be closed.

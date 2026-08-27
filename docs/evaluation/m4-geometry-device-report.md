@@ -34,6 +34,11 @@ Final production-build visual run: **5 passed in 5.6 seconds**.
 | ipad-pro-11-portrait-webkit  | WebKit   | 834 × 1194   | board/control split | PASS   | 4.7 s     |
 | ipad-pro-11-landscape-webkit | WebKit   | 1194 × 834   | board/control split | PASS   | 4.6 s     |
 
+After the final diff review expanded the same test to cover direct click selection, opened fallback
+layout, and executable-DOM absence, the five-project production run passed again in **5.4 seconds**:
+compact Chromium 2.4 s, Pixel 7 Chromium 2.5 s, iPhone 13 WebKit 4.7 s, iPad portrait WebKit 4.7 s,
+and iPad landscape WebKit 4.5 s.
+
 ## Regression assertions exercised in every project
 
 - Authenticate through the real local invite session and enter the internal geometry route from the
@@ -50,11 +55,14 @@ Final production-build visual run: **5 passed in 5.6 seconds**.
   pointer release to be below 1e-7.
 - Attempt to drag constructed midpoint M and locked free point B; require both final coordinates to
   remain unchanged.
-- Select a configured object through a real touch tap.
+- Select configured objects through both a real touch tap and a real board click.
 - Start ask-select, disable selectable objects outside its curated allowlist, record an incorrect
   allowed response deterministically, then submit the correct response with keyboard Enter.
 - Apply show, hide, highlight, clear-highlight, focus, and approved point-animation actions through
   the real control surface.
+- Open the committed static fallback, require its exact safe root-relative asset path, and include it
+  in the responsive containment audit.
+- Require the live board to contain no scripts, iframes, or inline executable event attributes.
 - Require the geometry shell, board, controls, action/selection lists, and diagnostic output to stay
   inside the viewport.
 - Require document scroll width to remain within one CSS pixel of client width.
@@ -82,6 +90,12 @@ The red-to-green browser sequence found issues that mock construction tests coul
    overlap or document overflow.
 7. JSXGraph replaced the initial React role and blanked the board label during initialization. The
    curated description is now passed as the board title and verified in the real DOM.
+8. JSXGraph's `freeBoard` method requires its owning `JXG.JSXGraph` receiver. A production navigation
+   trace exposed the unbound teardown; the method is now bound, cleanup exceptions are contained,
+   and content-preview navigation passes in all five projects.
+9. The locked renderer creates one hidden empty `foreignObject` for internal board infrastructure.
+   The browser safety assertion therefore targets executable DOM, while schema/component tests
+   reject all scene-provided SVG and markup before JSXGraph is loaded.
 
 No scene rule, action allowlist, fixed-object rule, or safety assertion was weakened to obtain the
 passing run.
