@@ -171,10 +171,30 @@ describe("TranscriptEditor", () => {
     );
   });
 
-  it("intercepts adjacent Backspace and empty-formula deletion before removing a token", async () => {
+  it("intercepts selected, adjacent, and empty-formula deletion before removing a token", async () => {
     const user = userEvent.setup();
     const { container } = render(<TranscriptEditor initialState={initialState} />);
     const editor = screen.getByRole("textbox", { name: "Editable transcript document" });
+
+    editor.focus();
+    const selection = window.getSelection();
+    const range = document.createRange();
+    range.setStart(textNodeContaining(editor, "Start with the equation."), 5);
+    range.setEnd(textNodeContaining(editor, " Therefore the positive root is "), 1);
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+    fireEvent.keyDown(editor, { key: "Delete" });
+    selection?.removeAllRanges();
+    const selectedDialog = container.querySelector<HTMLElement>("[role='alertdialog']");
+    expect(selectedDialog).not.toBeNull();
+    expect(container.querySelectorAll("[data-transcript-math-id]")).toHaveLength(2);
+    const keepFormula = Array.from(selectedDialog?.querySelectorAll("button") ?? []).find(
+      ({ textContent }) => textContent === "Keep formula",
+    );
+    if (keepFormula === undefined) {
+      throw new Error("Keep formula action not found in confirmation dialog.");
+    }
+    await user.click(keepFormula);
 
     placeCaret(editor, " Therefore the positive root is ", 0);
     fireEvent.keyDown(editor, { key: "Backspace" });
