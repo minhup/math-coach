@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 920" role="img" aria-labelledby="title description">
+  <title id="title">Original synthetic handwritten algebra solution</title>
+  <desc id="description">A deliberately synthetic sheet showing a quadratic factorization in three handwritten steps. It contains no student data.</desc>
+  <rect x="20" y="20" width="680" height="880" rx="18" fill="#fffdf3" stroke="#cfcbc0" stroke-width="2"/>
+  <g stroke="#b9d7e2" stroke-width="1.2">
+    <path d="M52 108h616M52 151h616M52 194h616M52 237h616M52 280h616M52 323h616M52 366h616M52 409h616M52 452h616M52 495h616M52 538h616M52 581h616M52 624h616M52 667h616M52 710h616M52 753h616M52 796h616"/>
+  </g>
+  <path d="M110 52v812" stroke="#e8a9a3" stroke-width="1.5"/>
+  <g transform="rotate(-1.2 360 460)" fill="#263d58" font-family="Comic Sans MS, Bradley Hand, cursive" font-size="27">
+    <text x="140" y="145">Solve: x² − 5x + 6 = 0</text>
+    <text x="140" y="250">1. x² − 5x + 6 = (x − 2)(x − 3)</text>
+    <text x="140" y="360">2. Set each factor equal to zero.</text>
+    <text x="140" y="450">x − 2 = 0 or x − 3 = 0</text>
+    <text x="140" y="565">3. Therefore x = 2 or x = 3.</text>
+    <path d="M140 610c120 15 270-8 430 5" fill="none" stroke="#263d58" stroke-width="3"/>
+    <text x="140" y="690" fill="#617080" font-size="19">original fixture for correction testing</text>
+  </g>
+  <g transform="rotate(-5 520 795)">
+    <rect x="385" y="768" width="270" height="54" rx="6" fill="#fff0ed" fill-opacity=".86" stroke="#a13f35" stroke-width="4"/>
+    <text x="520" y="803" fill="#a13f35" font-family="system-ui, sans-serif" font-size="15" font-weight="800" text-anchor="middle">SYNTHETIC · NOT STUDENT WORK</text>
+  </g>
+</svg>

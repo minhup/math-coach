@@ -660,6 +660,14 @@ components/content-preview.test.tsx --coverage=false` passed 20 focused renderer
   transcript module to coverage. Aggregate coverage remained above every 80% gate: 93.19%
   statements, 90.42% branches, 94.91% functions, and 93.01% lines.
 - `npm run typecheck --workspace @math-coach/student-web` passed after the transcript-state slice.
+- MathLive/workflow red/green evidence: separate focused runs first failed for missing
+  `MathLiveEditor`, `TranscriptEditor`, `CorrectionSpikeApp`, and workspace navigation, then passed
+  after each public behavior was introduced.
+- The post-refactor focused run passed 29 renderer, MathLive, mixed-block workflow, authentication,
+  responsive-mode, and workspace-navigation component tests across five test files.
+- `npm run lint --workspace @math-coach/student-web`, `npm run typecheck --workspace
+@math-coach/student-web`, and `npm run build --workspace @math-coach/student-web` passed after the
+  correction workflow. The production build includes `/internal/math-correction`.
 
 ## Result
 
@@ -668,4 +676,5 @@ ChangePlan exist, and the project owner confirmed the owned files/public test se
 All non-browser baseline gates pass; standard-port E2E is currently obstructed by owner-run services
 from the shared checkout and is recorded above. The controlled renderer, existing typed-content
 preview migration, and deterministic transcript-state operations are implemented and focused-green;
-the MathLive correction workflow is next.
+the MathLive correction workflow and authenticated synthetic route are also implemented and
+focused-green. Five-project browser/device verification is next.

@@ -43,6 +43,10 @@ describe("MathCoachApp", () => {
     expect(await screen.findByRole("heading", { name: "Add your solution" })).toBeInTheDocument();
     expect(screen.getByText("Confirm the transcript")).toBeInTheDocument();
     expect(screen.getAllByText("Internal learner")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Correction spike" })).toHaveAttribute(
+      "href",
+      "/internal/math-correction",
+    );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       "/api/v1/auth/pilot-login",

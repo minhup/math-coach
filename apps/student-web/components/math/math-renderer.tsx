@@ -1,7 +1,7 @@
 "use client";
 
 import katex from "katex";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 const MAX_LATEX_LENGTH = 2_000;
 
@@ -13,7 +13,6 @@ type MathRendererProps = {
 
 export function MathRenderer({ label, latex, mode }: MathRendererProps) {
   const hostRef = useRef<HTMLSpanElement>(null);
-  const [state, setState] = useState<"rendering" | "rendered" | "failed">("rendering");
 
   useLayoutEffect(() => {
     const host = hostRef.current;
@@ -44,26 +43,30 @@ export function MathRenderer({ label, latex, mode }: MathRendererProps) {
         throw new Error("Trusted KaTeX commands are disabled.");
       }
       host.replaceChildren(...staging.childNodes);
-      setState("rendered");
+      host.className = "math-render-output";
+      host.dataset.mathRenderState = "rendered";
+      host.setAttribute("aria-label", label);
+      host.removeAttribute("role");
     } catch {
-      host.replaceChildren();
-      setState("failed");
+      const message = document.createElement("span");
+      message.ariaHidden = "true";
+      message.textContent = "Math needs correction";
+      host.replaceChildren(message);
+      host.className = "math-render-output math-render-failure";
+      host.dataset.mathRenderState = "failed";
+      host.setAttribute("aria-label", "Math needs correction");
+      host.setAttribute("role", "img");
     }
-  }, [latex, mode]);
+  }, [label, latex, mode]);
 
   return (
     <span className={`math-renderer math-renderer-${mode}`}>
       <span
-        aria-label={state === "failed" ? undefined : label}
-        data-math-render-state={state}
-        hidden={state === "failed"}
+        aria-label={label}
+        className="math-render-output"
+        data-math-render-state="rendering"
         ref={hostRef}
       />
-      {state === "failed" ? (
-        <span aria-label="Math needs correction" className="math-render-failure" role="img">
-          <span aria-hidden="true">Math needs correction</span>
-        </span>
-      ) : null}
     </span>
   );
 }
