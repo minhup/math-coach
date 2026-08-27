@@ -16,3 +16,6 @@ test-results/
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+# Research corpora and local acquisition artifacts are not stored in Git for now.
+/data/
