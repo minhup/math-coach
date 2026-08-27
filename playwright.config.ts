@@ -11,6 +11,7 @@ export default defineConfig({
   reporter: process.env.CI ? "github" : "list",
   retries: process.env.CI ? 2 : 0,
   testDir: "./tests/e2e",
+  workers: 5,
   use: {
     baseURL: webUrl,
     screenshot: "only-on-failure",
