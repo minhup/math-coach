@@ -11,7 +11,7 @@ def synthetic_geometry_scene_version() -> dict[str, Any]:
         "version": 1,
         "viewport": {"xMin": -5, "xMax": 8, "yMin": -5, "yMax": 7},
         "objects": [
-            {"id": "labelM", "type": "label", "parents": ["M"], "label": "Midpoint M"},
+            {"id": "labelM", "type": "label", "parents": ["M"], "label": "midpoint"},
             {"id": "circumABC", "type": "circumcircle", "parents": ["A", "B", "C"]},
             {"id": "parallelC", "type": "parallel", "parents": ["base", "C"]},
             {"id": "perpendicularC", "type": "perpendicular", "parents": ["base", "C"]},

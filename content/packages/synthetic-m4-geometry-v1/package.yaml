@@ -387,7 +387,7 @@ geometryScenes:
             type: label
             parents:
               - M
-            label: Midpoint M
+            label: midpoint
           - id: circumABC
             type: circumcircle
             parents:

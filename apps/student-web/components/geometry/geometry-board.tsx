@@ -302,8 +302,8 @@ function createElement(
       return board.create<RenderedElement>(
         "text",
         [
-          () => (coordinates(anchor)?.[0] ?? 0) + 0.18,
-          () => (coordinates(anchor)?.[1] ?? 0) + 0.18,
+          () => (coordinates(anchor)?.[0] ?? 0) + 0.35,
+          () => (coordinates(anchor)?.[1] ?? 0) + 0.55,
           item.label ?? "",
         ],
         {
@@ -402,6 +402,7 @@ export function GeometryBoard({
           pan: { enabled: false },
           showCopyright: false,
           showNavigation: false,
+          title: scene.scene.accessibilityDescription,
           zoom: { wheel: false },
         });
         boardRef.current = board;

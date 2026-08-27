@@ -1,5 +1,8 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
+const syntheticGeometryDescription =
+  "A synthetic coordinate construction containing three free points and examples of every approved geometry primitive.";
+
 interface ConstraintSnapshot {
   pointCoordinates: Record<string, [number, number]>;
   constraintErrors: Record<string, number>;
@@ -44,6 +47,8 @@ test("curated geometry preserves constraints and interactions on phone and table
   const board = page.getByTestId("geometry-board");
   const constraintOutput = page.getByTestId("geometry-constraint-snapshot");
   await expect(board).toBeVisible();
+  await expect(board).toHaveAttribute("role", "region");
+  await expect(board).toHaveAttribute("aria-label", syntheticGeometryDescription);
   await expect(constraintOutput).toContainText("circumcircle:circumABC");
 
   const initial = await snapshot(constraintOutput);

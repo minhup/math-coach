@@ -106,6 +106,10 @@ describe("GeometryBoard", () => {
       "segment",
       "polygon",
     ]);
+    expect(graph.initBoard).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ title: syntheticGeometryScene.accessibilityDescription }),
+    );
     const baseCall = graph.create.mock.calls.find(([, , attributes]) => attributes.id === "base");
     expect(baseCall?.[1]).toEqual([graph.elements.get("A"), graph.elements.get("B")]);
     expect(

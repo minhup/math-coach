@@ -58,4 +58,4 @@ docker run --rm \
   --volume "${repository_root}:/work" \
   --workdir /work \
   "${playwright_image}" \
-  npx playwright test
+  npx playwright test "$@"
