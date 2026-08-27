@@ -8,7 +8,11 @@ import { formatFileSize, solutionImageType, validateSolutionImage } from "../lib
 
 type UploadPhase = "idle" | "selected" | "presigning" | "uploading" | "verifying" | "success";
 
-export function UploadWorkspace() {
+type UploadWorkspaceProps = {
+  onContinue?: (upload: Upload) => void;
+};
+
+export function UploadWorkspace({ onContinue }: UploadWorkspaceProps = {}) {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [phase, setPhase] = useState<UploadPhase>("idle");
@@ -167,7 +171,16 @@ export function UploadWorkspace() {
             {phase === "success" && completedUpload ? (
               <div className="success-card" aria-live="polite">
                 <strong>Image received and verified</strong>
-                <span>Ready for transcript confirmation in Milestone 3.</span>
+                <span>Ready to create the structured mock transcript.</span>
+                {onContinue ? (
+                  <button
+                    className="secondary-button"
+                    onClick={() => onContinue(completedUpload)}
+                    type="button"
+                  >
+                    Use this upload
+                  </button>
+                ) : null}
               </div>
             ) : null}
           </div>

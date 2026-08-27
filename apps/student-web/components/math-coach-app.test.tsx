@@ -30,6 +30,10 @@ describe("MathCoachApp", () => {
           expiresAt: "2026-08-26T00:00:00Z",
           user: { displayName: "Internal learner", id: "5fc1ca89-a9aa-43dc-a87f-012d9be99ac0" },
         }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ items: [] }))
+      .mockResolvedValueOnce(
+        jsonResponse({ error: { code: "profile_not_found", message: "Create a profile." } }, 404),
       );
     const user = userEvent.setup();
 
@@ -40,8 +44,9 @@ describe("MathCoachApp", () => {
     await user.type(inviteInput, "MATH-COACH-LOCAL");
     await user.click(screen.getByRole("button", { name: "Open workspace" }));
 
-    expect(await screen.findByRole("heading", { name: "Add your solution" })).toBeInTheDocument();
-    expect(screen.getByText("Confirm the transcript")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Create your study profile" }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText("Internal learner")).toHaveLength(2);
     expect(screen.getByRole("link", { name: "Correction spike" })).toHaveAttribute(
       "href",
@@ -112,6 +117,10 @@ describe("MathCoachApp", () => {
   it("keeps the workspace open and explains a failed sign-out", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse({ displayName: "Internal learner", id: "user-1" }))
+      .mockResolvedValueOnce(jsonResponse({ items: [] }))
+      .mockResolvedValueOnce(
+        jsonResponse({ error: { code: "profile_not_found", message: "Create a profile." } }, 404),
+      )
       .mockResolvedValueOnce(
         jsonResponse(
           { error: { code: "service_unavailable", message: "Could not end the session." } },
@@ -121,9 +130,10 @@ describe("MathCoachApp", () => {
     const user = userEvent.setup();
     render(<MathCoachApp />);
 
+    await screen.findByRole("heading", { name: "Create your study profile" });
     await user.click(await screen.findByRole("button", { name: "Sign out" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Could not end the session.");
-    expect(screen.getByRole("heading", { name: "Add your solution" })).toBeInTheDocument();
+    expect(await screen.findByText("Could not end the session.")).toHaveAttribute("role", "alert");
+    expect(screen.getByRole("heading", { name: "Create your study profile" })).toBeInTheDocument();
   });
 });

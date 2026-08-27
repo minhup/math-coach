@@ -4,8 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { ApiError, logout, type User } from "../lib/api";
-import { UploadWorkspace } from "./upload-workspace";
-import { WorkflowPanel } from "./workflow-panel";
+import { StaticStudentJourney } from "./journey/static-student-journey";
 
 type InteractionShellProps = {
   initialUser: User;
@@ -41,7 +40,7 @@ export function InteractionShell({ initialUser, onSignedOut }: InteractionShellP
             </span>
             <div>
               <strong>Math Coach</strong>
-              <span>Interaction foundation</span>
+              <span>Static student journey</span>
             </div>
           </div>
           <div className="header-account">
@@ -71,8 +70,7 @@ export function InteractionShell({ initialUser, onSignedOut }: InteractionShellP
           </div>
         </header>
         <div className="workspace">
-          <WorkflowPanel />
-          <UploadWorkspace />
+          <StaticStudentJourney />
         </div>
       </div>
     </main>

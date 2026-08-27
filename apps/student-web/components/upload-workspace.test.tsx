@@ -50,10 +50,11 @@ describe("UploadWorkspace", () => {
         }),
       );
     const user = userEvent.setup();
+    const onContinue = vi.fn();
     const file = new File([new Uint8Array([1, 2, 3, 4])], "synthetic-solution.png", {
       type: "image/png",
     });
-    render(<UploadWorkspace />);
+    render(<UploadWorkspace onContinue={onContinue} />);
 
     await user.upload(screen.getByLabelText("Choose image"), file);
     expect(screen.getByAltText("Preview of the selected paper solution")).toBeInTheDocument();
@@ -61,6 +62,10 @@ describe("UploadWorkspace", () => {
     await user.click(screen.getByRole("button", { name: "Upload solution" }));
 
     expect(await screen.findByText("Image received and verified")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Use this upload" }));
+    expect(onContinue).toHaveBeenCalledWith(
+      expect.objectContaining({ id: uploadId, status: "ready" }),
+    );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       "http://storage.test/signed-upload",
