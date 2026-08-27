@@ -2,10 +2,10 @@
 
 ## Metadata
 
-- Status: in-progress
+- Status: complete
 - Owner: Codex implementation; project owner approval
 - Branch: `feat/m3-math-rendering-correction-spike`
-- Base commit: `f899a11614784d21b365ad31ff271b7be7e0385c`
+- Base commit: `3753cd94bbc83ddeb284870600db9809524f0a82`
 - Related milestone: Milestone 3 — Mathematical rendering and correction spike
 - Related issue/ticket: Product clarification received 2026-08-27
 - Started: 2026-08-26
@@ -66,8 +66,9 @@ the UI.
 
 ## Current-state findings
 
-- `git fetch origin main` on 2026-08-27 resolved both `HEAD` and `origin/main` to
-  `f899a11614784d21b365ad31ff271b7be7e0385c`; the feature worktree is clean.
+- Revision work began from the merged Milestone 3 commit
+  `f899a11614784d21b365ad31ff271b7be7e0385c`. During implementation `origin/main` advanced to
+  `3753cd94bbc83ddeb284870600db9809524f0a82`; the branch rebased onto that commit without conflict.
 - The original shared checkout still contains unrelated corpus/data work. This revision continues
   only in `/home/minh/dev/math-coach-m3`; the shared checkout and corpus/data paths are not inspected,
   formatted, staged, stashed, or discarded.
@@ -328,7 +329,7 @@ plus element horizontal containment.
 ## Rollout and rollback
 
 The revision remains an authenticated local-state route with no feature flag or persistence. Deploy
-after `f899a11`. Rollback reverts only the clarification commits, restoring the obsolete step-based
+after `3753cd9`. Rollback reverts only the clarification commits, restoring the obsolete step-based
 spike without a database action. Because the old shape conflicts with the clarified product flow,
 rollback is an engineering contingency, not an endorsed product state.
 
@@ -346,10 +347,9 @@ reach focused green before the next slice.
 ## Conflict coordination
 
 Owned files are exactly those in **Files and components**. `docs/MVP_IMPLEMENTATION_PLAN.md`, README,
-global CSS, and correction components are shared surfaces. `origin/main` is the exact revision base
-and has no commits absent from this worktree at inspection. The original corpus branch is out of
-scope. Before handoff, fetch/rebase on current `origin/main`; any behavioral conflict must be
-documented and followed by affected focused tests and `make check`.
+global CSS, and correction components are shared surfaces. The original corpus branch is out of
+scope. The completed branch is rebased on `origin/main` at `3753cd9`; any later behavioral conflict
+must be documented and followed by affected focused tests and `make check`.
 
 ## Risks
 
@@ -372,14 +372,14 @@ documented and followed by affected focused tests and `make check`.
 - [x] Repository inspected
 - [x] Plan reviewed
 - [x] Branch created from current main
-- [ ] Tests written or updated
-- [ ] Implementation complete
-- [ ] Documentation updated
-- [ ] Relevant checks pass
-- [ ] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Tests written or updated
+- [x] Implementation complete
+- [x] Documentation updated
+- [x] Relevant checks pass
+- [x] Diff reviewed
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -403,17 +403,60 @@ documented and followed by affected focused tests and `make check`.
   the callback seam can prove typed order without exposing those details to a learner.
 - The generated API client has no transcription result. Flattening this frontend-local spike does
   not create generated-contract drift or a compatibility obligation.
+- A production Next.js rewrite is compiled into the build. The first isolated `make check` browser
+  harness reused a build compiled for host port 8000 inside Docker, so all ten browser cases reached
+  the recovery page. Rebuilding in the isolated container with its reachable API proxy corrected the
+  harness; the unchanged product suite then passed all ten cases. No temporary harness file remains.
 
 ## Verification evidence
 
-- `git fetch origin main` completed on 2026-08-27.
-- `git rev-parse HEAD` and `git rev-parse origin/main` both returned
-  `f899a11614784d21b365ad31ff271b7be7e0385c` before revision edits.
+- `git fetch origin main` completed before implementation and again before handoff. The branch was
+  rebased from the original Milestone 3 base `f899a11` onto current `origin/main` at `3753cd9`; there
+  were no conflicts.
 - Required root/local instructions, the MVP plan, prior complete ChangePlan, rendering/transcript
   architecture, device report, correction source/tests, package/validation configuration, relevant
   generated contracts, and repository-local Next.js Server/Client and CSS guides were read.
 - Baseline focused Vitest result: 5 files and 37 tests passed in 941 ms.
+- TDD red/green evidence: flat confirmation first failed against schema `1.0.0`; validation first
+  accepted a blank attempt; pure operation imports were absent; the editor first dereferenced
+  `transcript.steps`; click-to-edit, contextual controls, content-only confirmation, and clarified
+  route copy each failed before their implementation. Focused suites passed after each slice.
+- Final focused renderer/editor/transcript command:
+  `npx vitest run features/transcription/transcript-state.test.ts
+components/transcription/transcript-editor.test.tsx
+components/transcription/correction-spike-app.test.tsx components/math/mathlive-editor.test.tsx
+components/math/math-renderer.test.tsx components/content-preview.test.tsx --coverage=false` — 6
+  files and 37 tests passed in 994 ms after the final rebase freshness check.
+- `npm run test:unit --workspace @math-coach/student-web -- --coverage` — 11 files and 59 tests
+  passed; coverage was 90.36% statements, 86.92% branches, 92% functions, and 90.20% lines.
+- `make format-check lint typecheck api-contract-check content-validate build test-unit
+test-integration` — passed: Prettier/Ruff format checks, ESLint/Ruff lint, web/API TypeScript plus
+  mypy over 30 source files, generated API drift check, one validated content package with hash
+  `59f9572fb526842cbdddf438db2468c8d578a637fe814102f5bfbb95118ce7db`, Next.js production build,
+  59 frontend unit tests, 25 backend unit tests, migration downgrade/upgrade twice, and 19
+  integration tests.
+- `make check` — passed after the isolated browser harness was corrected. It repeated every
+  non-destructive gate above and ran 10 Playwright cases across the five configured projects in 7.3
+  seconds. Foundation/correction timings were compact Chromium 1.0/1.5 s, Pixel 7 Chromium 1.3/1.7
+  s, iPhone 13 WebKit 4.6/5.5 s, iPad portrait WebKit 3.9/6.0 s, and iPad landscape WebKit 2.8/5.0 s.
+- Dedicated production-build correction visual run — 5 passed in 6.6 seconds: compact Chromium 1.2
+  s, Pixel 7 Chromium 1.7 s, iPhone 13 WebKit 5.1 s, iPad portrait WebKit 5.3 s, and iPad landscape
+  WebKit 5.9 s.
+- Full-page screenshots for all five projects were inspected at original detail. Phone tabs,
+  tablet split layout, one paper-like document, click-to-edit math, contextual controls,
+  content-only confirmation, and horizontal containment were correct. Long phone formulas remained
+  locally contained without document/page overflow. Temporary configs, proxies, traces,
+  screenshots, and test results were removed; the shared checkout and its corpus/data work were not
+  touched.
+- `git diff --check origin/main...HEAD`, the complete file-by-file diff review, and searches for
+  correction-stage step exports/fields plus executable/unsafe HTML paths completed without an
+  implementation finding. Intentional negative test and documentation references are retained.
 
 ## Result
 
-In progress. No implementation result or revised device claim is recorded yet.
+Complete. Correction-stage state is now one flat, stable, typed block array; the route presents it as
+a continuous simulated-OCR document with in-place text editing, idle controlled KaTeX, activated
+MathLive correction, contextual global block operations, and exact content-only confirmation.
+Reasoning steps, OCR, grading, persistence, and downstream processing remain absent. No dependency,
+HTTP API, generated contract, content schema, database, or migration change was made. The complete
+unit/integration/build/browser gate and all configured phone/tablet correction regressions pass.
