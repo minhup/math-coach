@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: implementation complete; final rebase and verification in progress
+- Status: complete; ready for owner review
 - Owner: project owner and Codex
 - Branch: `feat/m6-multimodal-transcription`
 - Base commit: `dbfd8162a27f2f63fecfcdbe63759d64eab56c24`
@@ -636,6 +636,13 @@ policy; the benchmark uses repository-owned synthetic data only.
 
 Commits may be split further to keep each green and understandable; they will not be squashed locally.
 
+Actual commits before the final documentation-only handoff update:
+
+1. `2c3a90a docs: add Milestone 6 change plan`
+2. `1a5d3b3 feat: implement durable multimodal transcription`
+3. `7d02c43 feat: add guarded transcription benchmark`
+4. `f944e23 docs: record Milestone 6 architecture and evidence`
+
 ## Conflict coordination
 
 Owned shared contracts/files are the migration head, Alembic model imports, `api.py`, settings,
@@ -692,9 +699,9 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 - [x] Documentation updated
 - [x] Relevant checks pass
 - [x] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested (no conflicts occurred)
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -757,8 +764,11 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 - `git ls-remote https://github.com/minhup/math-coach.git refs/heads/main` — returned
   `dbfd8162a27f2f63fecfcdbe63759d64eab56c24 refs/heads/main`.
 - `git fetch https://github.com/minhup/math-coach.git +refs/heads/main:refs/remotes/origin/main` —
-  succeeded after the configured SSH remote failed authentication.
+  succeeded after the configured SSH remote failed authentication; the final 2026-08-28 fetch still
+  resolved `origin/main` to `dbfd8162a27f2f63fecfcdbe63759d64eab56c24`.
 - `git merge-base --is-ancestor dbfd8162a27f2f63fecfcdbe63759d64eab56c24 origin/main` — exit 0.
+- `git rebase origin/main` after the final fetch — reported that the feature branch was already up
+  to date; no conflicts occurred and no implementation changed.
 - `git worktree add -b feat/m6-multimodal-transcription
 /home/minh/dev/math-coach-m6-transcription origin/main` — succeeded at the M5 commit.
 - Read-only repository, documentation, migration, configuration, generated-contract, backend,
@@ -811,4 +821,4 @@ device evidence are complete. Gemini 3.5 Flash is the first real server adapter;
 Anthropic alternatives and the deterministic fake use the same boundary. The M5 multi-target plan
 and clearly mocked downstream path remain intact, and no Milestone 7–9 behavior was introduced. The
 real-provider benchmark remains intentionally deferred: no paid/provider call or production-quality
-claim is part of this result. Final remote rebase verification remains before handoff.
+claim is part of this result. Final remote rebase verification completed without conflicts.
