@@ -2,6 +2,12 @@ import type { ContentPreview as ContentPreviewData } from "../lib/api";
 import { TypedContentBlocks } from "./math/content-blocks";
 
 export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
+  const geometryActions = preview.hints.flatMap((hint) => hint.geometryActions);
+  const resolveGeometry = (sceneVersionId: string) =>
+    preview.geometryScene?.id === sceneVersionId
+      ? { actions: geometryActions, scene: preview.geometryScene }
+      : null;
+
   return (
     <article className="content-preview">
       <header className="preview-title">
@@ -42,7 +48,7 @@ export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
 
       <section className="preview-section" aria-labelledby="statement-heading">
         <h2 id="statement-heading">Statement</h2>
-        <TypedContentBlocks blocks={preview.statement} />
+        <TypedContentBlocks blocks={preview.statement} resolveGeometry={resolveGeometry} />
       </section>
 
       <section className="preview-section" aria-labelledby="skills-heading">
@@ -84,7 +90,7 @@ export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
         {preview.referenceSolutions.map((solution) => (
           <div className="preview-subsection" key={solution.id}>
             <h3>{solution.methodLabel}</h3>
-            <TypedContentBlocks blocks={solution.content} />
+            <TypedContentBlocks blocks={solution.content} resolveGeometry={resolveGeometry} />
           </div>
         ))}
       </section>
@@ -95,7 +101,7 @@ export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
           {preview.rubric.map((item) => (
             <li key={item.id}>
               <div>
-                <TypedContentBlocks blocks={item.description} />
+                <TypedContentBlocks blocks={item.description} resolveGeometry={resolveGeometry} />
               </div>
               <strong>{item.maximumScore} points</strong>
             </li>
@@ -111,7 +117,7 @@ export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
               Level {hint.hintLevel}
               {hint.revealsCompleteSolution ? " · complete solution reveal" : ""}
             </summary>
-            <TypedContentBlocks blocks={hint.content} />
+            <TypedContentBlocks blocks={hint.content} resolveGeometry={resolveGeometry} />
             {hint.geometryActions.length > 0 ? (
               <p className="muted">{hint.geometryActions.length} validated geometry action(s)</p>
             ) : null}

@@ -56,6 +56,9 @@ export function InteractionShell({ initialUser, onSignedOut }: InteractionShellP
               <Link className="text-button preview-link-button" href="/internal/math-correction">
                 Correction spike
               </Link>
+              <Link className="text-button preview-link-button" href="/internal/geometry-spike">
+                Geometry spike
+              </Link>
               <button className="text-button" disabled={signingOut} onClick={signOut} type="button">
                 {signingOut ? "Signing out…" : "Sign out"}
               </button>

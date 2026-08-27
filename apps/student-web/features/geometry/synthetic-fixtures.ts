@@ -1,6 +1,8 @@
 import type { components } from "@math-coach/api-client";
 
 export type GeometryScene = components["schemas"]["GeometrySceneVersion"];
+export type GeometryAction =
+  components["schemas"]["ContentPreviewResponse"]["hints"][number]["geometryActions"][number];
 
 const provenance: components["schemas"]["Provenance"] = {
   sourceKind: "original_synthetic",
@@ -51,7 +53,7 @@ export const syntheticGeometryScene: GeometryScene = {
     { id: "base", type: "line", parents: ["A", "B"] },
     { id: "segmentAB", type: "segment", parents: ["A", "B"] },
     { id: "C", type: "point", x: 1, y: 3, label: "C", selectable: true },
-    { id: "B", type: "point", x: 4, y: 0, label: "B", selectable: true },
+    { id: "B", type: "point", x: 6, y: 0, label: "B", selectable: true },
     {
       id: "A",
       type: "point",
@@ -86,6 +88,21 @@ export const syntheticGeometryScene: GeometryScene = {
     "A synthetic coordinate construction containing three free points and examples of every approved geometry primitive.",
   provenance,
 };
+
+export const syntheticGeometryActions: readonly GeometryAction[] = [
+  { type: "show", objectIds: ["labelM"] },
+  { type: "hide", objectIds: ["labelM"] },
+  { type: "highlight", objectIds: ["A", "B"] },
+  { type: "clear_highlight", objectIds: null },
+  { type: "focus", objectIds: ["triangle"] },
+  { type: "animate", objectId: "A", animationId: "pulse-A" },
+  {
+    type: "ask_select",
+    prompt: [{ id: "select-a-prompt", type: "text", text: "Select point A." }],
+    allowedObjectIds: ["A", "B"],
+    correctObjectIds: ["A"],
+  },
+];
 
 export function cloneSyntheticGeometryScene(): unknown {
   return structuredClone(syntheticGeometryScene);

@@ -294,6 +294,7 @@ label[for]:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 18px;
   padding: 10px 2px;
@@ -303,7 +304,12 @@ label[for]:focus-visible {
 .header-user {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 11px;
+}
+
+.header-user {
+  justify-content: flex-end;
 }
 
 .header-brand strong,
@@ -325,6 +331,8 @@ label[for]:focus-visible {
 
 .header-account {
   display: grid;
+  min-width: 0;
+  max-width: 100%;
   justify-items: end;
 }
 
@@ -1383,7 +1391,228 @@ label[for]:focus-visible {
   font-weight: 800;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  margin: -1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.geometry-spike-screen,
+.geometry-experience,
+.geometry-layout,
+.geometry-controls,
+.geometry-static-fallback,
+.geometry-constraint-snapshot {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.geometry-spike-shell {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+}
+
+.geometry-spike-header {
+  display: grid;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.geometry-spike-header h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(34px, 7vw, 58px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.geometry-spike-header > p {
+  max-width: 58ch;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.geometry-experience {
+  padding: clamp(14px, 3vw, 24px);
+  border: 1px solid rgba(216, 222, 216, 0.9);
+  border-radius: var(--radius-large);
+  background: rgba(255, 253, 247, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.geometry-description {
+  max-width: 74ch;
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.geometry-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.geometry-board {
+  width: 100%;
+  height: clamp(280px, 75vw, 620px);
+  overflow: hidden;
+  border: 1px solid rgba(23, 107, 104, 0.28);
+  border-radius: var(--radius-medium);
+  background: #fffef9;
+  touch-action: none;
+}
+
+.geometry-board svg text {
+  cursor: default;
+  user-select: none;
+}
+
+.geometry-board .JXGtext {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  pointer-events: none;
+}
+
+.geometry-board .JXGinfobox {
+  border: 0;
+}
+
+.geometry-board:focus-visible {
+  outline: 3px solid rgba(232, 105, 69, 0.38);
+  outline-offset: 3px;
+}
+
+.geometry-controls {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  background: var(--paper-deep);
+}
+
+.geometry-action-list,
+.geometry-selection-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 9px;
+}
+
+.geometry-action-list button,
+.geometry-selection-list button {
+  min-height: 46px;
+  padding: 9px 12px;
+  border: 1px solid rgba(23, 107, 104, 0.3);
+  border-radius: 12px;
+  color: var(--brand-dark);
+  background: white;
+  font-weight: 750;
+  text-align: left;
+}
+
+.geometry-action-list button:hover:not(:disabled),
+.geometry-selection-list button:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.geometry-selection-list button:disabled {
+  opacity: 0.48;
+}
+
+.geometry-selection-question {
+  padding: 12px;
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+  background: white;
+}
+
+.geometry-selection-question p {
+  margin: 0;
+}
+
+.geometry-fallback {
+  display: grid;
+  gap: 12px;
+}
+
+.geometry-fallback-details {
+  margin-top: 16px;
+}
+
+.geometry-fallback-details summary {
+  min-height: 44px;
+  padding: 11px 0;
+  color: var(--brand-dark);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.geometry-static-fallback {
+  margin: 0;
+}
+
+.geometry-static-fallback img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+}
+
+.geometry-static-fallback figcaption {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.geometry-constraint-snapshot {
+  display: block;
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: 16px;
+  color: #dff1eb;
+  background: #163b45;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.geometry-unresolved {
+  padding: 14px;
+  border-radius: 12px;
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
 @media (min-width: 768px) {
+  .geometry-spike-header {
+    align-items: end;
+    grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  }
+
+  .geometry-layout {
+    align-items: start;
+    grid-template-columns: minmax(0, 1.45fr) minmax(260px, 0.75fr);
+  }
+
+  .geometry-board {
+    height: clamp(440px, 57vw, 620px);
+  }
+
   .correction-header {
     align-items: end;
     grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);

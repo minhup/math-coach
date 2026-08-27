@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title description">
+  <title id="title">Synthetic Milestone 4 geometry construction</title>
+  <desc id="description">A static overview of the curated all-primitives construction with points, lines, circles, polygon, angle, midpoint, intersection, parallel and perpendicular lines.</desc>
+  <rect width="1200" height="800" rx="32" fill="#fffdf7"/>
+  <g stroke="#e2e8e4" stroke-width="2">
+    <path d="M100 80V720M220 80V720M340 80V720M460 80V720M580 80V720M700 80V720M820 80V720M940 80V720M1060 80V720"/>
+    <path d="M70 120H1130M70 240H1130M70 360H1130M70 480H1130M70 600H1130"/>
+  </g>
+  <circle cx="300" cy="470" r="240" fill="none" stroke="#7c3aed" stroke-width="6"/>
+  <circle cx="540" cy="375" r="310" fill="none" stroke="#176b68" stroke-width="6"/>
+  <path d="M80 560L1120 310" stroke="#164e63" stroke-width="7"/>
+  <path d="M140 650L1050 430" stroke="#087f5b" stroke-dasharray="18 12" stroke-width="6"/>
+  <path d="M660 80L805 720" stroke="#b54708" stroke-width="6"/>
+  <path d="M300 470L760 360L520 145Z" fill="#dbeafe" fill-opacity=".55" stroke="#176b68" stroke-width="7"/>
+  <path d="M300 470A170 170 0 0 1 438 308" fill="none" stroke="#e86945" stroke-width="10"/>
+  <path d="M300 470L760 360" stroke="#e86945" stroke-width="8"/>
+  <g fill="#18343b" font-family="system-ui, sans-serif" font-size="34" font-weight="700">
+    <circle cx="300" cy="470" r="14" fill="#176b68"/><text x="255" y="520">A</text>
+    <circle cx="760" cy="360" r="14" fill="#176b68"/><text x="780" y="355">B</text>
+    <circle cx="520" cy="145" r="14" fill="#176b68"/><text x="485" y="115">C</text>
+    <circle cx="530" cy="415" r="14" fill="#e86945"/><text x="515" y="460">M</text>
+    <circle cx="690" cy="413" r="14" fill="#7c3aed"/><text x="705" y="450">I</text>
+  </g>
+  <text x="70" y="755" fill="#5f7377" font-family="system-ui, sans-serif" font-size="24">Static synthetic fallback — interactive constraints are available in the authenticated preview.</text>
+</svg>

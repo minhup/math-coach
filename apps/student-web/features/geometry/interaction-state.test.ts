@@ -18,6 +18,7 @@ describe("geometry interaction state", () => {
     expect(state.highlightedObjectIds).toEqual([]);
     expect(state.focusedObjectIds).toEqual([]);
     expect(state.animation).toBeNull();
+    expect(state.selectedObjectId).toBeNull();
     expect(state.selection).toBeNull();
     expect(createGeometryInteractionState(validatedScene)).toEqual(state);
   });
@@ -133,6 +134,18 @@ describe("geometry interaction state", () => {
       selectedObjectId: "A",
       result: "correct",
     });
+  });
+
+  it("selects configured objects outside a question and rejects locked objects", () => {
+    const initial = createGeometryInteractionState(validatedScene);
+    const selected = selectGeometryObject(validatedScene, initial, "A", "pointer");
+    const locked = selectGeometryObject(validatedScene, initial, "M", "keyboard");
+
+    expect(selected.accepted).toBe(true);
+    expect(selected.state.selectedObjectId).toBe("A");
+    expect(selected.state.selection).toBeNull();
+    expect(locked.accepted).toBe(false);
+    expect(locked.state).toBe(initial);
   });
 
   it("returns the same ungraded response for pointer, touch, and keyboard selection", () => {

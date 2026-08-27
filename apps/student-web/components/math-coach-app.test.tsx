@@ -47,6 +47,10 @@ describe("MathCoachApp", () => {
       "href",
       "/internal/math-correction",
     );
+    expect(screen.getByRole("link", { name: "Geometry spike" })).toHaveAttribute(
+      "href",
+      "/internal/geometry-spike",
+    );
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       "/api/v1/auth/pilot-login",

@@ -1,7 +1,21 @@
 import type { ContentBlock } from "../../lib/api";
+import { GeometryScene } from "../geometry/geometry-scene";
 import { MathRenderer } from "./math-renderer";
 
-function TypedContentBlock({ block }: { block: ContentBlock }) {
+export interface ResolvedGeometryContent {
+  readonly scene: unknown;
+  readonly actions: readonly unknown[];
+}
+
+export type GeometryContentResolver = (sceneVersionId: string) => ResolvedGeometryContent | null;
+
+function TypedContentBlock({
+  block,
+  resolveGeometry,
+}: {
+  block: ContentBlock;
+  resolveGeometry?: GeometryContentResolver;
+}) {
   switch (block.type) {
     case "text":
       return <p>{block.text}</p>;
@@ -27,9 +41,13 @@ function TypedContentBlock({ block }: { block: ContentBlock }) {
         </p>
       );
     case "geometry":
+      const resolvedGeometry = resolveGeometry?.(block.sceneVersionId);
+      if (resolvedGeometry) {
+        return <GeometryScene actions={resolvedGeometry.actions} scene={resolvedGeometry.scene} />;
+      }
       return (
-        <p className="preview-geometry-reference">
-          Curated geometry scene version: <code>{block.sceneVersionId}</code>
+        <p className="geometry-unresolved" role="status">
+          Geometry unavailable.
         </p>
       );
     case "image":
@@ -42,17 +60,23 @@ function TypedContentBlock({ block }: { block: ContentBlock }) {
     case "callout":
       return (
         <aside className={`preview-callout preview-callout-${block.kind}`}>
-          <TypedContentBlocks blocks={block.content} />
+          <TypedContentBlocks blocks={block.content} resolveGeometry={resolveGeometry} />
         </aside>
       );
   }
 }
 
-export function TypedContentBlocks({ blocks }: { blocks: ContentBlock[] }) {
+export function TypedContentBlocks({
+  blocks,
+  resolveGeometry,
+}: {
+  blocks: ContentBlock[];
+  resolveGeometry?: GeometryContentResolver;
+}) {
   return (
     <div className="preview-blocks">
       {blocks.map((block) => (
-        <TypedContentBlock block={block} key={block.id} />
+        <TypedContentBlock block={block} key={block.id} resolveGeometry={resolveGeometry} />
       ))}
     </div>
   );

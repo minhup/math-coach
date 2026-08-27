@@ -25,6 +25,7 @@ export interface GeometryInteractionState {
   readonly highlightedObjectIds: readonly string[];
   readonly focusedObjectIds: readonly string[];
   readonly animation: GeometryAnimationState | null;
+  readonly selectedObjectId: string | null;
   readonly selection: GeometrySelectionState | null;
 }
 
@@ -224,6 +225,7 @@ export function createGeometryInteractionState(
     highlightedObjectIds: [],
     focusedObjectIds: [],
     animation: null,
+    selectedObjectId: null,
     selection: null,
   };
 }
@@ -292,6 +294,7 @@ export function applyGeometryAction(
           selectedObjectId: null,
           result: "pending",
         },
+        selectedObjectId: null,
       });
   }
 }
@@ -304,15 +307,20 @@ export function selectGeometryObject(
 ): GeometryInteractionTransition {
   if (
     !isIdentifier(objectId) ||
-    (source !== "pointer" && source !== "touch" && source !== "keyboard") ||
-    !state.selection ||
-    !state.selection.allowedObjectIds.includes(objectId)
+    (source !== "pointer" && source !== "touch" && source !== "keyboard")
   ) {
     return rejected(state);
   }
   const object = scene.scene.objects.find((item) => item.id === objectId);
-  if (!object || object.selectable !== true) {
+  if (
+    !object ||
+    object.selectable !== true ||
+    (state.selection !== null && !state.selection.allowedObjectIds.includes(objectId))
+  ) {
     return rejected(state);
+  }
+  if (!state.selection) {
+    return accepted({ ...state, selectedObjectId: objectId });
   }
   const result = state.selection.correctObjectIds
     ? state.selection.correctObjectIds.includes(objectId)
@@ -321,6 +329,7 @@ export function selectGeometryObject(
     : "ungraded";
   return accepted({
     ...state,
+    selectedObjectId: objectId,
     selection: { ...state.selection, selectedObjectId: objectId, result },
   });
 }

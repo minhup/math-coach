@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: proposed
+- Status: active
 - Owner: Codex implementation; project owner approval
 - Branch: `feat/m4-interactive-geometry-engine`
 - Base commit: `3bc9206c1adc0ee3b11a2adb016d8196a64cd58e`
@@ -344,7 +344,7 @@ Proposed and owned by this branch:
 - `apps/student-web/components/geometry/geometry-spike-app.tsx` and test — authenticated synthetic
   route states and responsive fixture surface.
 - `apps/student-web/app/internal/geometry-spike/page.tsx` — App Router entry.
-- `apps/student-web/public/fixtures/synthetic-m2-triangle-midpoint-fallback.svg` — missing static
+- `apps/student-web/public/fixtures/synthetic-triangle-midpoint-fallback.svg` — missing static
   fallback for the already released Milestone 2 scene.
 - `apps/student-web/public/fixtures/synthetic-m4-geometry-fallback.svg` — all-primitives synthetic
   scene fallback.
@@ -358,9 +358,15 @@ Proposed and owned by this branch:
 - `apps/student-web/app/globals.css` — contained board, fallback, action, selection, phone, tablet,
   focus, touch-target, and reduced-motion styles.
 - `tests/e2e/geometry.spec.ts` — unchanged five-project browser regression.
+- `playwright.config.ts` — allow isolated worktrees to select non-conflicting local web/API ports
+  while retaining the existing defaults and five device projects. The first real-browser red run
+  discovered live Milestone 3 servers owned by another worktree on ports 3000/8000; those processes
+  remain untouched.
+- `scripts/run_e2e.sh` — pass the same optional isolated ports through production-server and
+  container execution so the root E2E/check contract can run without stopping another worktree.
 
 `services/api/app/content/preview.py`, `preview_schemas.py`, database models/migrations,
-`playwright.config.ts`, `vitest.config.ts`, and existing correction code are not expected to change.
+`vitest.config.ts` and existing correction code are not expected to change.
 If installation or the first red slice proves another file necessary, this list will be updated
 before that file changes.
 
@@ -661,7 +667,7 @@ tests and `make check` must then be rerun.
 ## Progress
 
 - [x] Repository inspected
-- [ ] Plan reviewed
+- [x] Plan reviewed
 - [x] Branch created from current main
 - [ ] Tests written or updated
 - [ ] Implementation complete
@@ -674,6 +680,8 @@ tests and `make check` must then be rerun.
 
 ## Decisions
 
+- 2026-08-27: The project owner approved the proposed owned-file boundary and six public TDD seams
+  with “process it”; implementation may proceed through the recorded red-green slices.
 - 2026-08-27: Use the existing FastAPI/Pydantic geometry contract as authoritative and regenerate
   all downstream artifacts. A second frontend-owned canonical schema is rejected.
 - 2026-08-27: Use JSXGraph `1.13.2` provisionally because the repository architecture selects
