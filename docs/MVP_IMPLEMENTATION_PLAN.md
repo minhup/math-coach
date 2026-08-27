@@ -63,24 +63,24 @@ Next combined plan
 
 ### 2.1 Included
 
-| Area | MVP capability |
-|---|---|
-| Platform | Responsive PWA for phones and tablets |
-| Targeting | Multiple active examinations in one student profile |
-| Content | Curated exercise, skill, concept, rubric, solution, hint, and geometry data |
-| Math display | Typed math content rendered by the application |
-| Math correction | Visual formula editing; no raw-LaTeX requirement for students |
-| Geometry | Curated interactive scenes and a restricted action vocabulary |
-| Input | Camera capture and existing-photo upload |
-| AI transcription | Multimodal image-to-structured-solution transcription |
-| Confirmation | Student corrects the transcript before grading |
-| AI grading | Step status, root error, dependent error, score, and concise feedback |
-| Hints | Progressive hint ladder with optional geometry actions |
-| Learner state | Structured skill, mistake, independence, hint, time, and review evidence |
-| Planning | Deterministic multi-target daily-plan algorithm |
-| Engagement | XP, streak, session completion, mistake notebook, individual challenges |
-| Internal quality tools | Content preview and flagged-attempt inspection |
-| Content workflow | Version-controlled YAML/JSON and seed scripts |
+| Area                   | MVP capability                                                              |
+| ---------------------- | --------------------------------------------------------------------------- |
+| Platform               | Responsive PWA for phones and tablets                                       |
+| Targeting              | Multiple active examinations in one student profile                         |
+| Content                | Curated exercise, skill, concept, rubric, solution, hint, and geometry data |
+| Math display           | Typed math content rendered by the application                              |
+| Math correction        | Visual formula editing; no raw-LaTeX requirement for students               |
+| Geometry               | Curated interactive scenes and a restricted action vocabulary               |
+| Input                  | Camera capture and existing-photo upload                                    |
+| AI transcription       | Multimodal image-to-structured-solution transcription                       |
+| Confirmation           | Student corrects the transcript before grading                              |
+| AI grading             | Step status, root error, dependent error, score, and concise feedback       |
+| Hints                  | Progressive hint ladder with optional geometry actions                      |
+| Learner state          | Structured skill, mistake, independence, hint, time, and review evidence    |
+| Planning               | Deterministic multi-target daily-plan algorithm                             |
+| Engagement             | XP, streak, session completion, mistake notebook, individual challenges     |
+| Internal quality tools | Content preview and flagged-attempt inspection                              |
+| Content workflow       | Version-controlled YAML/JSON and seed scripts                               |
 
 ### 2.2 Excluded
 
@@ -110,14 +110,14 @@ Next combined plan
 
 No implementation agent may invent product values. However, decisions must block only the stage that actually needs them. Internal development may proceed with synthetic fixtures, mock exam records, deterministic fake AI, and non-personal test images.
 
-| Decision area | Must be resolved before | Does not block |
-|---|---|---|
-| Supported examination set | Importing or publishing real exam content in Milestone 2 | Milestone 1 foundation and mocked interaction work |
-| Pilot cohort and operations | Inviting external participants in Milestone 12 | Internal implementation and testing in Milestones 1–11 |
+| Decision area                                              | Must be resolved before                                     | Does not block                                                                                   |
+| ---------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Supported examination set                                  | Importing or publishing real exam content in Milestone 2    | Milestone 1 foundation and mocked interaction work                                               |
+| Pilot cohort and operations                                | Inviting external participants in Milestone 12              | Internal implementation and testing in Milestones 1–11                                           |
 | AI provider benchmark and production-provider confirmation | Sending real participant data or starting an external pilot | Provider-adapter implementation and internal provider trials using synthetic/non-personal inputs |
-| Legal, privacy, and consent review | Collecting real minors' data or starting an external pilot | Internal work using synthetic/non-personal fixtures |
-| Content provenance approval | Importing or publishing real third-party content | Schema and UI development using original synthetic fixtures |
-| Numeric release and pilot gates | Starting the external pilot | Internal product iteration and engineering checks |
+| Legal, privacy, and consent review                         | Collecting real minors' data or starting an external pilot  | Internal work using synthetic/non-personal fixtures                                              |
+| Content provenance approval                                | Importing or publishing real third-party content            | Schema and UI development using original synthetic fixtures                                      |
+| Numeric release and pilot gates                            | Starting the external pilot                                 | Internal product iteration and engineering checks                                                |
 
 The project owner is the sole MVP product decision authority. Specialist legal, privacy, rights, security, or mathematics review is supporting evidence when the decision requires that expertise; it is not a separate product-governance layer.
 
@@ -275,22 +275,22 @@ Use Android Emulator later for Android browser, camera, permission, and upload b
 
 ### 5.1 MVP stack
 
-| Layer | Choice |
-|---|---|
-| Student application | Next.js, React, TypeScript |
-| PWA | Web manifest and service worker |
-| Read-only mathematics | KaTeX |
-| Editable mathematics | MathLive |
-| Geometry | JSXGraph |
-| API | FastAPI and Pydantic |
-| Database | Managed PostgreSQL |
-| Flexible rich content | JSONB |
-| Images | S3-compatible object storage |
-| AI | One benchmark-selected multimodal provider behind an adapter |
-| Streaming status | Server-Sent Events |
-| Content source | Git-versioned YAML/JSON |
-| Retrieval | Relational SQL; no general RAG |
-| Authentication | Invite-only pilot accounts |
+| Layer                 | Choice                                                       |
+| --------------------- | ------------------------------------------------------------ |
+| Student application   | Next.js, React, TypeScript                                   |
+| PWA                   | Web manifest and service worker                              |
+| Read-only mathematics | KaTeX                                                        |
+| Editable mathematics  | MathLive                                                     |
+| Geometry              | JSXGraph                                                     |
+| API                   | FastAPI and Pydantic                                         |
+| Database              | Managed PostgreSQL                                           |
+| Flexible rich content | JSONB                                                        |
+| Images                | S3-compatible object storage                                 |
+| AI                    | One benchmark-selected multimodal provider behind an adapter |
+| Streaming status      | Server-Sent Events                                           |
+| Content source        | Git-versioned YAML/JSON                                      |
+| Retrieval             | Relational SQL; no general RAG                               |
+| Authentication        | Invite-only pilot accounts                                   |
 
 ---
 
@@ -384,10 +384,7 @@ type ContentBlock =
   | {
       id: string;
       type: "rich_line";
-      spans: Array<
-        | { type: "text"; text: string }
-        | { type: "math"; latex: string }
-      >;
+      spans: Array<{ type: "text"; text: string } | { type: "math"; latex: string }>;
     }
   | { id: string; type: "geometry"; sceneId: string }
   | { id: string; type: "image"; assetId: string; alt: string }
@@ -466,7 +463,6 @@ interface TranscriptionResult {
     type: "text" | "math";
     text?: string;
     latex?: string;
-    stepId: string;
     sourceRegion?: {
       x: number;
       y: number;
@@ -474,10 +470,13 @@ interface TranscriptionResult {
       height: number;
     };
   }>;
-  steps: Array<{ id: string; blockIds: string[] }>;
   warnings: Array<{ blockId?: string; message: string }>;
 }
 ```
+
+Block array order is the canonical transcription order. Correction-stage transcription does not
+contain reasoning-step IDs or grouping. Reasoning analysis may run only after the learner confirms
+this flat document.
 
 ### 7.5 Evaluation result
 
@@ -505,12 +504,7 @@ interface EvaluationResult {
   }>;
   mainIssueStepId?: string;
   nextAction:
-    | "retry"
-    | "request_hint"
-    | "review_concept"
-    | "show_solution"
-    | "complete"
-    | "manual_review";
+    "retry" | "request_hint" | "review_concept" | "show_solution" | "complete" | "manual_review";
   skillEvidence: Array<{
     skillId: string;
     achievement: number;
@@ -966,8 +960,7 @@ instruction to preserve exactly what the student wrote
 Output:
 
 ```text
-text and math blocks
-logical steps
+one continuous ordered document of typed text and math blocks
 warnings
 source regions when available
 ```
@@ -982,11 +975,11 @@ The student may:
 edit text
 edit math visually
 add/delete/reorder blocks
-split/merge steps
 confirm
 ```
 
-Only the confirmed version is graded.
+Only the confirmed flat version is authoritative downstream input. Reasoning-step detection and
+grouping occur, if needed, after confirmation; they are not part of transcription correction.
 
 ### 10.4 Evaluation
 
@@ -1017,13 +1010,13 @@ next action
 
 ### 10.5 Hints
 
-| Level | Behavior |
-|---|---|
-| 1 | Direct attention without naming the method |
-| 2 | Name the relevant concept or object |
-| 3 | Suggest a concrete transformation or construction |
-| 4 | Show a partial worked step |
-| Final | Full solution after explicit action |
+| Level | Behavior                                          |
+| ----- | ------------------------------------------------- |
+| 1     | Direct attention without naming the method        |
+| 2     | Name the relevant concept or object               |
+| 3     | Suggest a concrete transformation or construction |
+| 4     | Show a partial worked step                        |
+| Final | Full solution after explicit action               |
 
 ### 10.6 Validation and failure handling
 
@@ -1287,13 +1280,15 @@ Deliver:
 ```text
 KaTeX renderer
 MathLive editor
-mixed text/math blocks
-step split/merge/reorder
+flat mixed text/math blocks
+continuous document correction
+block add/delete/reorder
 regression suite
 device report
 ```
 
-Exit when no raw LaTeX appears in the regression suite.
+Exit when no raw LaTeX appears in the regression suite and confirmation preserves the exact flat
+ordered document without reasoning-step grouping.
 
 ### Milestone 4 — Interactive geometry engine
 

@@ -48,10 +48,12 @@ child, input/textarea value, HTML attribute, loading message, or error message. 
 with a visual formula field through physical keyboard and touch virtual-keyboard affordances; they
 are never required to read or edit raw LaTeX.
 
-Every mathematics transcript block keeps its visual editor mounted even when its read-only preview
-shows the safe failure placeholder. Correcting the field updates typed transcript state and reruns
-the controlled read-only preview. A local-package load failure has an explicit source-free failure
-message and does not fabricate a corrected expression.
+An idle mathematics transcript block shows only the controlled KaTeX result. Activating that result
+replaces it with the visual editor; completing the edit returns to the controlled renderer. The
+preview and editor are not permanently displayed as separate areas. A failed render shows the safe
+placeholder inside the same activation control, so invalid mathematics remains directly correctable.
+Correcting the field updates typed transcript state. A local-package load failure has an explicit
+source-free failure message and does not fabricate a corrected expression.
 
 The integration uses MathLive's official
 [React integration](https://mathlive.io/mathfield/guides/integration/),
@@ -65,16 +67,12 @@ The frontend-local correction model is deliberately smaller than problem `Conten
 
 ```typescript
 type TranscriptBlock =
-  | { id: string; stepId: string; type: "text"; text: string }
-  | { id: string; stepId: string; type: "math"; latex: string };
-
-type TranscriptStep = { id: string; blockIds: string[] };
+  { id: string; type: "text"; text: string } | { id: string; type: "math"; latex: string };
 
 type TranscriptState = {
-  schemaVersion: "1.0.0";
+  schemaVersion: "2.0.0";
   attemptId: string;
   blocks: TranscriptBlock[];
-  steps: TranscriptStep[];
 };
 ```
 
@@ -84,36 +82,35 @@ contract before accepting provider payloads.
 The validator enforces:
 
 - a supported schema version and non-empty attempt ID;
-- at least one step and at least one block in every step;
-- unique, non-empty block and step IDs;
-- exactly one step reference for every block;
-- no unknown, orphaned, or multiply referenced blocks; and
-- agreement between each block's `stepId` and its owning step.
+- at least one block; and
+- unique, non-empty block IDs.
 
 Pure operations accept caller-supplied IDs, never use time or randomness, do not mutate their input,
-and validate every result. Block add/delete/up/down operations preserve ownership; the final block in
-a step cannot be deleted. Splitting before a non-first block preserves leading/trailing order and
-changes ownership only for the trailing segment. Merging appends a step to its predecessor in visible
-order. Step movement swaps adjacent steps without changing internal block order. All operations use
-labelled buttons with disabled boundary states, so drag-and-drop is unnecessary.
+and validate every result. The `blocks` array is the sole canonical order, so no ownership/reference
+array can orphan or multiply reference a block. Add inserts at an explicit global index, delete
+removes a non-final block, and up/down movement swaps adjacent blocks across the continuous document.
+There are no correction-stage step types or split/merge/move-step operations. Controls live in
+labelled contextual menus with disabled boundary states, so drag-and-drop is unnecessary.
 
-Confirmation validates once more and produces a deeply independent snapshot. Its step array follows
-visible step order, and its block array is rebuilt in exact visible step/block order. It contains no
-timestamp, score, grade, provider record, AI metadata, or hidden reasoning, so identical visible
-state serializes identically. The UI identifies it as the future authoritative grading input. No
-grading pipeline exists in Milestone 3.
+Confirmation validates once more and produces a deeply independent snapshot whose flat block array
+matches the exact visible order. It contains no timestamp, score, grade, provider record, AI
+metadata, or reasoning grouping, so identical visible state serializes identically. The UI renders
+the reviewed content without IDs, schema details, or variant labels and identifies it as the future
+authoritative grading input. No grading or reasoning-step pipeline exists in Milestone 3.
 
 ## Authenticated correction route and responsive layout
 
 `/internal/math-correction` calls the existing authenticated-session endpoint before rendering its
 fixture. Checking, authentication-required, retryable-unavailable, and ready states are explicit.
 The ready state uses only a repository-owned SVG labelled as synthetic/non-student work and a local
-deterministic transcript.
+deterministic transcript explicitly presented as simulated OCR output. No OCR service runs.
 
 Below 768 px, PHOTO and TRANSCRIPT are keyboard-operable tabs and only the selected tab panel is
 exposed. At 768 px and above, the phone tablist is absent and the photo plus transcript are visible in
-a two-column split. Controls have labelled minimum 44 px targets, wrap at narrow widths, and remain
-inside the viewport. Long display formulas may scroll only within their own bounded renderer.
+a two-column split. The transcript is one paper-like document surface: text edits in place, formulas
+switch between idle KaTeX and active MathLive, and block actions are contextual. Controls have
+labelled minimum 44 px targets, wrap at narrow widths, and remain inside the viewport. Long display
+formulas may scroll only within their own bounded renderer.
 
 ## Contracts unchanged
 
@@ -126,11 +123,13 @@ contracts remain unchanged.
 
 ## Verification and rollback
 
-Unit tests cover transcript invariants and immutable operations. Component tests cover the complete
-render corpus, source-free adversarial failures, MathLive property/event behavior, correction, mixed
-blocks, operations, authentication states, and confirmation. The browser regression runs in all five
-configured phone/tablet projects and checks real MathLive keyboard correction, touch/keyboard tab
-controls, exact confirmation order, source absence, forbidden elements, and horizontal containment.
+Unit tests cover flat transcript invariants and immutable operations. Component tests cover the
+complete render corpus, source-free adversarial failures, MathLive property/event behavior,
+click-to-edit correction, mixed blocks, contextual operations, authentication states, and
+content-only confirmation. The browser regression runs in all five configured phone/tablet projects
+and checks real MathLive keyboard correction, touch/keyboard tab controls, absence of reasoning-step
+UI/state, exact flat confirmation order, source absence, forbidden elements, and horizontal
+containment.
 Exact results are in
 [the Milestone 3 device report](../evaluation/m3-math-rendering-device-report.md).
 

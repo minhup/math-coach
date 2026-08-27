@@ -10,7 +10,14 @@ The Next.js web app sends same-origin API requests through a rewrite to FastAPI.
 
 Milestone 2 implements `study_profile -> student_exam_targets[]`, shared exam/skill configuration, immutable concept/problem/geometry versions, and attempts pinned to exact problem versions. Strict YAML/JSON packages are imported transactionally and only original synthetic provenance is accepted. See [the versioned content and multi-exam architecture](docs/architecture/versioned-content-and-multi-exam.md).
 
-Milestone 3 routes read-only typed mathematics through a bounded, source-free KaTeX failure boundary and uses MathLive for visual correction. Its authenticated `/internal/math-correction` route uses only deterministic synthetic fixtures, keeps transcript blocks and steps typed and ordered, and produces a local confirmation snapshot labelled as the future authoritative grading input. It does not transcribe, grade, or persist work. See [the mathematical rendering and transcript-state architecture](docs/architecture/math-rendering-and-transcript-state.md) and [the five-project device report](docs/evaluation/m3-math-rendering-device-report.md).
+Milestone 3 routes read-only typed mathematics through a bounded, source-free KaTeX failure
+boundary and uses MathLive for visual correction. Its authenticated `/internal/math-correction`
+route presents deterministic simulated OCR as one continuous document: typed text/math blocks are
+flat and ordered, formulas switch from KaTeX to MathLive only when activated, and confirmation
+produces the future authoritative grading input. Reasoning grouping happens only after confirmation
+in a later milestone. The spike does not run OCR, grade, or persist work. See
+[the mathematical rendering and transcript-state architecture](docs/architecture/math-rendering-and-transcript-state.md)
+and [the five-project device report](docs/evaluation/m3-math-rendering-device-report.md).
 
 ## Local setup
 
