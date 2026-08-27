@@ -1357,6 +1357,21 @@ summary
 
 Exit when the entire journey works in the emulator-first phone/tablet development matrix. Physical-device and true iOS/iPadOS Simulator validation remain pre-pilot work.
 
+Implemented on 2026-08-27 as an authenticated synthetic-only vertical slice. One profile owns and
+renders two active examination-target records; the deterministic combined plan orders an existing
+M4 shared-target problem and M2 priority-target follow-up, with exact target-record support on every
+item. Attempts and retry remain pinned to immutable problem versions. The journey reuses the curated
+geometry renderer, authorized MinIO upload, continuous MathLive correction editor, typed
+`ContentBlock` renderer, stored hint ladder/actions, and immutable concept content. Strict Pydantic
+schemas validate application-owned mock transcript/evaluation payloads with one schema retry and
+explicit failure/uncertainty states. Only an explicitly confirmed transcript reaches evaluation,
+and the final summary derives from the pure application state machine. No migration, dependency,
+provider, grading pipeline, learner-state aggregation, or generalized planner was added. All 15
+browser cases, including the complete journey in each of the five configured phone/tablet projects,
+pass without horizontal overflow. See the
+[static journey architecture](architecture/static-student-journey.md) and
+[device report](evaluation/m5-static-journey-device-report.md).
+
 ### Milestone 6 — Multimodal transcription
 
 Deliver:

@@ -105,6 +105,14 @@ content-preview response. Missing or invalid references render a concise unavail
 references render the shared geometry experience, and hint actions are validated again against that
 scene before a control is exposed.
 
+Milestone 5 reuses the same component for its student-safe immutable problem payload and progressive
+hint ladder. The plan cannot replace the scene, and the hint endpoint can return only the next stored
+level for the attempt's exact problem version. Returned actions pass the existing Pydantic and
+frontend scene-ID validation boundaries before the shared reducer receives them. The representative
+journey exercises stored highlight, show, and ask-select actions; it does not introduce another
+renderer or an AI drawing language. See the
+[static student journey architecture](static-student-journey.md).
+
 /internal/geometry-spike checks the existing invite session before exposing the comprehensive
 synthetic fixture. It exercises every approved primitive and action, selection allowlists,
 free-point movement, constraint monitoring, accessibility copy, and fallback image. It does not add

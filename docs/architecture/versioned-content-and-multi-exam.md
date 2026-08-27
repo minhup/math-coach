@@ -74,6 +74,9 @@ Milestone 4 resolves geometry blocks through the current versioned scene in the 
 passes them through the
 [strict interactive-geometry boundary](interactive-geometry-engine.md). Missing or invalid scene
 references produce a concise unavailable state rather than partially rendering untrusted content.
+Milestone 5 exposes a separate student-safe deterministic plan response containing only the exact
+immutable problem version, typed statement, optional validated scene, and explicit supporting target
+record IDs. It does not expose the preview's reference solutions or rubric to the learner surface.
 
 Geometry scene versions are declarative JSON. Their finite object vocabulary contains IDs,
 construction parents, free-point coordinates, explicit drag/select capabilities, intersection
@@ -167,6 +170,12 @@ POST           /api/v1/attempts
 GET            /api/v1/attempts/{attempt_id}
 GET            /api/v1/internal/content-preview
 GET            /api/v1/internal/content-preview/{problem_id}
+GET            /api/v1/exam-cycles
+GET            /api/v1/plans/today
+POST           /api/v1/attempts/{attempt_id}/mock-transcription
+POST           /api/v1/attempts/{attempt_id}/mock-evaluation
+POST           /api/v1/attempts/{attempt_id}/hints/next
+GET            /api/v1/concept-versions/{concept_version_id}
 ```
 
 Profile responses contain `studentExamTargets: []`. Profile, target, and attempt queries verify the
@@ -179,6 +188,14 @@ FastAPI/Pydantic remains the backend contract. OpenAPI and the TypeScript client
 generated together. The web client additionally validates nested response data at runtime before
 rendering the internal preview. Loading, empty, authorization failure, retryable failure, and loaded
 states are explicit on phone and tablet layouts.
+
+Milestone 5's static plan still treats targets as a collection. Its shared-foundation item supports
+all active target records that match the problem's explicit relevance links, while its follow-up
+supports one exact priority target. UUIDv5 plan identity is derived from the plan date, profile,
+ordered targets, and ordered immutable problem versions, so identical inputs remain deterministic.
+This narrow fixture-backed composition does not duplicate skills, infer learner state, implement the
+Milestone 9 planner, or predict an examination outcome. The complete boundary is documented in the
+[static student journey architecture](static-student-journey.md).
 
 ## Migration and rollback
 

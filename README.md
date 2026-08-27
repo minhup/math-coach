@@ -1,6 +1,6 @@
 # Math Coach
 
-Math Coach is an interaction-first MVP for helping students move from a photographed paper solution to a confirmed transcript and useful mathematical feedback. Milestones 1 through 4 supply the internal engineering foundation, invite login, responsive phone/tablet shell, verified synthetic-image upload, multi-exam study-profile contracts, strictly validated versioned synthetic content, controlled mathematical rendering, a synthetic visual-correction spike, and the curated interactive geometry engine. AI transcription, grading, learner state, and student-facing practice arrive in later milestones.
+Math Coach is an interaction-first MVP for helping students move from a photographed paper solution to a confirmed transcript and useful mathematical feedback. Milestones 1 through 5 supply the internal engineering foundation, invite login, responsive phone/tablet shell, verified synthetic-image upload, multi-exam study-profile contracts, strictly validated versioned synthetic content, controlled mathematical rendering, the visual-correction editor, the curated interactive geometry engine, and a complete deterministic synthetic student journey. Real AI transcription, production grading, learner state, and adaptive coaching arrive in later milestones.
 
 Use synthetic or non-personal images only. The local credentials are development defaults, not production configuration.
 
@@ -29,6 +29,15 @@ static image on invalid data or renderer failure. See
 [the interactive geometry architecture](docs/architecture/interactive-geometry-engine.md) and
 [the five-project geometry report](docs/evaluation/m4-geometry-device-report.md).
 
+Milestone 5 connects invitation sign-in, one profile with multiple active examination targets, a
+deterministic combined plan, immutable problem attempts, geometry, synthetic upload, strict mock
+transcription, visual correction, explicit confirmation, strict mock evaluation, progressive hints,
+retry, concept review, and deterministic summary. Every plan item names its exact supporting target
+records. The application owns the transition and summary state; the mocks supply only validated
+synthetic transcript/evaluation payloads. See the
+[static student journey architecture](docs/architecture/static-student-journey.md) and
+[five-project journey report](docs/evaluation/m5-static-journey-device-report.md).
+
 ## Local setup
 
 Prerequisites are Node 20.19 or newer, npm, Python 3.12, uv, Docker with Compose, and Make.
@@ -46,9 +55,10 @@ make dev-api
 make dev-web
 ```
 
-Open `http://localhost:3000`. After signing in, use **Correction spike** for the synthetic
-Milestone 3 editor, **Geometry spike** for the all-primitives Milestone 4 surface, or **Content
-preview** for the typed versioned-package path. MinIO's local console is at
+Open `http://localhost:3000`. After signing in, the workspace starts the Milestone 5 synthetic
+student journey. Use **Correction spike** for the standalone Milestone 3 editor, **Geometry spike**
+for the all-primitives Milestone 4 surface, or **Content preview** for the typed versioned-package
+path. MinIO's local console is at
 `http://localhost:9001`. Stop infrastructure without deleting its volumes with
 `make services-down`.
 
@@ -95,6 +105,20 @@ make content-validate
 The E2E helper accepts optional Playwright paths and preserves the default full-suite behavior when
 called without arguments. `PLAYWRIGHT_WEB_PORT` and `PLAYWRIGHT_API_PORT` may select isolated
 ports for a parallel worktree; the defaults remain 3000 and 8000.
+
+Focused Milestone 5 checks can be run with:
+
+```bash
+cd apps/student-web
+npx vitest run features/journey components/journey lib/static-journey-api.test.ts --coverage=false
+cd ../..
+uv run --project services/api pytest services/api/tests/unit/test_static_journey_*.py
+./scripts/run_e2e.sh tests/e2e/foundation.spec.ts
+```
+
+The M5 E2E flow runs the complete invite-to-summary journey in all five configured projects. Each
+project uses a separate synthetic development invite identity so its profile and target records can
+run in parallel safely.
 
 ## Repository map
 

@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: proposed; implementation awaits project-owner seam approval
+- Status: active; public seams approved
 - Owner: Codex implementation; project owner approval required
 - Branch: `feat/m5-static-end-to-end-student-slice`
 - Base commit: `756af3719ff8b68db43c69c0edf1b73a0b96129b`
@@ -800,7 +800,7 @@ blindly.
 - [x] Repository inspected
 - [x] Plan reviewed
 - [x] Branch created from current main
-- [ ] Public seams approved by project owner
+- [x] Public seams approved by project owner
 - [ ] Tests written or updated
 - [ ] Implementation complete
 - [ ] Documentation updated
@@ -812,6 +812,8 @@ blindly.
 
 ## Decisions
 
+- 2026-08-27: The project owner approved the proposed files, public seams, and implementation
+  decisions with the instruction to complete Milestone 5 cleanly. TDD implementation may begin.
 - 2026-08-27: Use a separate clean worktree because the shared checkout contains unrelated untracked
   corpus/data work. Do not inspect or modify that work.
 - 2026-08-27: Add no database migration. Existing persistent profile/target, immutable attempt,
@@ -859,15 +861,19 @@ blindly.
 
 ## Verification evidence
 
+- Project-owner approval was received after the complete proposed file set and public seams were
+  presented. No implementation test or product code preceded approval.
 - Pre-change fetch and ancestry evidence is recorded in **Current-state findings**. Branch/worktree
   status after plan creation will be recorded before implementation.
 - Required source, docs, tests, manifests, generated-contract workflow, validation commands, test
   inventory, device matrix, dependency versions, and pre-change hashes were inspected before this
   file was created.
-- No baseline command has been claimed as newly executed in this worktree before approval. The exact
-  completed M4 `make check` evidence applies to the identical base commit and is recorded above. A
-  fresh focused/root baseline will be run after seam approval and before the first red implementation
-  slice, with exact results appended here.
+- After approval, a fresh pre-change `make check` passed against isolated M5 PostgreSQL, MinIO,
+  web, and API ports `5535`, `9105`, `3105`, and `8105`. Formatting, lint, TypeScript/mypy,
+  generated API drift, both content packages, and the Next.js 16.3.2 production build passed. Unit
+  results were 122 frontend and 67 backend tests; both full migration cycles and all 23 integration
+  tests passed; all 15 existing browser cases passed in 12.0 seconds. The shared checkout services
+  on ports 3000/8000/5432/9000 were not changed.
 - Red/green commands, regenerated hashes, migration-cycle results, final package hashes, unit/
   integration/browser counts, device timings, screenshots, complete diff review, rebase/conflicts,
   `git diff --check`, and final outcome remain pending implementation.

@@ -77,8 +77,10 @@ type TranscriptState = {
 };
 ```
 
-It is not an HTTP or database schema. Future transcription work must define and validate a server
-contract before accepting provider payloads.
+Milestone 5 promotes this exact shape to an authoritative strict Pydantic/OpenAPI HTTP schema for the
+deterministic mock boundary; the generated TypeScript declaration is the frontend type source. It
+still is not a database schema, and no transcript is persisted. Future real transcription work must
+keep validating provider payloads against an authoritative server contract.
 
 The validator enforces:
 
@@ -107,7 +109,11 @@ Confirmation validates once more and produces a deeply independent snapshot whos
 matches the exact visible order. It contains no timestamp, score, grade, provider record, AI
 metadata, or reasoning grouping, so identical visible state serializes identically. The UI renders
 the reviewed content without IDs, schema details, or variant labels and identifies it as the future
-authoritative grading input. No grading or reasoning-step pipeline exists in Milestone 3.
+authoritative grading input. No grading or reasoning-step pipeline exists in Milestone 3. Milestone 5
+reuses this confirmation operation as a state-machine boundary: confirmation unmounts correction,
+stores the independent snapshot, and is the only phase from which the deterministic mock evaluation
+request is permitted. Editing after confirmation and evaluation before confirmation are rejected
+instead of silently changing or skipping state.
 
 ## Authenticated correction route and responsive layout
 
@@ -124,11 +130,17 @@ caret and selection work directly in text; insertion and formula actions remain 
 have labelled minimum 44 px targets, wrap at narrow widths, and remain inside the viewport. Long
 mathematics may scroll only within its own bounded renderer.
 
-## Contracts unchanged
+## Milestone 3 contracts and Milestone 5 reuse
 
 Milestone 3 adds no database table, migration, HTTP route, OpenAPI declaration, generated API type,
 AI contract, content-package schema, geometry engine, Markdown renderer, rich-text framework, RAG
 system, or vector database. It reuses `GET /api/v1/auth/me` solely as an internal access gate.
+
+Milestone 5 later adds a strict HTTP `TranscriptDocument` with the same `2.0.0` flat model plus a
+`ConfirmedTranscript` wrapper. The application-owned synthetic mock records zero-cost synthetic
+metadata and returns typed evaluation content tied to the SHA-256 fingerprint of that exact confirmed
+document. No real OCR/provider runs, and the browser cannot select a mock outcome. The full lifecycle
+is documented in the [static student journey architecture](static-student-journey.md).
 
 The spike also makes no singular-exam assumption. Existing multi-exam content and learner-target
 contracts remain unchanged.
