@@ -46,6 +46,27 @@ from app.schemas import (
     UploadResponse,
     UserResponse,
 )
+from app.security import utc_now
+from app.static_journey.mocks import DeterministicMockBoundary, get_mock_boundary
+from app.static_journey.schemas import (
+    AvailableExamCycleListResponse,
+    ConceptVersionResponse,
+    MockEvaluationRequest,
+    MockEvaluationResponse,
+    MockTranscriptionRequest,
+    MockTranscriptionResponse,
+    NextHintRequest,
+    NextHintResponse,
+    StaticDailyPlanResponse,
+)
+from app.static_journey.service import (
+    available_exam_cycles,
+    concept_version,
+    mock_evaluation,
+    mock_transcription,
+    next_hint,
+    static_daily_plan,
+)
 from app.storage import ObjectStorage, get_object_storage
 from app.uploads import complete_upload, create_upload, owned_upload, upload_response
 
@@ -54,6 +75,7 @@ error_responses: dict[int | str, dict[str, Any]] = {
     401: {"model": ErrorEnvelope, "description": "Authentication failed or is required"},
     404: {"model": ErrorEnvelope, "description": "Owned resource was not found"},
     409: {"model": ErrorEnvelope, "description": "Request conflicts with current state"},
+    502: {"model": ErrorEnvelope, "description": "A structured mock payload was invalid"},
     422: {"model": ErrorEnvelope, "description": "Request or upload validation failed"},
     503: {"model": ErrorEnvelope, "description": "A required service is unavailable"},
 }
@@ -93,6 +115,104 @@ async def logout(
 @router.get("/auth/me", response_model=UserResponse, tags=["auth"])
 async def current_user(user: CurrentUser) -> UserResponse:
     return user_response(user)
+
+
+@router.get(
+    "/exam-cycles",
+    response_model=AvailableExamCycleListResponse,
+    tags=["static-journey"],
+)
+async def get_exam_cycles(
+    _user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> AvailableExamCycleListResponse:
+    return await available_exam_cycles(database)
+
+
+@router.get(
+    "/plans/today",
+    response_model=StaticDailyPlanResponse,
+    tags=["static-journey"],
+)
+async def get_static_daily_plan(
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> StaticDailyPlanResponse:
+    return await static_daily_plan(user, database, utc_now().date())
+
+
+@router.post(
+    "/attempts/{attempt_id}/mock-transcription",
+    response_model=MockTranscriptionResponse,
+    tags=["static-journey"],
+)
+async def post_mock_transcription(
+    attempt_id: uuid.UUID,
+    payload: MockTranscriptionRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+    boundary: Annotated[DeterministicMockBoundary, Depends(get_mock_boundary)],
+) -> MockTranscriptionResponse:
+    return await mock_transcription(
+        attempt_id=attempt_id,
+        payload=payload,
+        user=user,
+        database=database,
+        boundary=boundary,
+    )
+
+
+@router.post(
+    "/attempts/{attempt_id}/mock-evaluation",
+    response_model=MockEvaluationResponse,
+    tags=["static-journey"],
+)
+async def post_mock_evaluation(
+    attempt_id: uuid.UUID,
+    payload: MockEvaluationRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+    boundary: Annotated[DeterministicMockBoundary, Depends(get_mock_boundary)],
+) -> MockEvaluationResponse:
+    return await mock_evaluation(
+        attempt_id=attempt_id,
+        payload=payload,
+        user=user,
+        database=database,
+        boundary=boundary,
+    )
+
+
+@router.post(
+    "/attempts/{attempt_id}/hints/next",
+    response_model=NextHintResponse,
+    tags=["static-journey"],
+)
+async def post_next_hint(
+    attempt_id: uuid.UUID,
+    payload: NextHintRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> NextHintResponse:
+    return await next_hint(
+        attempt_id=attempt_id,
+        payload=payload,
+        user=user,
+        database=database,
+    )
+
+
+@router.get(
+    "/concept-versions/{concept_version_id}",
+    response_model=ConceptVersionResponse,
+    tags=["static-journey"],
+)
+async def get_concept_version(
+    concept_version_id: uuid.UUID,
+    _user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> ConceptVersionResponse:
+    return await concept_version(concept_version_id, database)
 
 
 @router.post("/uploads/presign", response_model=PresignUploadResponse, tags=["uploads"])

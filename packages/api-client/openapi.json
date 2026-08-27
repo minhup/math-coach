@@ -170,6 +170,78 @@
         "title": "AttemptResponse",
         "type": "object"
       },
+      "AvailableExamCycleListResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AvailableExamCycleResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "AvailableExamCycleListResponse",
+        "type": "object"
+      },
+      "AvailableExamCycleResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "cycleCode": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Cyclecode",
+            "type": "string"
+          },
+          "examCode": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Examcode",
+            "type": "string"
+          },
+          "examDate": {
+            "format": "date",
+            "title": "Examdate",
+            "type": "string"
+          },
+          "examId": {
+            "format": "uuid",
+            "title": "Examid",
+            "type": "string"
+          },
+          "examName": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Examname",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "year": {
+            "maximum": 2200.0,
+            "minimum": 2000.0,
+            "title": "Year",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "examId",
+          "examCode",
+          "examName",
+          "cycleCode",
+          "year",
+          "examDate"
+        ],
+        "title": "AvailableExamCycleResponse",
+        "type": "object"
+      },
       "CalloutBlock": {
         "additionalProperties": false,
         "properties": {
@@ -275,6 +347,120 @@
           "type"
         ],
         "title": "ClearHighlightAction",
+        "type": "object"
+      },
+      "ConceptVersionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "conceptId": {
+            "format": "uuid",
+            "title": "Conceptid",
+            "type": "string"
+          },
+          "conceptVersionId": {
+            "format": "uuid",
+            "title": "Conceptversionid",
+            "type": "string"
+          },
+          "content": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Content",
+            "type": "array"
+          },
+          "geometryScene": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GeometrySceneVersion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conceptId",
+          "conceptVersionId",
+          "code",
+          "name",
+          "version",
+          "content",
+          "geometryScene"
+        ],
+        "title": "ConceptVersionResponse",
+        "type": "object"
+      },
+      "ConfirmedTranscript": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmationStatus": {
+            "const": "confirmed",
+            "title": "Confirmationstatus",
+            "type": "string"
+          },
+          "transcript": {
+            "$ref": "#/components/schemas/TranscriptDocument"
+          }
+        },
+        "required": [
+          "confirmationStatus",
+          "transcript"
+        ],
+        "title": "ConfirmedTranscript",
         "type": "object"
       },
       "ContentPreviewListResponse": {
@@ -1110,6 +1296,369 @@
         "title": "MathSpan",
         "type": "object"
       },
+      "MockEvaluationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmedTranscript": {
+            "$ref": "#/components/schemas/ConfirmedTranscript"
+          }
+        },
+        "required": [
+          "confirmedTranscript"
+        ],
+        "title": "MockEvaluationRequest",
+        "type": "object"
+      },
+      "MockEvaluationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "feedback": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Feedback",
+            "type": "array"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MockRunMetadata"
+          },
+          "nextSteps": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Nextsteps",
+            "type": "array"
+          },
+          "outcome": {
+            "enum": [
+              "ready",
+              "uncertain"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "referenceSolutionsNonExhaustive": {
+            "const": true,
+            "title": "Referencesolutionsnonexhaustive",
+            "type": "boolean"
+          },
+          "transcriptFingerprint": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Transcriptfingerprint",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "feedback",
+          "nextSteps",
+          "referenceSolutionsNonExhaustive",
+          "transcriptFingerprint",
+          "metadata"
+        ],
+        "title": "MockEvaluationResponse",
+        "type": "object"
+      },
+      "MockRunMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "costUsd": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Costusd",
+            "type": "string"
+          },
+          "inputTokens": {
+            "const": 0,
+            "title": "Inputtokens",
+            "type": "integer"
+          },
+          "latencyMs": {
+            "minimum": 0.0,
+            "title": "Latencyms",
+            "type": "integer"
+          },
+          "modelSnapshot": {
+            "const": "m5-static-fixture-v1",
+            "title": "Modelsnapshot",
+            "type": "string"
+          },
+          "outputTokens": {
+            "const": 0,
+            "title": "Outputtokens",
+            "type": "integer"
+          },
+          "promptVersion": {
+            "const": "m5-no-provider-prompt-v1",
+            "title": "Promptversion",
+            "type": "string"
+          },
+          "provider": {
+            "const": "application-owned-synthetic-mock",
+            "title": "Provider",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0.0",
+            "title": "Schemaversion",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider",
+          "modelSnapshot",
+          "promptVersion",
+          "schemaVersion",
+          "latencyMs",
+          "inputTokens",
+          "outputTokens",
+          "costUsd"
+        ],
+        "title": "MockRunMetadata",
+        "type": "object"
+      },
+      "MockTranscriptionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "uploadId": {
+            "format": "uuid",
+            "title": "Uploadid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uploadId"
+        ],
+        "title": "MockTranscriptionRequest",
+        "type": "object"
+      },
+      "MockTranscriptionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/MockRunMetadata"
+          },
+          "transcript": {
+            "$ref": "#/components/schemas/TranscriptDocument"
+          }
+        },
+        "required": [
+          "transcript",
+          "metadata"
+        ],
+        "title": "MockTranscriptionResponse",
+        "type": "object"
+      },
+      "NextHintRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "previousHintLevel": {
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "title": "Previoushintlevel",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "previousHintLevel"
+        ],
+        "title": "NextHintRequest",
+        "type": "object"
+      },
+      "NextHintResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "conceptVersionId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conceptversionid"
+          },
+          "content": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Content",
+            "type": "array"
+          },
+          "geometryActions": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "animate": "#/components/schemas/AnimateAction",
+                  "ask_select": "#/components/schemas/AskSelectAction",
+                  "clear_highlight": "#/components/schemas/ClearHighlightAction",
+                  "focus": "#/components/schemas/FocusAction",
+                  "hide": "#/components/schemas/HideAction",
+                  "highlight": "#/components/schemas/HighlightAction",
+                  "show": "#/components/schemas/ShowAction"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ShowAction"
+                },
+                {
+                  "$ref": "#/components/schemas/HideAction"
+                },
+                {
+                  "$ref": "#/components/schemas/HighlightAction"
+                },
+                {
+                  "$ref": "#/components/schemas/ClearHighlightAction"
+                },
+                {
+                  "$ref": "#/components/schemas/FocusAction"
+                },
+                {
+                  "$ref": "#/components/schemas/AnimateAction"
+                },
+                {
+                  "$ref": "#/components/schemas/AskSelectAction"
+                }
+              ]
+            },
+            "title": "Geometryactions",
+            "type": "array"
+          },
+          "hintId": {
+            "format": "uuid",
+            "title": "Hintid",
+            "type": "string"
+          },
+          "hintLevel": {
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Hintlevel",
+            "type": "integer"
+          },
+          "revealsCompleteSolution": {
+            "title": "Revealscompletesolution",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hintId",
+          "hintLevel",
+          "content",
+          "geometryActions",
+          "revealsCompleteSolution",
+          "conceptVersionId"
+        ],
+        "title": "NextHintResponse",
+        "type": "object"
+      },
       "PilotLoginRequest": {
         "properties": {
           "inviteCode": {
@@ -1800,6 +2349,242 @@
         "title": "ShowAction",
         "type": "object"
       },
+      "StaticDailyPlanResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StaticPlanItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "planDate": {
+            "format": "date",
+            "title": "Plandate",
+            "type": "string"
+          },
+          "planId": {
+            "format": "uuid",
+            "title": "Planid",
+            "type": "string"
+          },
+          "profileId": {
+            "format": "uuid",
+            "title": "Profileid",
+            "type": "string"
+          },
+          "schemaVersion": {
+            "const": "1.0.0",
+            "title": "Schemaversion",
+            "type": "string"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/StaticPlanTarget"
+            },
+            "title": "Targets",
+            "type": "array"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "planId",
+          "planDate",
+          "profileId",
+          "targets",
+          "items"
+        ],
+        "title": "StaticDailyPlanResponse",
+        "type": "object"
+      },
+      "StaticPlanItem": {
+        "additionalProperties": false,
+        "properties": {
+          "conceptVersionId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conceptversionid"
+          },
+          "position": {
+            "minimum": 1.0,
+            "title": "Position",
+            "type": "integer"
+          },
+          "problem": {
+            "$ref": "#/components/schemas/StudentProblemContent"
+          },
+          "selectionReason": {
+            "enum": [
+              "shared_target_foundation",
+              "priority_target_follow_up"
+            ],
+            "title": "Selectionreason",
+            "type": "string"
+          },
+          "supportedTargetIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Supportedtargetids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "position",
+          "problem",
+          "supportedTargetIds",
+          "selectionReason",
+          "conceptVersionId"
+        ],
+        "title": "StaticPlanItem",
+        "type": "object"
+      },
+      "StaticPlanTarget": {
+        "additionalProperties": false,
+        "properties": {
+          "cycleCode": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Cyclecode",
+            "type": "string"
+          },
+          "examCycleId": {
+            "format": "uuid",
+            "title": "Examcycleid",
+            "type": "string"
+          },
+          "examName": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Examname",
+            "type": "string"
+          },
+          "priorityRank": {
+            "minimum": 1.0,
+            "title": "Priorityrank",
+            "type": "integer"
+          },
+          "targetId": {
+            "format": "uuid",
+            "title": "Targetid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetId",
+          "examCycleId",
+          "examName",
+          "cycleCode",
+          "priorityRank"
+        ],
+        "title": "StaticPlanTarget",
+        "type": "object"
+      },
+      "StudentProblemContent": {
+        "additionalProperties": false,
+        "properties": {
+          "estimatedMinutes": {
+            "maximum": 180.0,
+            "minimum": 1.0,
+            "title": "Estimatedminutes",
+            "type": "integer"
+          },
+          "externalCode": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Externalcode",
+            "type": "string"
+          },
+          "geometryScene": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GeometrySceneVersion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "problemId": {
+            "format": "uuid",
+            "title": "Problemid",
+            "type": "string"
+          },
+          "problemVersionId": {
+            "format": "uuid",
+            "title": "Problemversionid",
+            "type": "string"
+          },
+          "statement": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Statement",
+            "type": "array"
+          },
+          "version": {
+            "minimum": 1.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "problemId",
+          "problemVersionId",
+          "externalCode",
+          "version",
+          "estimatedMinutes",
+          "statement",
+          "geometryScene"
+        ],
+        "title": "StudentProblemContent",
+        "type": "object"
+      },
       "StudyProfileCreateRequest": {
         "properties": {
           "name": {
@@ -1969,6 +2754,107 @@
           "text"
         ],
         "title": "TextSpan",
+        "type": "object"
+      },
+      "TranscriptDocument": {
+        "additionalProperties": false,
+        "properties": {
+          "attemptId": {
+            "format": "uuid",
+            "title": "Attemptid",
+            "type": "string"
+          },
+          "blocks": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "math": "#/components/schemas/TranscriptMathBlock",
+                  "text": "#/components/schemas/TranscriptTextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TranscriptTextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/TranscriptMathBlock"
+                }
+              ]
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Blocks",
+            "type": "array"
+          },
+          "schemaVersion": {
+            "const": "2.0.0",
+            "title": "Schemaversion",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "attemptId",
+          "blocks"
+        ],
+        "title": "TranscriptDocument",
+        "type": "object"
+      },
+      "TranscriptMathBlock": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "latex": {
+            "maxLength": 2000,
+            "title": "Latex",
+            "type": "string"
+          },
+          "type": {
+            "const": "math",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "latex"
+        ],
+        "title": "TranscriptMathBlock",
+        "type": "object"
+      },
+      "TranscriptTextBlock": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 20000,
+            "title": "Text",
+            "type": "string"
+          },
+          "type": {
+            "const": "text",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "text"
+        ],
+        "title": "TranscriptTextBlock",
         "type": "object"
       },
       "UploadResponse": {
@@ -2151,6 +3037,16 @@
             },
             "description": "An unexpected server error occurred"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -2244,6 +3140,16 @@
             },
             "description": "An unexpected server error occurred"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -2258,6 +3164,345 @@
         "summary": "Get Attempt",
         "tags": [
           "attempts"
+        ]
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/hints/next": {
+      "post": {
+        "operationId": "post_next_hint_api_v1_attempts__attempt_id__hints_next_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NextHintRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextHintResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Post Next Hint",
+        "tags": [
+          "static-journey"
+        ]
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/mock-evaluation": {
+      "post": {
+        "operationId": "post_mock_evaluation_api_v1_attempts__attempt_id__mock_evaluation_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MockEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockEvaluationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Post Mock Evaluation",
+        "tags": [
+          "static-journey"
+        ]
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/mock-transcription": {
+      "post": {
+        "operationId": "post_mock_transcription_api_v1_attempts__attempt_id__mock_transcription_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MockTranscriptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MockTranscriptionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Post Mock Transcription",
+        "tags": [
+          "static-journey"
         ]
       }
     },
@@ -2317,6 +3562,16 @@
               }
             },
             "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
           },
           "503": {
             "content": {
@@ -2398,6 +3653,16 @@
               }
             },
             "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
           },
           "503": {
             "content": {
@@ -2490,6 +3755,16 @@
             },
             "description": "An unexpected server error occurred"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -2504,6 +3779,200 @@
         "summary": "Pilot Login",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/concept-versions/{concept_version_id}": {
+      "get": {
+        "operationId": "get_concept_version_api_v1_concept_versions__concept_version_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "concept_version_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Concept Version Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConceptVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Get Concept Version",
+        "tags": [
+          "static-journey"
+        ]
+      }
+    },
+    "/api/v1/exam-cycles": {
+      "get": {
+        "operationId": "get_exam_cycles_api_v1_exam_cycles_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailableExamCycleListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Get Exam Cycles",
+        "tags": [
+          "static-journey"
         ]
       }
     },
@@ -2570,6 +4039,16 @@
               }
             },
             "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
           },
           "503": {
             "content": {
@@ -2660,6 +4139,16 @@
             },
             "description": "An unexpected server error occurred"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -2745,6 +4234,16 @@
               }
             },
             "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
           },
           "503": {
             "content": {
@@ -2847,6 +4346,16 @@
             },
             "description": "An unexpected server error occurred"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -2928,6 +4437,16 @@
             },
             "description": "An unexpected server error occurred"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -3008,6 +4527,16 @@
               }
             },
             "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
           },
           "503": {
             "content": {
@@ -3102,6 +4631,16 @@
             },
             "description": "An unexpected server error occurred"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -3116,6 +4655,97 @@
         "summary": "Get Content Preview",
         "tags": [
           "internal-content"
+        ]
+      }
+    },
+    "/api/v1/plans/today": {
+      "get": {
+        "operationId": "get_static_daily_plan_api_v1_plans_today_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaticDailyPlanResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Get Static Daily Plan",
+        "tags": [
+          "static-journey"
         ]
       }
     },
@@ -3182,6 +4812,16 @@
               }
             },
             "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
           },
           "503": {
             "content": {
@@ -3272,6 +4912,16 @@
             },
             "description": "An unexpected server error occurred"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -3360,6 +5010,16 @@
               }
             },
             "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
           },
           "503": {
             "content": {
@@ -3451,6 +5111,16 @@
               }
             },
             "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
           },
           "503": {
             "content": {
@@ -3545,6 +5215,16 @@
             },
             "description": "An unexpected server error occurred"
           },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
+          },
           "503": {
             "content": {
               "application/json": {
@@ -3637,6 +5317,16 @@
               }
             },
             "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A structured mock payload was invalid"
           },
           "503": {
             "content": {

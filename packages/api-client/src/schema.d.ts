@@ -38,6 +38,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/attempts/{attempt_id}/hints/next": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Next Hint */
+        post: operations["post_next_hint_api_v1_attempts__attempt_id__hints_next_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attempts/{attempt_id}/mock-evaluation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Mock Evaluation */
+        post: operations["post_mock_evaluation_api_v1_attempts__attempt_id__mock_evaluation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attempts/{attempt_id}/mock-transcription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Mock Transcription */
+        post: operations["post_mock_transcription_api_v1_attempts__attempt_id__mock_transcription_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/logout": {
         parameters: {
             query?: never;
@@ -83,6 +134,40 @@ export interface paths {
         put?: never;
         /** Pilot Login */
         post: operations["pilot_login_api_v1_auth_pilot_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/concept-versions/{concept_version_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Concept Version */
+        get: operations["get_concept_version_api_v1_concept_versions__concept_version_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/exam-cycles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Exam Cycles */
+        get: operations["get_exam_cycles_api_v1_exam_cycles_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -168,6 +253,23 @@ export interface paths {
         };
         /** Get Content Preview */
         get: operations["get_content_preview_api_v1_internal_content_preview__problem_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/plans/today": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Static Daily Plan */
+        get: operations["get_static_daily_plan_api_v1_plans_today_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -312,6 +414,37 @@ export interface components {
              */
             studyProfileId: string;
         };
+        /** AvailableExamCycleListResponse */
+        AvailableExamCycleListResponse: {
+            /** Items */
+            items: components["schemas"]["AvailableExamCycleResponse"][];
+        };
+        /** AvailableExamCycleResponse */
+        AvailableExamCycleResponse: {
+            /** Cyclecode */
+            cycleCode: string;
+            /** Examcode */
+            examCode: string;
+            /**
+             * Examdate
+             * Format: date
+             */
+            examDate: string;
+            /**
+             * Examid
+             * Format: uuid
+             */
+            examId: string;
+            /** Examname */
+            examName: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Year */
+            year: number;
+        };
         /** CalloutBlock */
         CalloutBlock: {
             /** Content */
@@ -338,6 +471,37 @@ export interface components {
              * @enum {string}
              */
             type: "clear_highlight";
+        };
+        /** ConceptVersionResponse */
+        ConceptVersionResponse: {
+            /** Code */
+            code: string;
+            /**
+             * Conceptid
+             * Format: uuid
+             */
+            conceptId: string;
+            /**
+             * Conceptversionid
+             * Format: uuid
+             */
+            conceptVersionId: string;
+            /** Content */
+            content: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            geometryScene: components["schemas"]["GeometrySceneVersion"] | null;
+            /** Name */
+            name: string;
+            /** Version */
+            version: number;
+        };
+        /** ConfirmedTranscript */
+        ConfirmedTranscript: {
+            /**
+             * Confirmationstatus
+             * @constant
+             */
+            confirmationStatus: "confirmed";
+            transcript: components["schemas"]["TranscriptDocument"];
         };
         /** ContentPreviewListResponse */
         ContentPreviewListResponse: {
@@ -630,6 +794,103 @@ export interface components {
              */
             type: "math";
         };
+        /** MockEvaluationRequest */
+        MockEvaluationRequest: {
+            confirmedTranscript: components["schemas"]["ConfirmedTranscript"];
+        };
+        /** MockEvaluationResponse */
+        MockEvaluationResponse: {
+            /** Feedback */
+            feedback: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            metadata: components["schemas"]["MockRunMetadata"];
+            /** Nextsteps */
+            nextSteps: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "ready" | "uncertain";
+            /**
+             * Referencesolutionsnonexhaustive
+             * @constant
+             */
+            referenceSolutionsNonExhaustive: true;
+            /** Transcriptfingerprint */
+            transcriptFingerprint: string;
+        };
+        /** MockRunMetadata */
+        MockRunMetadata: {
+            /** Costusd */
+            costUsd: string;
+            /**
+             * Inputtokens
+             * @constant
+             */
+            inputTokens: 0;
+            /** Latencyms */
+            latencyMs: number;
+            /**
+             * Modelsnapshot
+             * @constant
+             */
+            modelSnapshot: "m5-static-fixture-v1";
+            /**
+             * Outputtokens
+             * @constant
+             */
+            outputTokens: 0;
+            /**
+             * Promptversion
+             * @constant
+             */
+            promptVersion: "m5-no-provider-prompt-v1";
+            /**
+             * Provider
+             * @constant
+             */
+            provider: "application-owned-synthetic-mock";
+            /**
+             * Schemaversion
+             * @constant
+             */
+            schemaVersion: "1.0.0";
+        };
+        /** MockTranscriptionRequest */
+        MockTranscriptionRequest: {
+            /**
+             * Uploadid
+             * Format: uuid
+             */
+            uploadId: string;
+        };
+        /** MockTranscriptionResponse */
+        MockTranscriptionResponse: {
+            metadata: components["schemas"]["MockRunMetadata"];
+            transcript: components["schemas"]["TranscriptDocument"];
+        };
+        /** NextHintRequest */
+        NextHintRequest: {
+            /** Previoushintlevel */
+            previousHintLevel: number;
+        };
+        /** NextHintResponse */
+        NextHintResponse: {
+            /** Conceptversionid */
+            conceptVersionId: string | null;
+            /** Content */
+            content: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /** Geometryactions */
+            geometryActions: (components["schemas"]["ShowAction"] | components["schemas"]["HideAction"] | components["schemas"]["HighlightAction"] | components["schemas"]["ClearHighlightAction"] | components["schemas"]["FocusAction"] | components["schemas"]["AnimateAction"] | components["schemas"]["AskSelectAction"])[];
+            /**
+             * Hintid
+             * Format: uuid
+             */
+            hintId: string;
+            /** Hintlevel */
+            hintLevel: number;
+            /** Revealscompletesolution */
+            revealsCompleteSolution: boolean;
+        };
         /** PilotLoginRequest */
         PilotLoginRequest: {
             /** Invitecode */
@@ -870,6 +1131,89 @@ export interface components {
              */
             type: "show";
         };
+        /** StaticDailyPlanResponse */
+        StaticDailyPlanResponse: {
+            /** Items */
+            items: components["schemas"]["StaticPlanItem"][];
+            /**
+             * Plandate
+             * Format: date
+             */
+            planDate: string;
+            /**
+             * Planid
+             * Format: uuid
+             */
+            planId: string;
+            /**
+             * Profileid
+             * Format: uuid
+             */
+            profileId: string;
+            /**
+             * Schemaversion
+             * @constant
+             */
+            schemaVersion: "1.0.0";
+            /** Targets */
+            targets: components["schemas"]["StaticPlanTarget"][];
+        };
+        /** StaticPlanItem */
+        StaticPlanItem: {
+            /** Conceptversionid */
+            conceptVersionId: string | null;
+            /** Position */
+            position: number;
+            problem: components["schemas"]["StudentProblemContent"];
+            /**
+             * Selectionreason
+             * @enum {string}
+             */
+            selectionReason: "shared_target_foundation" | "priority_target_follow_up";
+            /** Supportedtargetids */
+            supportedTargetIds: string[];
+        };
+        /** StaticPlanTarget */
+        StaticPlanTarget: {
+            /** Cyclecode */
+            cycleCode: string;
+            /**
+             * Examcycleid
+             * Format: uuid
+             */
+            examCycleId: string;
+            /** Examname */
+            examName: string;
+            /** Priorityrank */
+            priorityRank: number;
+            /**
+             * Targetid
+             * Format: uuid
+             */
+            targetId: string;
+        };
+        /** StudentProblemContent */
+        StudentProblemContent: {
+            /** Estimatedminutes */
+            estimatedMinutes: number;
+            /** Externalcode */
+            externalCode: string;
+            geometryScene: components["schemas"]["GeometrySceneVersion"] | null;
+            /**
+             * Problemid
+             * Format: uuid
+             */
+            problemId: string;
+            /**
+             * Problemversionid
+             * Format: uuid
+             */
+            problemVersionId: string;
+            /** Statement */
+            statement: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /** Version */
+            version: number;
+        };
         /** StudyProfileCreateRequest */
         StudyProfileCreateRequest: {
             /** Name */
@@ -929,6 +1273,45 @@ export interface components {
         };
         /** TextSpan */
         TextSpan: {
+            /** Text */
+            text: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "text";
+        };
+        /** TranscriptDocument */
+        TranscriptDocument: {
+            /**
+             * Attemptid
+             * Format: uuid
+             */
+            attemptId: string;
+            /** Blocks */
+            blocks: (components["schemas"]["TranscriptTextBlock"] | components["schemas"]["TranscriptMathBlock"])[];
+            /**
+             * Schemaversion
+             * @constant
+             */
+            schemaVersion: "2.0.0";
+        };
+        /** TranscriptMathBlock */
+        TranscriptMathBlock: {
+            /** Id */
+            id: string;
+            /** Latex */
+            latex: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "math";
+        };
+        /** TranscriptTextBlock */
+        TranscriptTextBlock: {
+            /** Id */
+            id: string;
             /** Text */
             text: string;
             /**
@@ -1061,6 +1444,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -1130,6 +1522,282 @@ export interface operations {
             };
             /** @description An unexpected server error occurred */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    post_next_hint_api_v1_attempts__attempt_id__hints_next_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NextHintRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NextHintResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    post_mock_evaluation_api_v1_attempts__attempt_id__mock_evaluation_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MockEvaluationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MockEvaluationResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    post_mock_transcription_api_v1_attempts__attempt_id__mock_transcription_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MockTranscriptionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MockTranscriptionResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1209,6 +1877,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -1276,6 +1953,15 @@ export interface operations {
             };
             /** @description An unexpected server error occurred */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1361,6 +2047,183 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_concept_version_api_v1_concept_versions__concept_version_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                concept_version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConceptVersionResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_exam_cycles_api_v1_exam_cycles_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AvailableExamCycleListResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -1428,6 +2291,15 @@ export interface operations {
             };
             /** @description An unexpected server error occurred */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1513,6 +2385,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -1580,6 +2461,15 @@ export interface operations {
             };
             /** @description An unexpected server error occurred */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1667,6 +2557,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -1741,6 +2640,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -1808,6 +2716,15 @@ export interface operations {
             };
             /** @description An unexpected server error occurred */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1891,6 +2808,98 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_static_daily_plan_api_v1_plans_today_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaticDailyPlanResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -1958,6 +2967,15 @@ export interface operations {
             };
             /** @description An unexpected server error occurred */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2043,6 +3061,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -2114,6 +3141,15 @@ export interface operations {
             };
             /** @description An unexpected server error occurred */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2199,6 +3235,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -2275,6 +3320,15 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
+            /** @description A structured mock payload was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
             /** @description A required service is unavailable */
             503: {
                 headers: {
@@ -2344,6 +3398,15 @@ export interface operations {
             };
             /** @description An unexpected server error occurred */
             500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A structured mock payload was invalid */
+            502: {
                 headers: {
                     [name: string]: unknown;
                 };
