@@ -6,7 +6,7 @@ PYTHON := uv run --project $(API_DIR)
 RUFF := $(PYTHON) ruff --config $(API_DIR)/pyproject.toml
 TEST_ENV := MATH_COACH_ENVIRONMENT=test MATH_COACH_DATABASE_URL=postgresql+asyncpg://math_coach:math_coach_dev@localhost:5432/math_coach_test MATH_COACH_OBJECT_STORAGE_BUCKET=math-coach-test
 
-.PHONY: setup format format-check lint typecheck test-unit test-integration test-e2e content-schema-generate content-validate test check services services-down migrate seed api-generate api-contract-check build dev-api dev-web
+.PHONY: setup format format-check lint typecheck test-unit test-integration test-e2e content-schema-generate content-validate transcription-benchmark test check services services-down migrate seed api-generate api-contract-check build dev-api dev-web
 
 setup:
 	npm ci
@@ -49,6 +49,9 @@ content-validate:
 
 content-schema-generate:
 	cd $(API_DIR) && uv run python -m app.scripts.export_content_schema ../../packages/content-schema/content-package.schema.json
+
+transcription-benchmark:
+	cd $(API_DIR) && uv run python -m app.scripts.benchmark_transcription $(BENCHMARK_ARGS)
 
 test: test-unit test-integration test-e2e
 
