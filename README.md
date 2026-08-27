@@ -31,7 +31,7 @@ static image on invalid data or renderer failure. See
 
 ## Local setup
 
-Prerequisites are Node 20.9 or newer, npm, Python 3.12, uv, Docker with Compose, and Make.
+Prerequisites are Node 20.19 or newer, npm, Python 3.12, uv, Docker with Compose, and Make.
 
 ```bash
 make setup
