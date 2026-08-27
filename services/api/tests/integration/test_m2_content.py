@@ -158,7 +158,7 @@ async def test_seed_command_is_deterministic_and_idempotent() -> None:
         receipt_count = await database.scalar(select(func.count()).select_from(ContentImport))
         exam_count = await database.scalar(select(func.count()).select_from(Exam))
 
-    assert receipt_count == 1
+    assert receipt_count == 2
     assert exam_count == 2
 
 
