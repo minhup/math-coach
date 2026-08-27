@@ -561,8 +561,8 @@ contract will be documented and resolved deliberately, followed by affected focu
 - [x] Repository inspected
 - [x] Plan reviewed
 - [x] Branch created from current main
-- [ ] Tests written or updated
-- [ ] Implementation complete
+- [x] Tests written or updated
+- [x] Implementation complete
 - [ ] Documentation updated
 - [ ] Relevant checks pass
 - [ ] Diff reviewed
@@ -574,6 +574,9 @@ contract will be documented and resolved deliberately, followed by affected focu
 
 - 2026-08-27: The project owner confirmed the proposed public test seams and file set. Test-first
   implementation may proceed within this ChangePlan's owned scope.
+- 2026-08-27: Keep phone tabs in normal document flow. A preliminary visual run showed that sticky
+  positioning could cover transcript controls while scrolling; normal flow keeps the switch visible
+  before the active panel and leaves every correction control unobstructed.
 - 2026-08-26: Keep the spike frontend-local and reuse the existing authentication endpoint. A new
   transcript API or database contract would exceed Milestone 3 and falsely imply persistence.
 - 2026-08-26: Use KaTeX's DOM renderer with `throwOnError: true`, not string injection or built-in
@@ -668,6 +671,21 @@ components/content-preview.test.tsx --coverage=false` passed 20 focused renderer
 - `npm run lint --workspace @math-coach/student-web`, `npm run typecheck --workspace
 @math-coach/student-web`, and `npm run build --workspace @math-coach/student-web` passed after the
   correction workflow. The production build includes `/internal/math-correction`.
+- The isolated real-browser regression passed all five unchanged configured projects in Docker:
+  `compact-chromium`, `pixel-7-chromium`, `iphone-13-webkit`,
+  `ipad-pro-11-portrait-webkit`, and `ipad-pro-11-landscape-webkit` all passed in 7.4 seconds.
+- The final production-build run with `VISUAL_QA=1` passed all five projects in 6.5 seconds after the
+  phone-tab refinement. Per-project times were 1.3, 1.8, 5.2, 5.3, and 5.7 seconds in the order
+  listed in the committed device report.
+- A final non-visual rerun after explicit photo-visibility and forbidden-element assertions passed
+  all five projects in 5.5 seconds.
+- All five final screenshots were inspected at high detail. Phone tabs were clear of transcript
+  controls; both tablet orientations kept simultaneous photo/transcript panels; MathLive, KaTeX,
+  labelled operations, and confirmation stayed legible and inside the viewport. The automated
+  document-width and element-bound checks reported no horizontal page overflow.
+- `docs/evaluation/m3-math-rendering-device-report.md` records the exact environment, assertions,
+  results, manual inspection, and isolated-port reason. The temporary base-URL config and generated
+  screenshots were not committed.
 
 ## Result
 
@@ -677,4 +695,5 @@ All non-browser baseline gates pass; standard-port E2E is currently obstructed b
 from the shared checkout and is recorded above. The controlled renderer, existing typed-content
 preview migration, and deterministic transcript-state operations are implemented and focused-green;
 the MathLive correction workflow and authenticated synthetic route are also implemented and
-focused-green. Five-project browser/device verification is next.
+focused-green. All five browser/device projects pass with manual visual evidence. Permanent
+architecture/developer documentation and final full verification remain.

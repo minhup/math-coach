@@ -1053,9 +1053,6 @@ label[for]:focus-visible {
 
 .correction-tabs {
   display: grid;
-  position: sticky;
-  z-index: 2;
-  top: 0;
   margin-bottom: 12px;
   padding: 5px;
   border: 1px solid var(--line);
