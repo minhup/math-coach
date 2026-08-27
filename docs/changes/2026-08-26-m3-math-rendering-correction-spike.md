@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: in-progress
+- Status: complete
 - Owner: Codex implementation; project owner approval
 - Branch: `feat/m3-math-rendering-correction-spike`
 - Base commit: `984da70f7fb0e51446054f7dea3c852fca08dac0`
@@ -566,11 +566,11 @@ contract will be documented and resolved deliberately, followed by affected focu
 - [x] Tests written or updated
 - [x] Implementation complete
 - [x] Documentation updated
-- [ ] Relevant checks pass
-- [ ] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Relevant checks pass
+- [x] Diff reviewed
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -692,14 +692,41 @@ components/content-preview.test.tsx --coverage=false` passed 20 focused renderer
   the root formatting contract.
 - The documented focused command `npx vitest run components/math components/transcription
 features/transcription --coverage=false` passed 41 tests across six files.
+- Final `make check` passed with this worktree isolated from the owner-run processes at 3000/8000.
+  The temporary runner used this branch's FastAPI on 8100 and built/served this branch's Next.js app
+  inside the version-matched Playwright container at the standard browser origin
+  `http://localhost:3000`; a narrow in-container proxy preserved that origin for MinIO on 9000. The
+  repository `scripts/run_e2e.sh`, Playwright config, and temporary proxy were restored/deleted
+  immediately afterward and have no diff.
+- Exact final `make check` results: Prettier and Ruff format passed; ESLint and Ruff lint passed;
+  TypeScript and mypy passed; OpenAPI/generated TypeScript drift passed; the one versioned package
+  validated at hash `59f9572fb526842cbdddf438db2468c8d578a637fe814102f5bfbb95118ce7db`;
+  the production build generated `/`, `/internal/content-preview`, and
+  `/internal/math-correction`; 63 frontend tests passed with 91.50% statements, 87.67% branches,
+  92.13% functions, and 91.50% lines; 25 backend unit tests passed; two complete migration
+  downgrade/upgrade cycles passed; 19 integration tests passed; and all 10 browser cases passed in
+  7.0 seconds across the five projects.
+- The first final-check E2E attempt intentionally reused the already-running 3100 server while the
+  check rebuilt `.next`; this invalidated that process's loaded asset manifest, and the alternate
+  origin also triggered the deliberately narrow MinIO CORS policy. The correction spec still passed
+  5/5, but the existing upload spec failed 5/5. The isolated standard-origin rerun above removed both
+  environmental causes and passed the complete suite without an application/test assertion change.
+- `git fetch origin main` on 2026-08-27 confirmed `origin/main` remained
+  `984da70f7fb0e51446054f7dea3c852fca08dac0`. `git rebase origin/main` reported the branch was
+  already up to date; there were no conflicts and therefore no behavior or contract conflict to
+  resolve.
+- The complete `origin/main...HEAD` diff and every owned file were reviewed. Dead pre-KaTeX preview
+  styles were removed, safety searches found no `dangerouslySetInnerHTML`, HTML assignment, `eval`,
+  generated function, or Markdown renderer in application code, and `git diff --check` passed.
 
 ## Result
 
-In progress. Repository and official documentation inspection is complete, the isolated branch and
-ChangePlan exist, and the project owner confirmed the owned files/public test seams on 2026-08-27.
-All non-browser baseline gates pass; standard-port E2E is currently obstructed by owner-run services
-from the shared checkout and is recorded above. The controlled renderer, existing typed-content
-preview migration, and deterministic transcript-state operations are implemented and focused-green;
-the MathLive correction workflow and authenticated synthetic route are also implemented and
-focused-green. All five browser/device projects pass with manual visual evidence. Permanent
-architecture/developer documentation and final full verification remain.
+Complete. Milestone 3 now has one bounded read-only KaTeX boundary, source-free correctable failure
+states, a MathLive visual editor, deterministic typed transcript operations and confirmation, an
+authenticated synthetic correction route, phone tabs, tablet split layout, migrated typed-content
+preview math, complete unit/component/browser regressions, permanent architecture documentation,
+and exact five-project device evidence. The confirmed snapshot is explicitly the future
+authoritative grading input, but the branch adds no grading, AI, persistence, database, HTTP,
+OpenAPI, generated-contract, content-schema, geometry, RAG, or vector-database behavior. All final
+checks pass, the complete diff is reviewed, the branch is rebased on unchanged `origin/main`, no
+conflicts occurred, and the original shared worktree/data work was not touched.
