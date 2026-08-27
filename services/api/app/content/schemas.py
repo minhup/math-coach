@@ -12,6 +12,7 @@ from pydantic.alias_generators import to_camel
 
 NonEmptyText = Annotated[str, Field(min_length=1)]
 Identifier = Annotated[str, Field(min_length=1, pattern=r"^[A-Za-z][A-Za-z0-9_-]*$")]
+FiniteNumber = Annotated[float, Field(allow_inf_nan=False)]
 PositiveVersion = Annotated[int, Field(strict=True, ge=1)]
 PositiveMinutes = Annotated[int, Field(strict=True, ge=1, le=180)]
 Score = Annotated[Decimal, Field(ge=Decimal("0"), max_digits=8, decimal_places=2)]
@@ -123,10 +124,10 @@ ContentBlock = Annotated[
 
 
 class Viewport(ContentModel):
-    x_min: float
-    x_max: float
-    y_min: float
-    y_max: float
+    x_min: FiniteNumber
+    x_max: FiniteNumber
+    y_min: FiniteNumber
+    y_max: FiniteNumber
 
     @model_validator(mode="after")
     def bounds_are_ordered(self) -> Self:
@@ -169,14 +170,36 @@ PARENT_COUNTS: dict[str, tuple[int, int]] = {
     "label": (1, 1),
 }
 
+POINT_OBJECT_TYPES = {"point", "midpoint", "intersection"}
+LINE_OBJECT_TYPES = {"segment", "line", "ray", "perpendicular", "parallel"}
+CURVE_OBJECT_TYPES = LINE_OBJECT_TYPES | {"circle", "circumcircle"}
+POINT_PARENT_OBJECT_TYPES = {
+    "segment",
+    "line",
+    "ray",
+    "circle",
+    "arc",
+    "polygon",
+    "angle",
+    "midpoint",
+    "circumcircle",
+    "label",
+}
+
 
 class GeometryObject(ContentModel):
     id: Identifier
     type: GeometryObjectType
     parents: list[Identifier] = Field(default_factory=list)
-    x: float | None = None
-    y: float | None = None
+    x: FiniteNumber | None = None
+    y: FiniteNumber | None = None
     label: NonEmptyText | None = None
+    draggable: bool = Field(default=False, exclude_if=lambda value: not value)
+    selectable: bool = Field(default=False, exclude_if=lambda value: not value)
+    intersection_index: Literal[0, 1] | None = Field(
+        default=None,
+        exclude_if=lambda value: value is None,
+    )
 
     @model_validator(mode="after")
     def fields_match_object_type(self) -> Self:
@@ -188,6 +211,17 @@ class GeometryObject(ContentModel):
                 raise ValueError("free points require x and y coordinates")
         elif self.x is not None or self.y is not None:
             raise ValueError("only free points may contain x or y coordinates")
+        if self.draggable and self.type != "point":
+            raise ValueError("only free points may be draggable")
+        if self.selectable and self.type == "label":
+            raise ValueError("labels may not be selectable")
+        if self.type == "intersection":
+            if self.intersection_index is None:
+                raise ValueError("intersection requires intersectionIndex")
+        elif self.intersection_index is not None:
+            raise ValueError("only intersections may contain intersectionIndex")
+        if self.type == "label" and self.label is None:
+            raise ValueError("label objects require label text")
         if len(self.parents) != len(set(self.parents)):
             raise ValueError("geometry object parents must be unique")
         return self
@@ -197,25 +231,55 @@ class ShowAction(ContentModel):
     type: Literal["show"]
     object_ids: Annotated[list[Identifier], Field(min_length=1)]
 
+    @model_validator(mode="after")
+    def object_ids_are_unique(self) -> Self:
+        if len(self.object_ids) != len(set(self.object_ids)):
+            raise ValueError("objectIds must be unique")
+        return self
+
 
 class HideAction(ContentModel):
     type: Literal["hide"]
     object_ids: Annotated[list[Identifier], Field(min_length=1)]
+
+    @model_validator(mode="after")
+    def object_ids_are_unique(self) -> Self:
+        if len(self.object_ids) != len(set(self.object_ids)):
+            raise ValueError("objectIds must be unique")
+        return self
 
 
 class HighlightAction(ContentModel):
     type: Literal["highlight"]
     object_ids: Annotated[list[Identifier], Field(min_length=1)]
 
+    @model_validator(mode="after")
+    def object_ids_are_unique(self) -> Self:
+        if len(self.object_ids) != len(set(self.object_ids)):
+            raise ValueError("objectIds must be unique")
+        return self
+
 
 class ClearHighlightAction(ContentModel):
     type: Literal["clear_highlight"]
     object_ids: list[Identifier] | None = None
 
+    @model_validator(mode="after")
+    def object_ids_are_unique(self) -> Self:
+        if self.object_ids is not None and len(self.object_ids) != len(set(self.object_ids)):
+            raise ValueError("objectIds must be unique")
+        return self
+
 
 class FocusAction(ContentModel):
     type: Literal["focus"]
     object_ids: Annotated[list[Identifier], Field(min_length=1)]
+
+    @model_validator(mode="after")
+    def object_ids_are_unique(self) -> Self:
+        if len(self.object_ids) != len(set(self.object_ids)):
+            raise ValueError("objectIds must be unique")
+        return self
 
 
 class AnimateAction(ContentModel):
@@ -229,6 +293,16 @@ class AskSelectAction(ContentModel):
     prompt: Annotated[list[ContentBlock], Field(min_length=1)]
     allowed_object_ids: Annotated[list[Identifier], Field(min_length=1)]
     correct_object_ids: list[Identifier] | None = None
+
+    @model_validator(mode="after")
+    def object_ids_are_unique(self) -> Self:
+        if len(self.allowed_object_ids) != len(set(self.allowed_object_ids)):
+            raise ValueError("allowedObjectIds must be unique")
+        if self.correct_object_ids is not None and len(self.correct_object_ids) != len(
+            set(self.correct_object_ids)
+        ):
+            raise ValueError("correctObjectIds must be unique")
+        return self
 
 
 GeometryAction = Annotated[
@@ -259,6 +333,10 @@ class GeometrySceneVersion(ContentModel):
         object_ids = [item.id for item in self.objects]
         if len(object_ids) != len(set(object_ids)):
             raise ValueError("geometry object IDs must be unique within a scene")
+        if len(self.initial_visible_object_ids) != len(set(self.initial_visible_object_ids)):
+            raise ValueError("initially visible geometry object IDs must be unique")
+        if not self.accessibility_description.strip():
+            raise ValueError("accessibilityDescription must not be blank")
         known = set(object_ids)
         unknown_visible = set(self.initial_visible_object_ids) - known
         if unknown_visible:
@@ -290,6 +368,21 @@ class GeometrySceneVersion(ContentModel):
 
         for object_id in object_ids:
             visit(object_id)
+        object_type_by_id = {item.id: item.type for item in self.objects}
+        for item in self.objects:
+            parent_types = [object_type_by_id[parent_id] for parent_id in item.parents]
+            if item.type in POINT_PARENT_OBJECT_TYPES and not all(
+                parent_type in POINT_OBJECT_TYPES for parent_type in parent_types
+            ):
+                raise ValueError(f"{item.type} parents must be point objects")
+            if item.type == "intersection" and not all(
+                parent_type in CURVE_OBJECT_TYPES for parent_type in parent_types
+            ):
+                raise ValueError("intersection parents must be curves")
+            if item.type in {"perpendicular", "parallel"} and not (
+                parent_types[0] in LINE_OBJECT_TYPES and parent_types[1] in POINT_OBJECT_TYPES
+            ):
+                raise ValueError(f"{item.type} requires a line parent followed by a point parent")
         return self
 
 
@@ -750,6 +843,7 @@ class ContentPackage(ContentModel):
             else None
         )
         known_object_ids = {item.id for item in scene.objects} if scene is not None else set()
+        object_by_id = {item.id: item for item in scene.objects} if scene is not None else {}
         known_animation_ids = set(scene.animation_ids) if scene is not None else set()
         for hint in version.hints:
             if hint.concept_id is not None and hint.concept_id not in concept_ids:
@@ -774,7 +868,16 @@ class ContentPackage(ContentModel):
                     raise ValueError(
                         f"problem {problem_code} hint action references an unknown animation"
                     )
+                if isinstance(action, AnimateAction) and (
+                    object_by_id[action.object_id].type not in POINT_OBJECT_TYPES
+                ):
+                    raise ValueError("animate target must be a point object")
                 if isinstance(action, AskSelectAction):
+                    if any(
+                        not object_by_id[object_id].selectable
+                        for object_id in action.allowed_object_ids
+                    ):
+                        raise ValueError("ask_select allowed objects must be selectable")
                     if action.correct_object_ids is not None and not set(
                         action.correct_object_ids
                     ) <= set(action.allowed_object_ids):

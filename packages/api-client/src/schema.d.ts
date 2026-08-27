@@ -522,12 +522,24 @@ export interface components {
         };
         /** GeometryObject */
         GeometryObject: {
+            /**
+             * Draggable
+             * @default false
+             */
+            draggable: boolean;
             /** Id */
             id: string;
+            /** Intersectionindex */
+            intersectionIndex?: (0 | 1) | null;
             /** Label */
             label?: string | null;
             /** Parents */
             parents?: string[];
+            /**
+             * Selectable
+             * @default false
+             */
+            selectable: boolean;
             /**
              * Type
              * @enum {string}

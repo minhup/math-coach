@@ -774,11 +774,31 @@
       "GeometryObject": {
         "additionalProperties": false,
         "properties": {
+          "draggable": {
+            "default": false,
+            "title": "Draggable",
+            "type": "boolean"
+          },
           "id": {
             "minLength": 1,
             "pattern": "^[A-Za-z][A-Za-z0-9_-]*$",
             "title": "Id",
             "type": "string"
+          },
+          "intersectionIndex": {
+            "anyOf": [
+              {
+                "enum": [
+                  0,
+                  1
+                ],
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intersectionindex"
           },
           "label": {
             "anyOf": [
@@ -800,6 +820,11 @@
             },
             "title": "Parents",
             "type": "array"
+          },
+          "selectable": {
+            "default": false,
+            "title": "Selectable",
+            "type": "boolean"
           },
           "type": {
             "enum": [
