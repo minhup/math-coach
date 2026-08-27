@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: active; public seams approved
+- Status: complete; ready for review
 - Owner: Codex implementation; project owner approval required
 - Branch: `feat/m5-static-end-to-end-student-slice`
 - Base commit: `756af3719ff8b68db43c69c0edf1b73a0b96129b`
@@ -354,7 +354,7 @@ inventing M6–M10 persistence early.
 
 ## Files and components
 
-Proposed and owned by this branch before implementation:
+Proposed before implementation and final files owned by this branch:
 
 ### Documentation and root configuration
 
@@ -368,7 +368,7 @@ Proposed and owned by this branch before implementation:
 - `docs/architecture/interactive-geometry-engine.md` — record reuse by student problems/hints.
 - `docs/MVP_IMPLEMENTATION_PLAN.md` — record final M5 implementation without changing later
   milestone scope.
-- `docs/evaluation/m5-static-student-journey-device-report.md` — exact five-project commands,
+- `docs/evaluation/m5-static-journey-device-report.md` — exact five-project commands,
   timings, screenshot inspection, interaction, and overflow results.
 - `README.md` — static journey, deterministic mock, refresh, and focused command documentation.
 - `package.json` — include new/updated documentation in existing Prettier checks only; no dependency
@@ -405,30 +405,32 @@ Proposed and owned by this branch before implementation:
   summary derivation.
 - `apps/student-web/lib/api-transport.ts` — extract the existing shared fetch/error boundary for the
   existing and new generated clients; no renaming-only wrapper.
-- `apps/student-web/lib/api.ts` and test — retain auth/upload/content behavior and add profile, target,
-  attempt, and exam-cycle calls where shared.
+- `apps/student-web/lib/api.ts` — retain auth/upload/content behavior while using the extracted shared
+  transport.
 - `apps/student-web/lib/static-journey-api.ts` and test — strict runtime parsing for plan,
   transcript, evaluation, hint, and concept responses using generated types.
 - `apps/student-web/components/journey/static-student-journey.tsx` and test — async orchestration,
   error states, reload boundary, and public journey behavior.
-- `apps/student-web/components/journey/journey-panels.tsx` and test — accessible presentation for
-  onboarding, plan, problem, confirmation/evaluation, hints, retry, concept, and summary.
-- `apps/student-web/components/journey/static-student-journey.module.css` — phone/tablet scoped
-  layout and containment.
+- `apps/student-web/app/globals.css` — phone/tablet journey layout and containment alongside the
+  existing shared component styles. Inspection showed a separate CSS module/panel file would split
+  one cohesive responsive surface without a second consumer, so the approved orchestrator remains
+  the single exhaustive presentation component.
 - `apps/student-web/components/upload-workspace.tsx` and test — optional post-success continue seam.
 - `apps/student-web/features/transcription/transcript-state.ts` and test — consume the generated
   transcript shapes while preserving existing pure operations.
 - `apps/student-web/components/transcription/transcript-editor.tsx` and test only if a small labeling
   prop is required; visual editing and confirmation behavior remain intact.
-- `apps/student-web/components/math-coach-app.tsx` and test — mount the static journey after invite
-  authentication.
-- `apps/student-web/components/interaction-shell.tsx` — remove only if it becomes dead after the M5
-  root replaces the placeholder shell; internal review links remain in the journey.
-- `tests/e2e/static-student-journey.spec.ts` — full journey across all five projects, including
-  refresh and containment.
-- Existing `tests/e2e/foundation.spec.ts`, `math-correction.spec.ts`, and `geometry.spec.ts` only for
-  selector/navigation updates needed after the authenticated root changes; their behavior coverage
-  will not be weakened.
+- `apps/student-web/components/math-coach-app.test.tsx` and
+  `apps/student-web/components/interaction-shell.tsx` — mount the static journey after invite
+  authentication while retaining the shell's internal review links.
+- `services/api/app/scripts/seed_dev.py` and `services/api/tests/unit/test_seed_dev.py` — five stable
+  synthetic invite identities for isolated parallel device profiles.
+- `playwright.config.ts` — cap the suite at the five required device workers after real MinIO
+  verification exposed host-storage pressure at eight workers.
+- `tests/e2e/foundation.spec.ts` — replace the foundation-only path with the full static journey,
+  including reload-safe profile creation, authorized upload retry, touch/keyboard, and containment.
+  Keeping this as the canonical foundation-to-summary spec avoids a second browser creating the same
+  user/profile journey. Existing math-correction and geometry specs remain unchanged and green.
 
 No content package, content JSON Schema, SQLAlchemy model, Alembic migration, Python/JavaScript
 dependency manifest entry, lockfile, object-storage contract, or geometry executable boundary is
@@ -441,7 +443,7 @@ All new models extend a strict M5 API base with camel-case aliases and `extra="f
 TypeScript types remain derived from FastAPI. The frontend may add runtime type guards because HTTP
 JSON is untrusted, but it will not redeclare incompatible canonical types.
 
-Planned response/request families:
+Implemented response/request families:
 
 - `AvailableExamCycleResponse` / `AvailableExamCycleListResponse`;
 - `StaticDailyPlanResponse`, `StaticPlanItem`, `StaticPlanTarget`, and finite
@@ -473,7 +475,7 @@ and unavailable/empty static plan. No failure response includes a fabricated suc
 
 ## Database and migration
 
-No migration is planned or justified.
+No migration was required or justified.
 
 Existing persistent fields already cover the M5 requirements:
 
@@ -801,14 +803,14 @@ blindly.
 - [x] Plan reviewed
 - [x] Branch created from current main
 - [x] Public seams approved by project owner
-- [ ] Tests written or updated
-- [ ] Implementation complete
-- [ ] Documentation updated
-- [ ] Relevant checks pass
-- [ ] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Tests written or updated
+- [x] Implementation complete
+- [x] Documentation updated
+- [x] Relevant checks pass
+- [x] Diff reviewed
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested (not applicable; no conflicts)
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -838,6 +840,14 @@ blindly.
   journey uses the deterministic ready fixture.
 - 2026-08-27: Derive summary values from application state and use finite reason/status codes; no
   generated narrative becomes canonical.
+- 2026-08-27: Keep the exhaustive panels in `StaticStudentJourney` and responsive rules in the
+  existing global stylesheet. No second consumer emerged to justify the proposed panel/module split.
+- 2026-08-27: Replace the former foundation browser flow with the complete journey rather than add a
+  second concurrent spec that creates the same profile. Retain the standalone M3/M4 specs as
+  regressions.
+- 2026-08-27: Give each Playwright project its own deterministic synthetic invite identity and cap
+  parallelism at five workers. This preserves one real browser per required device while avoiding
+  unnecessary upload pressure from eight workers.
 
 ## Discoveries
 
@@ -858,6 +868,15 @@ blindly.
   at the mock-transcription request without inventing a durable attempt-asset/transcript model.
 - All five Playwright projects run every spec, so one added full-journey spec produces five new browser
   cases while retaining M1/M3/M4 regression cases.
+- The host filesystem reached 99% use with 18 GB available. MinIO correctly returned HTTP 507 from
+  its disk-safety boundary even for a 68-byte PNG; the journey retained the selected image and showed
+  retryable failure rather than fabricating success. Final verification used the same pinned MinIO
+  image with a 256 MB temporary memory-backed `/data` mount, then removed that exact container.
+- A first final-check invocation omitted the outer isolated Compose variables. It recreated the
+  existing default development PostgreSQL container without deleting its volume and inserted five
+  synthetic development invite rows before an existing content-hash conflict stopped the run. No
+  repository/corpus file or image data changed; the rows were not destructively removed. All final
+  evidence comes from the corrected isolated invocation.
 
 ## Verification evidence
 
@@ -874,11 +893,84 @@ blindly.
   results were 122 frontend and 67 backend tests; both full migration cycles and all 23 integration
   tests passed; all 15 existing browser cases passed in 12.0 seconds. The shared checkout services
   on ports 3000/8000/5432/9000 were not changed.
-- Red/green commands, regenerated hashes, migration-cycle results, final package hashes, unit/
-  integration/browser counts, device timings, screenshots, complete diff review, rebase/conflicts,
-  `git diff --check`, and final outcome remain pending implementation.
+- Red/green focused backend runs used
+  `uv run --project services/api pytest services/api/tests/unit/test_seed_dev.py
+services/api/tests/unit/test_static_journey_schemas.py
+services/api/tests/unit/test_static_journey_planning.py
+services/api/tests/unit/test_static_journey_mocks.py` (final: 9 passed in 0.22 s) and the isolated
+  M5 integration file (5 passed in 2.91 s). Strict schema, mock retry/failure/uncertainty, plan,
+  ownership, upload, hint, concept, and retry tests were observed red for missing seams before their
+  implementation and green afterward.
+- Final focused frontend coverage used
+  `npx vitest run features/journey components/journey lib/static-journey-api.test.ts
+components/upload-workspace.test.tsx components/math-coach-app.test.tsx
+features/transcription/transcript-state.test.ts --coverage=false` from `apps/student-web`: 7 files
+  and 27 tests passed in 1.04 s. Earlier phase-by-phase red/green runs covered the state machine,
+  deterministic summary, HTTP boundary, and complete component before the full suite.
+- `./scripts/check_api_contract.sh` passed after `make api-generate`. Final artifact hashes are:
+  `package-lock.json`
+  `6dbc57fa9fb169ee41d4d0620a08bfc45646b1bebb534ba0e65cc5dfca128bde` (unchanged),
+  `services/api/uv.lock`
+  `60357067a09fcfe5adbaacbb18b21c7d3e799761a38bb06260b8e5b0c7f4b442` (unchanged), OpenAPI
+  `6b2ae0913ba724fbb59cf91273cef41e783bf4a571ec2396767049ba073dc913`, and generated TypeScript
+  `291477c868b25f61f7f88cabcbe40d5dc17f4b6c0dd10fa31774a3ea40251f75`.
+- `make content-validate` passed with canonical validated hashes M2
+  `59f9572fb526842cbdddf438db2468c8d578a637fe814102f5bfbb95118ce7db` and M4
+  `0041b97d4aa5297f8761adb55695197a82811a2c1c452c2585b571b7feadf2b5`.
+  The content files and generated content schema are unchanged.
+- A focused production journey run passed all five projects in 8.0 s: compact Chromium 2.8 s,
+  Pixel 7 Chromium 3.0 s, iPhone 13 WebKit 7.3 s, iPad portrait WebKit 7.1 s, and iPad landscape
+  WebKit 7.3 s. Full-page screenshots named
+  `test-results/m5-static-journey-<project>.png` were inspected at original detail for target/plan,
+  math/geometry/fallback, upload/correction, evaluation/hints, retry/concept, summary, touch targets,
+  and horizontal containment. Exact visual findings are committed in the M5 device report.
+- `git fetch origin` on 2026-08-27 left `origin/main` at the required completed M4 commit
+  `756af3719ff8b68db43c69c0edf1b73a0b96129b`. `git rebase origin/main` reported the branch up to
+  date; there were no conflicts and therefore no behavior-changing resolution.
+- The first post-rebase root attempt exposed three Ruff import-order failures in new tests. Ruff
+  fixed only those imports, the change was committed, and the entire root check was restarted. A
+  corrected isolated-disk run then proved 13 browser passes plus two honest MinIO 507 failures under
+  host disk pressure. Network traces showed both initial and retry PUT responses as HTTP 507.
+- Final root verification used the complete documented isolated PostgreSQL/web/API configuration and
+  a temporary memory-backed instance of the repository-pinned MinIO image at ports 9115/9116:
+
+  ```text
+  COMPOSE_PROJECT_NAME=math-coach-m5 POSTGRES_PORT=5535
+  MATH_COACH_DATABASE_URL=postgresql+asyncpg://math_coach:math_coach_dev@localhost:5535/math_coach
+  MATH_COACH_OBJECT_STORAGE_ENDPOINT=localhost:9115
+  MATH_COACH_OBJECT_STORAGE_PUBLIC_ENDPOINT=localhost:9115
+  MATH_COACH_OBJECT_STORAGE_BUCKET=math-coach-m5-verification-dev
+  PLAYWRIGHT_WEB_PORT=3105 PLAYWRIGHT_API_PORT=8105
+  make check TEST_ENV='<matching test DB and memory-backed MinIO variables>'
+  ```
+
+  Formatting and Ruff (78 files), ESLint, TypeScript, mypy (35 source files), generated API drift,
+  both content packages, and the Next.js 16.3.2 production build passed. Frontend unit/component:
+  20 files, 133 tests, 88.09% statements/81.36% branches/92.78% functions/87.94% lines. Backend
+  unit: 76 passed. Both downgrade-to-base/upgrade-to-head cycles passed. Integration: 28 passed in
+  8.28 s. Browser: 15 passed in 16.7 s. Final per-project M5/math/geometry timings were compact
+  2.2/1.3/2.3 s, Pixel 2.4/1.3/2.4 s, iPhone 8.9/7.1/5.0 s, iPad portrait 8.5/5.8/4.8 s, and iPad
+  landscape 6.8/4.2/3.7 s. The exact temporary container was stopped and auto-removed afterward.
+
+- The dependency graph is unchanged; no post-change `npm audit` was required. The initial unchanged
+  `npm ci` installed 504 packages and reported zero vulnerabilities.
+- Complete `origin/main...HEAD` and final documentation diffs were reviewed by changed-file inventory
+  and public-boundary/security scans. No provider SDK/call, raw HTML/Markdown renderer, executable
+  geometry, unsafe cast in production journey code, singular-target assumption, answer/rubric leak,
+  or unrelated file was found. `git diff --check origin/main...HEAD` and the final documentation diff
+  passed. The final commit/status evidence is recorded in the handoff.
 
 ## Result
 
-Pending public-seam approval and implementation. No implementation test or product-code change has
-been made.
+Milestone 5 is implemented and verified. The invite-to-summary journey now connects one owned
+profile and plural target records, a deterministic student-safe plan with explicit target support,
+immutable attempts, existing math/geometry/upload/correction boundaries, strict synthetic
+transcription and evaluation, confirmation gating, ordered curated hints, retry, exact concept
+content, and an application-derived summary. Invalid transitions and untrusted mock payloads fail
+safely; uncertainty remains explicit. No migration, dependency, real provider, production grader,
+learner-state engine, generalized planner, raw Markdown/HTML, executable geometry, real data, score
+prediction, or admission probability was introduced.
+
+All required automated categories and all five phone/tablet projects pass. Physical devices and true
+iOS/iPadOS Simulator validation remain the MVP plan's documented pre-pilot work. The branch is not
+merged or pushed.

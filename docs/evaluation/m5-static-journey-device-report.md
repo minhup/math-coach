@@ -18,7 +18,11 @@ collection isolated. The fixture contains no real examination, learner, provider
 Playwright is capped at five workers, one for each required project. The host volume was 99% full
 during verification; eight concurrent browsers/uploads could make local MinIO return HTTP 507 even
 though the UI exposed the transfer as retryable. Five workers preserves cross-device parallelism and
-made repeated full runs stable without weakening an assertion.
+made earlier full runs stable without weakening an assertion. When the remaining disk later fell
+below MinIO's safety threshold, even a 68-byte PNG correctly received 507 on its initial PUT and
+retry. The final root check therefore used the same pinned MinIO image with a temporary 256 MB
+memory-backed `/data` store at ports 9115/9116. It exercised the real presign/PUT/verification flow;
+the exact temporary container and its synthetic data were removed after the run.
 
 ## Exact automated result
 
@@ -32,17 +36,18 @@ The focused full-journey production run passed **5 tests in 8.0 seconds**.
 | `ipad-pro-11-portrait-webkit`  | WebKit   | 834 × 1194   | PASS   | 7.1 s     |
 | `ipad-pro-11-landscape-webkit` | WebKit   | 1194 × 834   | PASS   | 7.3 s     |
 
-The final full browser suite passed **15 tests in 16.4 seconds**. It includes the complete M5
-journey, the standalone Milestone 3 correction regression, and the Milestone 4 all-primitives
-geometry regression in every project.
+An earlier stable full browser suite passed **15 tests in 16.4 seconds**. The final post-rebase root
+check passed the same **15 tests in 16.7 seconds** using the memory-backed verification store
+described above. It includes the complete M5 journey, the standalone Milestone 3 correction
+regression, and the Milestone 4 all-primitives geometry regression in every project.
 
 | Project                        | M5 journey | Math regression | Geometry regression |
 | ------------------------------ | ---------- | --------------- | ------------------- |
-| `compact-chromium`             | 2.3 s      | 1.3 s           | 2.2 s               |
-| `pixel-7-chromium`             | 2.5 s      | 1.3 s           | 2.3 s               |
-| `iphone-13-webkit`             | 8.9 s      | 7.0 s           | 5.1 s               |
-| `ipad-pro-11-portrait-webkit`  | 8.1 s      | 6.8 s           | 4.2 s               |
-| `ipad-pro-11-landscape-webkit` | 6.7 s      | 4.2 s           | 3.7 s               |
+| `compact-chromium`             | 2.2 s      | 1.3 s           | 2.3 s               |
+| `pixel-7-chromium`             | 2.4 s      | 1.3 s           | 2.4 s               |
+| `iphone-13-webkit`             | 8.9 s      | 7.1 s           | 5.0 s               |
+| `ipad-pro-11-portrait-webkit`  | 8.5 s      | 5.8 s           | 4.8 s               |
+| `ipad-pro-11-landscape-webkit` | 6.8 s      | 4.2 s           | 3.7 s               |
 
 ## Complete journey assertions in every project
 
