@@ -3,12 +3,18 @@
 import { createElement, useEffect, useRef, useState } from "react";
 
 type MathLiveEditorProps = {
+  focusOnReady?: boolean;
   label: string;
   onInput: (value: string) => void;
   value: string;
 };
 
-export function MathLiveEditor({ label, onInput, value }: MathLiveEditorProps) {
+export function MathLiveEditor({
+  focusOnReady = false,
+  label,
+  onInput,
+  value,
+}: MathLiveEditorProps) {
   const fieldRef = useRef<HTMLElement>(null);
   const initialValueRef = useRef(value);
   const onInputRef = useRef(onInput);
@@ -61,6 +67,12 @@ export function MathLiveEditor({ label, onInput, value }: MathLiveEditorProps) {
     }
   }, [loadState, value]);
 
+  useEffect(() => {
+    if (focusOnReady && loadState === "ready") {
+      fieldRef.current?.focus();
+    }
+  }, [focusOnReady, loadState]);
+
   return (
     <div className="mathlive-editor" data-editor-state={loadState}>
       {createElement("math-field", {
@@ -68,6 +80,7 @@ export function MathLiveEditor({ label, onInput, value }: MathLiveEditorProps) {
         className: "mathlive-field",
         hidden: loadState !== "ready",
         ref: fieldRef,
+        tabIndex: 0,
       })}
       {loadState === "loading" ? (
         <span className="mathlive-editor-status" role="status">

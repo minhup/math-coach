@@ -37,4 +37,19 @@ describe("MathLiveEditor", () => {
     rerender(<MathLiveEditor label="Visual expression" onInput={onInput} value="x=3" />);
     await waitFor(() => expect(Reflect.get(field, "value")).toBe("x=3"));
   });
+
+  it("focuses the visual field on request so keyboard input can begin immediately", async () => {
+    render(
+      <MathLiveEditor
+        focusOnReady
+        label="Inserted mathematics"
+        onInput={() => undefined}
+        value=""
+      />,
+    );
+
+    const field = await screen.findByLabelText("Inserted mathematics");
+    await waitFor(() => expect(field).toHaveFocus());
+    expect(Reflect.get(field, "mathVirtualKeyboardPolicy")).toBe("auto");
+  });
 });
