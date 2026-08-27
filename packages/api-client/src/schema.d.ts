@@ -522,11 +522,8 @@ export interface components {
         };
         /** GeometryObject */
         GeometryObject: {
-            /**
-             * Draggable
-             * @default false
-             */
-            draggable: boolean;
+            /** Draggable */
+            draggable?: boolean | null;
             /** Id */
             id: string;
             /** Intersectionindex */
@@ -535,11 +532,8 @@ export interface components {
             label?: string | null;
             /** Parents */
             parents?: string[];
-            /**
-             * Selectable
-             * @default false
-             */
-            selectable: boolean;
+            /** Selectable */
+            selectable?: boolean | null;
             /**
              * Type
              * @enum {string}

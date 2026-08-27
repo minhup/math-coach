@@ -775,9 +775,15 @@
         "additionalProperties": false,
         "properties": {
           "draggable": {
-            "default": false,
-            "title": "Draggable",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draggable"
           },
           "id": {
             "minLength": 1,
@@ -822,9 +828,15 @@
             "type": "array"
           },
           "selectable": {
-            "default": false,
-            "title": "Selectable",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Selectable"
           },
           "type": {
             "enum": [

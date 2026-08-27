@@ -194,8 +194,8 @@ class GeometryObject(ContentModel):
     x: FiniteNumber | None = None
     y: FiniteNumber | None = None
     label: NonEmptyText | None = None
-    draggable: bool = Field(default=False, exclude_if=lambda value: not value)
-    selectable: bool = Field(default=False, exclude_if=lambda value: not value)
+    draggable: bool | None = Field(default=None, exclude_if=lambda value: value is None)
+    selectable: bool | None = Field(default=None, exclude_if=lambda value: value is None)
     intersection_index: Literal[0, 1] | None = Field(
         default=None,
         exclude_if=lambda value: value is None,
