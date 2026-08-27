@@ -2,6 +2,9 @@ import type { components } from "@math-coach/api-client";
 
 import { validateAndOrderGeometryScene } from "../features/geometry/geometry-scene";
 import { validateGeometryAction } from "../features/geometry/interaction-state";
+import { ApiError, apiRequest, apiRequestWithoutBody } from "./api-transport";
+
+export { ApiError } from "./api-transport";
 
 export type User = components["schemas"]["UserResponse"];
 export type Session = components["schemas"]["SessionResponse"];
@@ -13,17 +16,6 @@ export type ContentPreview = components["schemas"]["ContentPreviewResponse"];
 export type ContentBlock = ContentPreview["statement"][number];
 export type GeometryAction = ContentPreview["hints"][number]["geometryActions"][number];
 export type GeometryScene = NonNullable<ContentPreview["geometryScene"]>;
-
-export class ApiError extends Error {
-  constructor(
-    public readonly code: string,
-    message: string,
-    public readonly status: number,
-  ) {
-    super(message);
-    this.name = "ApiError";
-  }
-}
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -41,7 +33,7 @@ function isNullableString(value: unknown): value is string | null {
   return value === null || typeof value === "string";
 }
 
-function invalidResponse(): never {
+export function invalidResponse(): never {
   throw new ApiError(
     "invalid_response",
     "The service returned an unexpected response. Try again.",
@@ -133,7 +125,7 @@ function isProvenance(value: unknown): value is components["schemas"]["Provenanc
   );
 }
 
-function isContentBlock(value: unknown): value is ContentBlock {
+export function isContentBlock(value: unknown): value is ContentBlock {
   if (!isObject(value) || typeof value.id !== "string") {
     return false;
   }
@@ -168,11 +160,11 @@ function isContentBlock(value: unknown): value is ContentBlock {
   }
 }
 
-function isContentBlocks(value: unknown): value is ContentBlock[] {
+export function isContentBlocks(value: unknown): value is ContentBlock[] {
   return Array.isArray(value) && value.every(isContentBlock);
 }
 
-function isGeometryAction(value: unknown): value is GeometryAction {
+export function isGeometryAction(value: unknown): value is GeometryAction {
   if (!isObject(value)) {
     return false;
   }
@@ -201,7 +193,9 @@ function isGeometryAction(value: unknown): value is GeometryAction {
   }
 }
 
-function isGeometryScene(value: unknown): value is components["schemas"]["GeometrySceneVersion"] {
+export function isGeometryScene(
+  value: unknown,
+): value is components["schemas"]["GeometrySceneVersion"] {
   try {
     validateAndOrderGeometryScene(value);
     return true;
@@ -334,47 +328,6 @@ function parseContentPreview(value: unknown): ContentPreview {
     return invalidResponse();
   }
   return value;
-}
-
-async function readError(response: Response): Promise<ApiError> {
-  let payload: unknown;
-  try {
-    payload = await response.json();
-  } catch {
-    // The stable fallback prevents upstream HTML or storage errors reaching the UI.
-  }
-  const error = isObject(payload) && isObject(payload.error) ? payload.error : undefined;
-  const code = typeof error?.code === "string" ? error.code : "request_failed";
-  const message =
-    typeof error?.message === "string" ? error.message : "Something went wrong. Try again.";
-  return new ApiError(code, message, response.status);
-}
-
-async function apiRequest<T>(
-  path: string,
-  parse: (value: unknown) => T,
-  init?: RequestInit,
-): Promise<T> {
-  const response = await fetch(path, {
-    ...init,
-    credentials: "same-origin",
-    headers: {
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      ...init?.headers,
-    },
-  });
-  if (!response.ok) {
-    throw await readError(response);
-  }
-  const payload: unknown = await response.json();
-  return parse(payload);
-}
-
-async function apiRequestWithoutBody(path: string, init?: RequestInit): Promise<void> {
-  const response = await fetch(path, { ...init, credentials: "same-origin" });
-  if (!response.ok) {
-    throw await readError(response);
-  }
 }
 
 export function getCurrentUser(): Promise<User> {

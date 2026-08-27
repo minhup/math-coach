@@ -1,13 +1,9 @@
+import type { components } from "@math-coach/api-client";
+
 export const TRANSCRIPT_SCHEMA_VERSION = "2.0.0" as const;
 
-export type TranscriptBlock =
-  { id: string; text: string; type: "text" } | { id: string; latex: string; type: "math" };
-
-export type TranscriptState = {
-  attemptId: string;
-  blocks: TranscriptBlock[];
-  schemaVersion: typeof TRANSCRIPT_SCHEMA_VERSION;
-};
+export type TranscriptState = components["schemas"]["TranscriptDocument"];
+export type TranscriptBlock = TranscriptState["blocks"][number];
 
 export type ConfirmedTranscriptSnapshot = TranscriptState;
 
