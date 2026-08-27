@@ -39,6 +39,11 @@ layout, and executable-DOM absence, the five-project production run passed again
 compact Chromium 2.4 s, Pixel 7 Chromium 2.5 s, iPhone 13 WebKit 4.7 s, iPad portrait WebKit 4.7 s,
 and iPad landscape WebKit 4.5 s.
 
+The final post-rebase root `make check` then passed all **15 browser cases in 11.8 seconds**. Within
+that parallel full-suite run, the expanded geometry case passed in compact Chromium 2.9 s, Pixel 7
+Chromium 3.2 s, iPhone 13 WebKit 7.6 s, iPad portrait WebKit 6.3 s, and iPad landscape WebKit 5.4 s.
+The foundation upload/navigation and Milestone 3 correction cases also passed in every project.
+
 ## Regression assertions exercised in every project
 
 - Authenticate through the real local invite session and enter the internal geometry route from the

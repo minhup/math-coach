@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: active
+- Status: complete
 - Owner: Codex implementation; project owner approval
 - Branch: `feat/m4-interactive-geometry-engine`
 - Base commit: `3bc9206c1adc0ee3b11a2adb016d8196a64cd58e`
@@ -678,11 +678,11 @@ tests and `make check` must then be rerun.
 - [x] Tests written or updated
 - [x] Implementation complete
 - [x] Documentation updated
-- [ ] Relevant checks pass
+- [x] Relevant checks pass
 - [x] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -764,13 +764,31 @@ origin/main` created a clean isolated branch/worktree at the exact base.
   5.4 seconds.
 - `npm audit --omit=dev` reports zero vulnerabilities; `du -sh node_modules/jsxgraph` reports 76 MiB;
   the matching production chunk measures 1,151,137 bytes and 262,447 bytes with gzip.
-- A pre-final isolated `make check` completed formatting, lint, type checks, contract/content drift,
-  production build, 120 frontend tests, 65 backend unit tests, 23 integration tests, two migration
-  cycles, and 15 E2E cases. The subsequent strict-number and expanded browser assertions require the
-  final post-rebase root rerun before handoff.
+- The final `git fetch origin main` kept `origin/main` at
+  `3bc9206c1adc0ee3b11a2adb016d8196a64cd58e`; `git rebase origin/main` reported the branch already up
+  to date. There were no conflicts and therefore no conflict-altered behavior to retest separately.
+- Final post-rebase `make check` ran with the branch web/API/object-storage isolated on ports
+  3104/8104/9104. Formatting, ESLint/Ruff, TypeScript/mypy, generated OpenAPI/TypeScript drift,
+  content-schema validation, and the Next.js 16.3.2 production build passed.
+- Content validation accepted exactly two packages. The preserved M2 hash is
+  `59f9572fb526842cbdddf438db2468c8d578a637fe814102f5bfbb95118ce7db`; the M4 package hash is
+  `0041b97d4aa5297f8761adb55695197a82811a2c1c452c2585b571b7feadf2b5`.
+- Final unit results: 16 frontend files and 122 tests passed with 89.54% statements and 82.78%
+  branches; 67 backend unit tests passed. Both complete Alembic downgrade/upgrade cycles passed and
+  all 23 integration tests passed.
+- Final browser result: all 15 cases passed in 11.8 seconds. The expanded geometry case passed in
+  compact Chromium 2.9 s, Pixel 7 Chromium 3.2 s, iPhone 13 WebKit 7.6 s, iPad portrait WebKit 6.3 s,
+  and iPad landscape WebKit 5.4 s. Foundation upload/navigation and Milestone 3 correction also
+  passed in every project.
+- The isolated temporary object-storage container stopped and removed itself after each run. Shared
+  Milestone 3 web/API processes and the original dirty checkout were never stopped or modified.
 
 ## Result
 
-Implementation, permanent documentation, synthetic fixtures, and focused regression/device
-verification are complete. Final root verification, the required fetch/rebase, conflict audit, and
-handoff evidence remain before this plan can be closed.
+Milestone 4 is complete. Curated versioned scenes render deterministically through the approved
+finite primitive adapter; constructed objects remain parent-derived; typed actions and selection
+stay inside current-scene capabilities and allowlists; malformed or executable payloads reject at
+backend and browser boundaries; accessible static fallback remains available; and the full
+post-rebase root gate passes across all five phone/tablet projects without horizontal overflow. No
+database migration, new API endpoint, AI/provider integration, grading path, or singular-exam model
+was introduced.
