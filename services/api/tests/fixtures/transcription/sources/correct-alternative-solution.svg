@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <rect width="900" height="1200" fill="#fffdf7"/>
+  <text x="48" y="72" fill="#a13f35" font-family="sans-serif" font-size="24" font-weight="700">SYNTHETIC TEST FIXTURE — NO PERSON</text>
+  <g fill="#18343b" font-family="Comic Sans MS, cursive" font-size="41">
+    <text x="65" y="180">For x² − 5x + 6 = 0, use the formula.</text>
+    <text x="90" y="315">Δ = (−5)² − 4(1)(6) = 1</text>
+    <text x="90" y="450">x = (5 ± √1)/2</text>
+    <text x="90" y="585">x = 2 or x = 3</text>
+  </g>
+</svg>

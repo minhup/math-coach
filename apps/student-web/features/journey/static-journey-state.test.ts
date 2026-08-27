@@ -31,7 +31,20 @@ const attempt = {
 const transcript = {
   attemptId: attempt.id,
   blocks: [{ id: "text-1", text: "Reviewed.", type: "text" as const }],
-  schemaVersion: "2.0.0" as const,
+  schemaVersion: "3.0.0" as const,
+  warnings: [],
+};
+
+const transcriptVersion = {
+  hash: "b".repeat(64),
+  id: "50000000-0000-4000-8000-000000000050",
+  version: 1,
+};
+
+const confirmation = {
+  hash: transcriptVersion.hash,
+  id: "50000000-0000-4000-8000-000000000051",
+  transcriptVersionId: transcriptVersion.id,
 };
 
 function accepted(
@@ -58,8 +71,13 @@ describe("static student journey state", () => {
       type: "upload_ready",
       upload: { id: "50000000-0000-4000-8000-000000000040", status: "ready" },
     });
-    state = accepted(state, { transcript, type: "transcript_received" });
-    state = accepted(state, { transcript, type: "transcript_confirmed" });
+    state = accepted(state, { transcript, transcriptVersion, type: "transcript_received" });
+    state = accepted(state, {
+      confirmation,
+      transcript,
+      transcriptVersion,
+      type: "transcript_confirmed",
+    });
     state = accepted(state, { type: "evaluation_requested" });
     state = accepted(state, {
       evaluation: { outcome: "ready", transcriptFingerprint: "a".repeat(64) },
@@ -114,8 +132,13 @@ describe("static student journey state", () => {
       type: "upload_ready",
       upload: { id: "upload-1", status: "ready" },
     });
-    state = accepted(state, { transcript, type: "transcript_received" });
-    state = accepted(state, { transcript, type: "transcript_confirmed" });
+    state = accepted(state, { transcript, transcriptVersion, type: "transcript_received" });
+    state = accepted(state, {
+      confirmation,
+      transcript,
+      transcriptVersion,
+      type: "transcript_confirmed",
+    });
     state = accepted(state, { type: "evaluation_requested" });
     state = accepted(state, {
       evaluation: { outcome: "ready", transcriptFingerprint: "a".repeat(64) },

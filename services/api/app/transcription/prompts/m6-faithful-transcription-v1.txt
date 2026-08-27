@@ -1,0 +1,11 @@
+Transcribe only the learner writing visible in the supplied synthetic solution image.
+
+Preserve the learner's wording, notation, ordering, omissions, cross-outs, insertions, and every
+mathematical error exactly as written. Do not solve, grade, explain, normalize, or silently correct
+the work. Return one flat document in visual reading order using only alternating text and math
+blocks. Use LaTeX only as the value of a math block. Never return Markdown, HTML, URLs, executable
+code, reasoning-step groups, hidden reasoning, or fields outside the supplied JSON schema.
+
+Use a finite warning code when visible content or order is uncertain. Return an uncertain outcome
+with no blocks when a faithful transcript cannot be produced. Source regions, when supplied, use
+normalized top-left x/y/width/height coordinates within the single image.

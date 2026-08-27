@@ -2,11 +2,10 @@ import uuid
 
 import pytest
 from app.static_journey.schemas import (
-    ConfirmedTranscript,
     MockEvaluationRequest,
     MockEvaluationResponse,
-    TranscriptDocument,
 )
+from app.transcription.schemas import TranscriptDocument
 from pydantic import ValidationError
 
 ATTEMPT_ID = uuid.UUID("50000000-0000-4000-8000-000000000001")
@@ -15,12 +14,13 @@ ATTEMPT_ID = uuid.UUID("50000000-0000-4000-8000-000000000001")
 def test_transcript_document_accepts_only_the_flat_strict_correction_contract() -> None:
     transcript = TranscriptDocument.model_validate(
         {
-            "schemaVersion": "2.0.0",
+            "schemaVersion": "3.0.0",
             "attemptId": str(ATTEMPT_ID),
             "blocks": [
                 {"id": "synthetic-text-1", "type": "text", "text": "Let M be the midpoint. "},
                 {"id": "synthetic-math-1", "type": "math", "latex": "M=(2,0)"},
             ],
+            "warnings": [],
         }
     )
 
@@ -34,19 +34,8 @@ def test_transcript_document_accepts_only_the_flat_strict_correction_contract() 
 
 
 def test_evaluation_contract_requires_an_explicit_confirmation_and_typed_feedback() -> None:
-    transcript = TranscriptDocument.model_validate(
-        {
-            "schemaVersion": "2.0.0",
-            "attemptId": str(ATTEMPT_ID),
-            "blocks": [{"id": "synthetic-text-1", "type": "text", "text": "Reviewed."}],
-        }
-    )
-    request = MockEvaluationRequest(
-        confirmed_transcript=ConfirmedTranscript(
-            confirmation_status="confirmed",
-            transcript=transcript,
-        )
-    )
+    version_id = uuid.uuid4()
+    request = MockEvaluationRequest(confirmed_transcript_version_id=version_id)
     response = MockEvaluationResponse.model_validate(
         {
             "outcome": "ready",
@@ -71,7 +60,7 @@ def test_evaluation_contract_requires_an_explicit_confirmation_and_typed_feedbac
         }
     )
 
-    assert request.confirmed_transcript.transcript == transcript
+    assert request.confirmed_transcript_version_id == version_id
     assert response.reference_solutions_non_exhaustive is True
     assert response.feedback[0].type == "text"
 

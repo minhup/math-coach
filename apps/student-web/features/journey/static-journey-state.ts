@@ -5,7 +5,7 @@ export type JourneyPhase =
   | "planning"
   | "problem_work"
   | "upload"
-  | "mock_transcription"
+  | "transcription"
   | "correction"
   | "confirmation"
   | "mock_evaluation"
@@ -22,6 +22,7 @@ export type JourneyStatus =
   | "empty"
   | "retryable_failure"
   | "permanent_failure"
+  | "invalid_schema"
   | "uncertain";
 
 export type JourneyProfileReference = {
@@ -56,6 +57,18 @@ export type JourneyEvaluationReference = {
   transcriptFingerprint: string;
 };
 
+export type JourneyTranscriptVersionReference = {
+  hash: string;
+  id: string;
+  version: number;
+};
+
+export type JourneyConfirmationReference = {
+  hash: string;
+  id: string;
+  transcriptVersionId: string;
+};
+
 export type JourneyHintReference = {
   hintLevel: number;
 };
@@ -66,6 +79,7 @@ export type JourneyConceptReference = {
 
 export type StaticJourneyData = {
   attempts: JourneyAttemptReference[];
+  confirmation?: JourneyConfirmationReference;
   concept?: JourneyConceptReference;
   confirmedTranscript?: components["schemas"]["TranscriptDocument"];
   evaluation?: JourneyEvaluationReference;
@@ -74,6 +88,7 @@ export type StaticJourneyData = {
   profile?: JourneyProfileReference;
   selectedItem?: JourneyPlanItemReference;
   transcript?: components["schemas"]["TranscriptDocument"];
+  transcriptVersion?: JourneyTranscriptVersionReference;
   upload?: JourneyUploadReference;
 };
 
@@ -92,12 +107,17 @@ export type StaticJourneyEvent =
   | { type: "upload_ready"; upload: JourneyUploadReference }
   | {
       transcript: components["schemas"]["TranscriptDocument"];
+      transcriptVersion: JourneyTranscriptVersionReference;
       type: "transcript_received";
     }
   | {
+      confirmation: JourneyConfirmationReference;
       transcript: components["schemas"]["TranscriptDocument"];
+      transcriptVersion: JourneyTranscriptVersionReference;
       type: "transcript_confirmed";
     }
+  | { type: "transcription_uncertain" }
+  | { type: "transcription_retake" }
   | { type: "evaluation_requested" }
   | { evaluation: JourneyEvaluationReference; type: "evaluation_received" }
   | { type: "hint_requested" }
@@ -106,7 +126,7 @@ export type StaticJourneyEvent =
   | { type: "concept_requested" }
   | { concept: JourneyConceptReference; type: "concept_received" }
   | { type: "session_completed" }
-  | { failure: "permanent" | "retryable"; type: "operation_failed" }
+  | { failure: "invalid_schema" | "permanent" | "retryable"; type: "operation_failed" }
   | { type: "operation_retried" };
 
 export type StaticJourneyTransition =
@@ -186,29 +206,61 @@ export function transitionStaticJourney(
   if (event.type === "upload_ready" && state.phase === "upload") {
     return accept({
       data: { ...state.data, upload: event.upload },
-      phase: "mock_transcription",
+      phase: "transcription",
       status: "loading",
     });
   }
   if (
     event.type === "transcript_received" &&
-    state.phase === "mock_transcription" &&
+    state.phase === "transcription" &&
     state.status === "loading" &&
-    event.transcript.attemptId === state.data.attempts.at(-1)?.id
+    event.transcript.attemptId === state.data.attempts.at(-1)?.id &&
+    event.transcriptVersion.id.length > 0 &&
+    event.transcriptVersion.hash.length === 64 &&
+    event.transcriptVersion.version >= 1
   ) {
     return accept({
-      data: { ...state.data, transcript: event.transcript },
+      data: {
+        ...state.data,
+        transcript: event.transcript,
+        transcriptVersion: event.transcriptVersion,
+      },
       phase: "correction",
+      status: "ready",
+    });
+  }
+  if (
+    event.type === "transcription_uncertain" &&
+    state.phase === "transcription" &&
+    state.status === "loading"
+  ) {
+    return accept({ ...state, status: "uncertain" });
+  }
+  if (
+    event.type === "transcription_retake" &&
+    state.phase === "transcription" &&
+    state.status === "uncertain"
+  ) {
+    return accept({
+      data: { ...state.data, upload: undefined },
+      phase: "upload",
       status: "ready",
     });
   }
   if (
     event.type === "transcript_confirmed" &&
     state.phase === "correction" &&
-    event.transcript.attemptId === state.data.attempts.at(-1)?.id
+    event.transcript.attemptId === state.data.attempts.at(-1)?.id &&
+    event.confirmation.transcriptVersionId === event.transcriptVersion.id &&
+    event.confirmation.hash === event.transcriptVersion.hash
   ) {
     return accept({
-      data: { ...state.data, confirmedTranscript: event.transcript },
+      data: {
+        ...state.data,
+        confirmation: event.confirmation,
+        confirmedTranscript: event.transcript,
+        transcriptVersion: event.transcriptVersion,
+      },
       phase: "confirmation",
       status: "ready",
     });
@@ -286,11 +338,16 @@ export function transitionStaticJourney(
   }
   if (
     event.type === "operation_failed" &&
-    ["planning", "mock_transcription", "mock_evaluation", "hint", "concept"].includes(state.phase)
+    ["planning", "transcription", "mock_evaluation", "hint", "concept"].includes(state.phase)
   ) {
     return accept({
       ...state,
-      status: event.failure === "retryable" ? "retryable_failure" : "permanent_failure",
+      status:
+        event.failure === "retryable"
+          ? "retryable_failure"
+          : event.failure === "invalid_schema"
+            ? "invalid_schema"
+            : "permanent_failure",
     });
   }
   if (event.type === "operation_retried" && state.status === "retryable_failure") {

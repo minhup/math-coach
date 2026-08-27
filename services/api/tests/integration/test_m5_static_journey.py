@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 from pathlib import Path
 
@@ -57,6 +58,57 @@ async def create_profile_with_two_targets(client: httpx.AsyncClient) -> list[dic
         assert target.status_code == 201
         targets.append(target.json())
     return targets
+
+
+async def create_confirmed_transcript(
+    client: httpx.AsyncClient,
+    attempt_id: str,
+    *,
+    suffix: str,
+) -> str:
+    image_bytes = b"\x89PNG\r\n\x1a\n" + suffix.encode()
+    signed = await client.post(
+        "/api/v1/uploads/presign",
+        json={
+            "contentType": "image/png",
+            "fileName": f"{suffix}.png",
+            "sizeBytes": len(image_bytes),
+        },
+    )
+    async with httpx.AsyncClient() as storage_client:
+        stored = await storage_client.put(
+            signed.json()["uploadUrl"],
+            content=image_bytes,
+            headers={"Content-Type": "image/png"},
+        )
+    assert stored.status_code == 200
+    completed = await client.post(f"/api/v1/uploads/{signed.json()['uploadId']}/complete")
+    assert completed.status_code == 200
+    transcription = await client.post(
+        f"/api/v1/attempts/{attempt_id}/transcribe",
+        json={
+            "uploadId": completed.json()["id"],
+            "idempotencyKey": str(uuid.uuid4()),
+        },
+    )
+    assert transcription.status_code == 200
+    initial = transcription.json()["transcriptVersion"]
+    document = initial["document"]
+    document["blocks"][0]["text"] += " Confirmed synthetic correction."
+    corrected = await client.post(
+        f"/api/v1/attempts/{attempt_id}/transcripts",
+        json={"baseTranscriptVersionId": initial["id"], "document": document},
+    )
+    assert corrected.status_code == 201
+    confirmation = await client.post(
+        f"/api/v1/attempts/{attempt_id}/confirm-transcript",
+        json={
+            "transcriptVersionId": corrected.json()["id"],
+            "transcriptHash": corrected.json()["transcriptHash"],
+        },
+    )
+    assert confirmation.status_code == 200
+    return corrected.json()["id"]
 
 
 async def test_authenticated_static_plan_is_deterministic_and_explicitly_multi_target(
@@ -151,23 +203,36 @@ async def test_owned_attempt_upload_confirmation_hint_retry_and_concept_form_one
     completed = await client.post(f"/api/v1/uploads/{signed.json()['uploadId']}/complete")
 
     transcription = await client.post(
-        f"/api/v1/attempts/{attempt_id}/mock-transcription",
-        json={"uploadId": completed.json()["id"]},
+        f"/api/v1/attempts/{attempt_id}/transcribe",
+        json={
+            "uploadId": completed.json()["id"],
+            "idempotencyKey": str(uuid.uuid4()),
+        },
     )
-    transcript = transcription.json()["transcript"]
+    transcript_version = transcription.json()["transcriptVersion"]
+    transcript = transcript_version["document"]
     unconfirmed = await client.post(
         f"/api/v1/attempts/{attempt_id}/mock-evaluation",
-        json={"transcript": transcript},
+        json={"confirmedTranscriptVersionId": transcript_version["id"]},
     )
     transcript["blocks"][0]["text"] += " Corrected by the synthetic learner."
+    corrected = await client.post(
+        f"/api/v1/attempts/{attempt_id}/transcripts",
+        json={
+            "baseTranscriptVersionId": transcript_version["id"],
+            "document": transcript,
+        },
+    )
+    confirmation = await client.post(
+        f"/api/v1/attempts/{attempt_id}/confirm-transcript",
+        json={
+            "transcriptVersionId": corrected.json()["id"],
+            "transcriptHash": corrected.json()["transcriptHash"],
+        },
+    )
     evaluation = await client.post(
         f"/api/v1/attempts/{attempt_id}/mock-evaluation",
-        json={
-            "confirmedTranscript": {
-                "confirmationStatus": "confirmed",
-                "transcript": transcript,
-            }
-        },
+        json={"confirmedTranscriptVersionId": corrected.json()["id"]},
     )
     hint = await client.post(
         f"/api/v1/attempts/{attempt_id}/hints/next",
@@ -187,8 +252,11 @@ async def test_owned_attempt_upload_confirmation_hint_retry_and_concept_form_one
     assert completed.json()["status"] == "ready"
     assert transcription.status_code == 200
     assert transcript["attemptId"] == attempt_id
-    assert transcription.json()["metadata"]["provider"] == "application-owned-synthetic-mock"
-    assert unconfirmed.status_code == 422
+    assert transcription.json()["run"]["provider"] == "application-owned-deterministic-fake"
+    assert unconfirmed.status_code == 409
+    assert unconfirmed.json()["error"]["code"] == "transcript_not_confirmed"
+    assert corrected.status_code == 201
+    assert confirmation.status_code == 200
     assert evaluation.status_code == 200
     assert evaluation.json()["outcome"] == "ready"
     assert evaluation.json()["referenceSolutionsNonExhaustive"] is True
@@ -224,16 +292,12 @@ async def test_mock_evaluation_failure_and_uncertainty_never_fabricate_ready_fee
         json={"problemVersionId": M4_PROBLEM_VERSION_ID},
     )
     attempt_id = attempt.json()["id"]
-    request = {
-        "confirmedTranscript": {
-            "confirmationStatus": "confirmed",
-            "transcript": {
-                "schemaVersion": "2.0.0",
-                "attemptId": attempt_id,
-                "blocks": [{"id": "reviewed", "type": "text", "text": "Reviewed."}],
-            },
-        }
-    }
+    confirmed_version_id = await create_confirmed_transcript(
+        client,
+        attempt_id,
+        suffix="m5-evaluation-states",
+    )
+    request = {"confirmedTranscriptVersionId": confirmed_version_id}
 
     try:
         app.dependency_overrides[get_mock_boundary] = lambda: DeterministicMockBoundary(
@@ -280,23 +344,16 @@ async def test_mock_journey_resources_are_isolated_between_authenticated_learner
     )
     try:
         await login(other_client, "M5-OTHER")
-        transcript = {
-            "schemaVersion": "2.0.0",
-            "attemptId": attempt_id,
-            "blocks": [{"id": "reviewed", "type": "text", "text": "Reviewed."}],
-        }
         hidden_transcription = await other_client.post(
-            f"/api/v1/attempts/{attempt_id}/mock-transcription",
-            json={"uploadId": "50000000-0000-4000-8000-000000000099"},
+            f"/api/v1/attempts/{attempt_id}/transcribe",
+            json={
+                "uploadId": "50000000-0000-4000-8000-000000000099",
+                "idempotencyKey": str(uuid.uuid4()),
+            },
         )
         hidden_evaluation = await other_client.post(
             f"/api/v1/attempts/{attempt_id}/mock-evaluation",
-            json={
-                "confirmedTranscript": {
-                    "confirmationStatus": "confirmed",
-                    "transcript": transcript,
-                }
-            },
+            json={"confirmedTranscriptVersionId": str(uuid.uuid4())},
         )
         hidden_hint = await other_client.post(
             f"/api/v1/attempts/{attempt_id}/hints/next",

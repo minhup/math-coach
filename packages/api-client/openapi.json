@@ -444,25 +444,6 @@
         "title": "ConceptVersionResponse",
         "type": "object"
       },
-      "ConfirmedTranscript": {
-        "additionalProperties": false,
-        "properties": {
-          "confirmationStatus": {
-            "const": "confirmed",
-            "title": "Confirmationstatus",
-            "type": "string"
-          },
-          "transcript": {
-            "$ref": "#/components/schemas/TranscriptDocument"
-          }
-        },
-        "required": [
-          "confirmationStatus",
-          "transcript"
-        ],
-        "title": "ConfirmedTranscript",
-        "type": "object"
-      },
       "ContentPreviewListResponse": {
         "properties": {
           "items": {
@@ -1299,12 +1280,14 @@
       "MockEvaluationRequest": {
         "additionalProperties": false,
         "properties": {
-          "confirmedTranscript": {
-            "$ref": "#/components/schemas/ConfirmedTranscript"
+          "confirmedTranscriptVersionId": {
+            "format": "uuid",
+            "title": "Confirmedtranscriptversionid",
+            "type": "string"
           }
         },
         "required": [
-          "confirmedTranscript"
+          "confirmedTranscriptVersionId"
         ],
         "title": "MockEvaluationRequest",
         "type": "object"
@@ -1484,38 +1467,6 @@
           "costUsd"
         ],
         "title": "MockRunMetadata",
-        "type": "object"
-      },
-      "MockTranscriptionRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "uploadId": {
-            "format": "uuid",
-            "title": "Uploadid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "uploadId"
-        ],
-        "title": "MockTranscriptionRequest",
-        "type": "object"
-      },
-      "MockTranscriptionResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "metadata": {
-            "$ref": "#/components/schemas/MockRunMetadata"
-          },
-          "transcript": {
-            "$ref": "#/components/schemas/TranscriptDocument"
-          }
-        },
-        "required": [
-          "transcript",
-          "metadata"
-        ],
-        "title": "MockTranscriptionResponse",
         "type": "object"
       },
       "NextHintRequest": {
@@ -2260,6 +2211,29 @@
         "title": "Provenance",
         "type": "object"
       },
+      "ReadyTranscriptionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "outcome": {
+            "const": "ready",
+            "title": "Outcome",
+            "type": "string"
+          },
+          "run": {
+            "$ref": "#/components/schemas/TranscriptionRunResponse"
+          },
+          "transcriptVersion": {
+            "$ref": "#/components/schemas/TranscriptVersionResponse"
+          }
+        },
+        "required": [
+          "outcome",
+          "run",
+          "transcriptVersion"
+        ],
+        "title": "ReadyTranscriptionResponse",
+        "type": "object"
+      },
       "RichLineBlock": {
         "additionalProperties": false,
         "properties": {
@@ -2347,6 +2321,55 @@
           "objectIds"
         ],
         "title": "ShowAction",
+        "type": "object"
+      },
+      "SourceRegion": {
+        "additionalProperties": false,
+        "properties": {
+          "attemptAssetId": {
+            "format": "uuid",
+            "title": "Attemptassetid",
+            "type": "string"
+          },
+          "height": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 1.0,
+            "title": "Height",
+            "type": "number"
+          },
+          "units": {
+            "const": "normalized",
+            "default": "normalized",
+            "title": "Units",
+            "type": "string"
+          },
+          "width": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 1.0,
+            "title": "Width",
+            "type": "number"
+          },
+          "x": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Y",
+            "type": "number"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "width",
+          "height",
+          "attemptAssetId"
+        ],
+        "title": "SourceRegion",
         "type": "object"
       },
       "StaticDailyPlanResponse": {
@@ -2756,6 +2779,87 @@
         "title": "TextSpan",
         "type": "object"
       },
+      "TranscribeRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "idempotencyKey": {
+            "format": "uuid",
+            "title": "Idempotencykey",
+            "type": "string"
+          },
+          "uploadId": {
+            "format": "uuid",
+            "title": "Uploadid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uploadId",
+          "idempotencyKey"
+        ],
+        "title": "TranscribeRequest",
+        "type": "object"
+      },
+      "TranscriptConfirmRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "transcriptHash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Transcripthash",
+            "type": "string"
+          },
+          "transcriptVersionId": {
+            "format": "uuid",
+            "title": "Transcriptversionid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "transcriptVersionId",
+          "transcriptHash"
+        ],
+        "title": "TranscriptConfirmRequest",
+        "type": "object"
+      },
+      "TranscriptConfirmationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "attemptId": {
+            "format": "uuid",
+            "title": "Attemptid",
+            "type": "string"
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "title": "Confirmedat",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "transcriptHash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Transcripthash",
+            "type": "string"
+          },
+          "transcriptVersionId": {
+            "format": "uuid",
+            "title": "Transcriptversionid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "attemptId",
+          "transcriptVersionId",
+          "transcriptHash",
+          "confirmedAt"
+        ],
+        "title": "TranscriptConfirmationResponse",
+        "type": "object"
+      },
       "TranscriptDocument": {
         "additionalProperties": false,
         "properties": {
@@ -2788,9 +2892,18 @@
             "type": "array"
           },
           "schemaVersion": {
-            "const": "2.0.0",
+            "const": "3.0.0",
             "title": "Schemaversion",
             "type": "string"
+          },
+          "warnings": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/TranscriptWarning"
+            },
+            "maxItems": 100,
+            "title": "Warnings",
+            "type": "array"
           }
         },
         "required": [
@@ -2815,6 +2928,16 @@
             "title": "Latex",
             "type": "string"
           },
+          "sourceRegion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRegion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "type": {
             "const": "math",
             "title": "Type",
@@ -2838,6 +2961,16 @@
             "title": "Id",
             "type": "string"
           },
+          "sourceRegion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SourceRegion"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "text": {
             "maxLength": 20000,
             "title": "Text",
@@ -2855,6 +2988,471 @@
           "text"
         ],
         "title": "TranscriptTextBlock",
+        "type": "object"
+      },
+      "TranscriptVersionCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "baseTranscriptVersionId": {
+            "format": "uuid",
+            "title": "Basetranscriptversionid",
+            "type": "string"
+          },
+          "document": {
+            "$ref": "#/components/schemas/TranscriptDocument"
+          }
+        },
+        "required": [
+          "baseTranscriptVersionId",
+          "document"
+        ],
+        "title": "TranscriptVersionCreateRequest",
+        "type": "object"
+      },
+      "TranscriptVersionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "attemptId": {
+            "format": "uuid",
+            "title": "Attemptid",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "document": {
+            "$ref": "#/components/schemas/TranscriptDocument"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "origin": {
+            "enum": [
+              "provider",
+              "learner"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "parentTranscriptVersionId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parenttranscriptversionid"
+          },
+          "sourceRunId": {
+            "format": "uuid",
+            "title": "Sourcerunid",
+            "type": "string"
+          },
+          "transcriptHash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Transcripthash",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "attemptId",
+          "sourceRunId",
+          "parentTranscriptVersionId",
+          "version",
+          "transcriptHash",
+          "origin",
+          "document",
+          "createdAt"
+        ],
+        "title": "TranscriptVersionResponse",
+        "type": "object"
+      },
+      "TranscriptWarning": {
+        "additionalProperties": false,
+        "properties": {
+          "blockId": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blockid"
+          },
+          "code": {
+            "enum": [
+              "low_confidence_text",
+              "low_confidence_math",
+              "ambiguous_cross_out",
+              "ambiguous_insertion",
+              "ordering_uncertain",
+              "source_region_unavailable"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "TranscriptWarning",
+        "type": "object"
+      },
+      "TranscriptionFailureState": {
+        "additionalProperties": false,
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/TranscriptionRunResponse"
+          },
+          "status": {
+            "enum": [
+              "retryable_failure",
+              "permanent_failure",
+              "invalid_schema"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "run"
+        ],
+        "title": "TranscriptionFailureState",
+        "type": "object"
+      },
+      "TranscriptionNotStartedState": {
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "const": "not_started",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "TranscriptionNotStartedState",
+        "type": "object"
+      },
+      "TranscriptionProcessingState": {
+        "additionalProperties": false,
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/TranscriptionRunResponse"
+          },
+          "status": {
+            "const": "processing",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "run"
+        ],
+        "title": "TranscriptionProcessingState",
+        "type": "object"
+      },
+      "TranscriptionReadyState": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TranscriptConfirmationResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "run": {
+            "$ref": "#/components/schemas/TranscriptionRunResponse"
+          },
+          "status": {
+            "const": "ready",
+            "title": "Status",
+            "type": "string"
+          },
+          "transcriptVersion": {
+            "$ref": "#/components/schemas/TranscriptVersionResponse"
+          }
+        },
+        "required": [
+          "status",
+          "run",
+          "transcriptVersion",
+          "confirmation"
+        ],
+        "title": "TranscriptionReadyState",
+        "type": "object"
+      },
+      "TranscriptionRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "completedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completedat"
+          },
+          "costUsd": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Costusd"
+          },
+          "errorCode": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errorcode"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "inputTokens": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inputtokens"
+          },
+          "latencyMs": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latencyms"
+          },
+          "modelSnapshot": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Modelsnapshot",
+            "type": "string"
+          },
+          "outputTokens": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputtokens"
+          },
+          "pricingVersion": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Pricingversion",
+            "type": "string"
+          },
+          "promptHash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Prompthash",
+            "type": "string"
+          },
+          "promptVersion": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Promptversion",
+            "type": "string"
+          },
+          "provider": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Provider",
+            "type": "string"
+          },
+          "schemaAttempts": {
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Schemaattempts",
+            "type": "integer"
+          },
+          "schemaVersion": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Schemaversion",
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "title": "Startedat",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "processing",
+              "succeeded",
+              "uncertain",
+              "retryable_failure",
+              "permanent_failure",
+              "invalid_schema"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "provider",
+          "modelSnapshot",
+          "promptVersion",
+          "promptHash",
+          "schemaVersion",
+          "pricingVersion",
+          "schemaAttempts",
+          "latencyMs",
+          "inputTokens",
+          "outputTokens",
+          "costUsd",
+          "errorCode",
+          "startedAt",
+          "completedAt"
+        ],
+        "title": "TranscriptionRunResponse",
+        "type": "object"
+      },
+      "TranscriptionUncertainState": {
+        "additionalProperties": false,
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/TranscriptionRunResponse"
+          },
+          "status": {
+            "const": "uncertain",
+            "title": "Status",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/TranscriptWarning"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "run",
+          "warnings"
+        ],
+        "title": "TranscriptionUncertainState",
+        "type": "object"
+      },
+      "UncertainTranscriptionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "outcome": {
+            "const": "uncertain",
+            "title": "Outcome",
+            "type": "string"
+          },
+          "run": {
+            "$ref": "#/components/schemas/TranscriptionRunResponse"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/TranscriptWarning"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "outcome",
+          "run",
+          "warnings"
+        ],
+        "title": "UncertainTranscriptionResponse",
+        "type": "object"
+      },
+      "UploadDownloadResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "downloadUrl": {
+            "minLength": 1,
+            "title": "Downloadurl",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "title": "Expiresat",
+            "type": "string"
+          },
+          "uploadId": {
+            "format": "uuid",
+            "title": "Uploadid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uploadId",
+          "downloadUrl",
+          "expiresAt"
+        ],
+        "title": "UploadDownloadResponse",
         "type": "object"
       },
       "UploadResponse": {
@@ -3045,7 +3643,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -3148,7 +3746,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -3164,6 +3762,119 @@
         "summary": "Get Attempt",
         "tags": [
           "attempts"
+        ]
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/confirm-transcript": {
+      "post": {
+        "operationId": "post_transcript_confirmation_api_v1_attempts__attempt_id__confirm_transcript_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscriptConfirmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscriptConfirmationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An upstream structured response was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Post Transcript Confirmation",
+        "tags": [
+          "transcription"
         ]
       }
     },
@@ -3261,7 +3972,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -3374,7 +4085,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -3393,9 +4104,9 @@
         ]
       }
     },
-    "/api/v1/attempts/{attempt_id}/mock-transcription": {
+    "/api/v1/attempts/{attempt_id}/transcribe": {
       "post": {
-        "operationId": "post_mock_transcription_api_v1_attempts__attempt_id__mock_transcription_post",
+        "operationId": "post_transcription_api_v1_attempts__attempt_id__transcribe_post",
         "parameters": [
           {
             "in": "path",
@@ -3412,7 +4123,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MockTranscriptionRequest"
+                "$ref": "#/components/schemas/TranscribeRequest"
               }
             }
           },
@@ -3423,7 +4134,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MockTranscriptionResponse"
+                  "discriminator": {
+                    "mapping": {
+                      "ready": "#/components/schemas/ReadyTranscriptionResponse",
+                      "uncertain": "#/components/schemas/UncertainTranscriptionResponse"
+                    },
+                    "propertyName": "outcome"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ReadyTranscriptionResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UncertainTranscriptionResponse"
+                    }
+                  ],
+                  "title": "Response Post Transcription Api V1 Attempts  Attempt Id  Transcribe Post"
                 }
               }
             },
@@ -3487,7 +4213,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -3500,9 +4226,254 @@
             "description": "A required service is unavailable"
           }
         },
-        "summary": "Post Mock Transcription",
+        "summary": "Post Transcription",
         "tags": [
-          "static-journey"
+          "transcription"
+        ]
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/transcription": {
+      "get": {
+        "operationId": "get_transcription_state_api_v1_attempts__attempt_id__transcription_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "discriminator": {
+                    "mapping": {
+                      "invalid_schema": "#/components/schemas/TranscriptionFailureState",
+                      "not_started": "#/components/schemas/TranscriptionNotStartedState",
+                      "permanent_failure": "#/components/schemas/TranscriptionFailureState",
+                      "processing": "#/components/schemas/TranscriptionProcessingState",
+                      "ready": "#/components/schemas/TranscriptionReadyState",
+                      "retryable_failure": "#/components/schemas/TranscriptionFailureState",
+                      "uncertain": "#/components/schemas/TranscriptionUncertainState"
+                    },
+                    "propertyName": "status"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/TranscriptionNotStartedState"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TranscriptionProcessingState"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TranscriptionReadyState"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TranscriptionUncertainState"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TranscriptionFailureState"
+                    }
+                  ],
+                  "title": "Response Get Transcription State Api V1 Attempts  Attempt Id  Transcription Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An upstream structured response was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Get Transcription State",
+        "tags": [
+          "transcription"
+        ]
+      }
+    },
+    "/api/v1/attempts/{attempt_id}/transcripts": {
+      "post": {
+        "operationId": "post_transcript_version_api_v1_attempts__attempt_id__transcripts_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscriptVersionCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscriptVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An upstream structured response was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Post Transcript Version",
+        "tags": [
+          "transcription"
         ]
       }
     },
@@ -3571,7 +4542,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -3662,7 +4633,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -3763,7 +4734,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -3866,7 +4837,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -3957,7 +4928,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4048,7 +5019,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4147,7 +5118,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4243,7 +5214,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4354,7 +5325,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4445,7 +5416,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4536,7 +5507,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4639,7 +5610,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4730,7 +5701,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4821,7 +5792,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -4920,7 +5891,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -5019,7 +5990,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -5120,7 +6091,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -5223,7 +6194,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -5326,7 +6297,7 @@
                 }
               }
             },
-            "description": "A structured mock payload was invalid"
+            "description": "An upstream structured response was invalid"
           },
           "503": {
             "content": {
@@ -5340,6 +6311,109 @@
           }
         },
         "summary": "Mark Upload Complete",
+        "tags": [
+          "uploads"
+        ]
+      }
+    },
+    "/api/v1/uploads/{upload_id}/download-url": {
+      "post": {
+        "operationId": "get_upload_download_url_api_v1_uploads__upload_id__download_url_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadDownloadResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An upstream structured response was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Get Upload Download Url",
         "tags": [
           "uploads"
         ]

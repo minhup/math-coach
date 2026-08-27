@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <rect width="900" height="1200" fill="#fbf8ed"/>
+  <text x="48" y="72" fill="#a13f35" font-family="sans-serif" font-size="24" font-weight="700">SYNTHETIC TEST FIXTURE — NO PERSON</text>
+  <g fill="#26424a" font-family="Comic Sans MS, cursive" font-size="47">
+    <text x="82" y="215" transform="rotate(-2 82 215)">3(y − 2) = 15</text>
+    <text x="145" y="345" transform="rotate(1 145 345)">3y − 6 = 15</text>
+    <text x="102" y="485" transform="rotate(-1 102 485)">3y = 21</text>
+    <text x="176" y="635" transform="rotate(2 176 635)">y = 7</text>
+    <path d="M78 760 C250 720 420 810 655 750" fill="none" stroke="#26424a" stroke-width="5"/>
+  </g>
+</svg>

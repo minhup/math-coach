@@ -49,6 +49,29 @@ class ObjectStorage:
             expires=timedelta(seconds=expires_seconds),
         )
 
+    def presign_get(self, object_key: str, expires_seconds: int) -> str:
+        return self._public.presigned_get_object(
+            self._bucket,
+            object_key,
+            expires=timedelta(seconds=expires_seconds),
+        )
+
+    def read(self, object_key: str, max_bytes: int) -> bytes:
+        try:
+            response = self._internal.get_object(self._bucket, object_key)
+        except S3Error as error:
+            if error.code in {"NoSuchKey", "NoSuchObject", "NoSuchBucket"}:
+                raise ObjectNotFoundError from error
+            raise
+        try:
+            content = response.read(max_bytes + 1)
+        finally:
+            response.close()
+            response.release_conn()
+        if len(content) > max_bytes:
+            raise ValueError("Stored object exceeds its verified maximum")
+        return content
+
     def stat(self, object_key: str) -> StoredObject:
         try:
             item: Object = self._internal.stat_object(self._bucket, object_key)

@@ -171,7 +171,7 @@ export function UploadWorkspace({ onContinue }: UploadWorkspaceProps = {}) {
             {phase === "success" && completedUpload ? (
               <div className="success-card" aria-live="polite">
                 <strong>Image received and verified</strong>
-                <span>Ready to create the structured mock transcript.</span>
+                <span>Ready for validated server-side transcription.</span>
                 {onContinue ? (
                   <button
                     className="secondary-button"

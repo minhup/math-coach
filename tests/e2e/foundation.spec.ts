@@ -1,8 +1,9 @@
+import { readFileSync } from "node:fs";
+
 import { expect, type Page, test } from "@playwright/test";
 
-const syntheticPng = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-  "base64",
+const syntheticPng = readFileSync(
+  "services/api/tests/fixtures/transcription/warnings-source-regions.png",
 );
 
 const inviteByProject: Record<string, string> = {
@@ -107,6 +108,17 @@ test("invited learner completes the deterministic multi-exam student journey", a
   await page.getByRole("button", { name: "Use this upload" }).click();
 
   await expect(page.getByRole("heading", { name: "Review the transcript" })).toBeVisible();
+  await expect(page.getByAltText("Clearly synthetic uploaded mathematics solution")).toBeVisible();
+  await expect(page.getByText(/application-owned-deterministic-fake/)).toBeVisible();
+  await expect(page.getByText("A formula may need review.")).toBeVisible();
+  await page.getByRole("button", { name: "Show source region for block 1" }).click();
+  await expect(page.getByRole("img", { name: "Selected transcript source region" })).toBeVisible();
+  if (process.env.VISUAL_QA) {
+    await page.screenshot({
+      fullPage: true,
+      path: `test-results/m6-transcription-review-${testInfo.project.name}.png`,
+    });
+  }
   await placeCaret(page, "The synthetic draft", 19);
   await page.keyboard.type(" reviewed");
   await page.getByRole("button", { name: "Edit formula 1" }).click();
@@ -114,20 +126,34 @@ test("invited learner completes the deterministic multi-exam student journey", a
   await expect(mathField).toBeFocused();
   await mathField.press("ControlOrMeta+A");
   await mathField.pressSequentially("M=(2,0)");
+  if (process.env.VISUAL_QA) {
+    await page.screenshot({
+      fullPage: true,
+      path: `test-results/m6-mathlive-correction-${testInfo.project.name}.png`,
+    });
+  }
   await page.getByRole("button", { name: "Done editing formula 1" }).click();
   await expect(page.getByRole("textbox", { name: "Editable transcript document" })).toContainText(
     "draft reviewed",
   );
-  await page.getByRole("button", { name: "Confirm transcript" }).click();
+  await page.getByRole("button", { name: "Confirm exact transcript" }).click();
 
   await expect(page.getByRole("heading", { name: "Authoritative evaluation input" })).toBeVisible();
+  await expect(page.getByText(/Transcript version 2/)).toBeVisible();
+  await expect(page.getByText(/SHA-256 [0-9a-f]{64}/)).toBeVisible();
   await expect(page.getByLabel("Confirmed authoritative transcript")).toContainText(
     "draft reviewed",
   );
-  await page.getByRole("button", { name: "Evaluate confirmed transcript" }).click();
+  await page.getByRole("button", { name: "Run clearly mocked evaluation" }).click();
   await expect(page.getByRole("heading", { name: "Deterministic feedback" })).toBeVisible();
   await expect(page.getByText(/Reference solutions are non-exhaustive/)).toBeVisible();
   await expect(page.locator(".math-render-failure")).toHaveCount(0);
+  if (process.env.VISUAL_QA) {
+    await page.screenshot({
+      fullPage: true,
+      path: `test-results/m6-mock-evaluation-${testInfo.project.name}.png`,
+    });
+  }
 
   await page.getByRole("button", { name: "Request hint 1" }).click();
   await expect(page.getByText("Identify the free and constructed points.")).toBeVisible();
@@ -184,7 +210,7 @@ test("invited learner completes the deterministic multi-exam student journey", a
   if (process.env.VISUAL_QA) {
     await page.screenshot({
       fullPage: true,
-      path: `test-results/m5-static-journey-${testInfo.project.name}.png`,
+      path: `test-results/m6-multimodal-transcription-${testInfo.project.name}.png`,
     });
   }
 

@@ -21,7 +21,8 @@ const initialState: TranscriptState = {
     { id: "math-b", latex: "x=2", type: "math" },
     { id: "text-c", text: ".", type: "text" },
   ],
-  schemaVersion: "2.0.0",
+  schemaVersion: "3.0.0",
+  warnings: [],
 };
 
 function textNodeContaining(root: HTMLElement, text: string) {
@@ -52,6 +53,7 @@ describe("TranscriptEditor", () => {
   it("presents one inline plaintext editor with a native caret and no text-block controls", async () => {
     const { container } = render(<TranscriptEditor initialState={initialState} />);
 
+    expect(screen.getByText("Simulated OCR transcript", { exact: true })).toBeInTheDocument();
     const editor = screen.getByRole("textbox", { name: "Editable transcript document" });
     expect(editor).toHaveAttribute("contenteditable", "plaintext-only");
     expect(editor).toHaveAttribute("aria-multiline", "true");
@@ -64,6 +66,50 @@ describe("TranscriptEditor", () => {
     expect(container.innerHTML).not.toMatch(/stepId|PRIVATE_INVALID_SOURCE/);
   });
 
+  it("accepts an application-owned source label for production-shaped transcription", () => {
+    render(
+      <TranscriptEditor initialState={initialState} sourceLabel="Validated image transcription" />,
+    );
+
+    expect(screen.getByText("Validated image transcription", { exact: true })).toBeInTheDocument();
+  });
+
+  it("exposes validated source regions as keyboard-operable review controls", async () => {
+    const onSourceRegionChange = vi.fn();
+    const user = userEvent.setup();
+    const region = {
+      attemptAssetId: "60000000-0000-4000-8000-000000000002",
+      height: 0.1,
+      units: "normalized" as const,
+      width: 0.4,
+      x: 0.1,
+      y: 0.2,
+    };
+    render(
+      <TranscriptEditor
+        initialState={{
+          ...initialState,
+          blocks: [
+            { ...initialState.blocks[0], sourceRegion: region },
+            ...initialState.blocks.slice(1),
+          ],
+          warnings: [
+            {
+              blockId: "text-a",
+              code: "low_confidence_text",
+              message: "Some text may need review.",
+            },
+          ],
+        }}
+        onSourceRegionChange={onSourceRegionChange}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Show source region for block 1" }));
+
+    expect(onSourceRegionChange).toHaveBeenCalledWith(region);
+  });
+
   it("types directly at the browser caret and confirms the visible text", async () => {
     const onConfirm = vi.fn<(snapshot: ConfirmedTranscriptSnapshot) => void>();
     const user = userEvent.setup();
@@ -74,7 +120,7 @@ describe("TranscriptEditor", () => {
     const textNode = textNodeContaining(editor, "Start with the equation.") as Text;
     textNode.insertData(5, " directly");
     fireEvent.input(editor, { data: " directly", inputType: "insertText" });
-    await user.click(screen.getByRole("button", { name: "Confirm transcript" }));
+    await user.click(screen.getByRole("button", { name: "Confirm exact transcript" }));
 
     expect(onConfirm.mock.calls[0]?.[0].blocks[0]).toEqual({
       id: "text-a",
@@ -98,7 +144,7 @@ describe("TranscriptEditor", () => {
           type === "text/plain" ? " pasted" : '<img src="https://example.invalid/tracker">',
       },
     });
-    await user.click(screen.getByRole("button", { name: "Confirm transcript" }));
+    await user.click(screen.getByRole("button", { name: "Confirm exact transcript" }));
 
     expect(onConfirm.mock.calls[0]?.[0].blocks[0]).toMatchObject({
       text: "Start pasted with the equation. ",
@@ -119,7 +165,7 @@ describe("TranscriptEditor", () => {
     Reflect.set(field, "value", "y=1");
     field.dispatchEvent(new Event("input", { bubbles: true }));
     await user.click(screen.getByRole("button", { name: "Done editing formula 1" }));
-    await user.click(screen.getByRole("button", { name: "Confirm transcript" }));
+    await user.click(screen.getByRole("button", { name: "Confirm exact transcript" }));
 
     expect(onConfirm.mock.calls[0]?.[0].blocks.slice(0, 3)).toEqual([
       { id: "text-a", text: "Start", type: "text" },
@@ -218,7 +264,7 @@ describe("TranscriptEditor", () => {
     await user.click(screen.getByRole("button", { name: "Edit formula 2" }));
     await user.click(screen.getByRole("button", { name: "Move formula 2 earlier" }));
     await user.click(screen.getByRole("button", { name: "Done editing formula 2" }));
-    await user.click(screen.getByRole("button", { name: "Confirm transcript" }));
+    await user.click(screen.getByRole("button", { name: "Confirm exact transcript" }));
 
     expect(onConfirm.mock.calls[0]?.[0].blocks.map(({ id }) => id)).toEqual([
       "text-a",

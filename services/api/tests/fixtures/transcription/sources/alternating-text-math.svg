@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <rect width="900" height="1200" fill="#fffdf7"/>
+  <text x="48" y="72" fill="#a13f35" font-family="sans-serif" font-size="24" font-weight="700">SYNTHETIC TEST FIXTURE — NO PERSON</text>
+  <g fill="#18343b" font-family="Comic Sans MS, cursive" font-size="38">
+    <text x="45" y="220">Since x = 4, then 2x + 1 = 9, so y = 9.</text>
+    <text x="45" y="350">But if x = −4, then 2x + 1 = −7.</text>
+    <text x="45" y="500">Therefore f(4) = 9 while f(−4) = −7.</text>
+  </g>
+</svg>

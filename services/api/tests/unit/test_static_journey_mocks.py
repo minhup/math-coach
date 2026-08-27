@@ -7,26 +7,12 @@ from app.static_journey.mocks import (
     MockSourceError,
     RawMockSource,
 )
-from app.static_journey.schemas import ConfirmedTranscript, TranscriptDocument
+from app.transcription.schemas import TranscriptDocument
 
 ATTEMPT_ID = uuid.UUID("50000000-0000-4000-8000-000000000001")
 
 
-class TranscriptSequenceSource(RawMockSource):
-    def __init__(self, payloads: list[object]) -> None:
-        self.payloads = iter(payloads)
-
-    def transcript_payload(self, attempt_id: uuid.UUID) -> object:
-        return next(self.payloads)
-
-    def evaluation_payload(self, transcript_fingerprint: str) -> object:
-        raise AssertionError("Evaluation is outside this test")
-
-
 class UncertainEvaluationSource(RawMockSource):
-    def transcript_payload(self, attempt_id: uuid.UUID) -> object:
-        raise AssertionError("Transcription is outside this test")
-
     def evaluation_payload(self, transcript_fingerprint: str) -> object:
         return {
             "outcome": "uncertain",
@@ -68,54 +54,8 @@ class WrongFingerprintSource(UncertainEvaluationSource):
 
 
 class FailedSource(RawMockSource):
-    def transcript_payload(self, attempt_id: uuid.UUID) -> object:
-        raise MockSourceError(retryable=True)
-
     def evaluation_payload(self, transcript_fingerprint: str) -> object:
         raise MockSourceError(retryable=False)
-
-
-def test_mock_transcription_validates_unknown_output_and_retries_one_schema_failure() -> None:
-    source = TranscriptSequenceSource(
-        [
-            {"schemaVersion": "2.0.0", "attemptId": str(ATTEMPT_ID), "blocks": []},
-            {
-                "schemaVersion": "2.0.0",
-                "attemptId": str(ATTEMPT_ID),
-                "blocks": [
-                    {
-                        "id": "synthetic-text-1",
-                        "type": "text",
-                        "text": "Let M be the midpoint. ",
-                    },
-                    {"id": "synthetic-math-1", "type": "math", "latex": "M=(2,0"},
-                ],
-            },
-        ]
-    )
-
-    response = DeterministicMockBoundary(source).transcribe(ATTEMPT_ID)
-
-    assert response.transcript.attempt_id == ATTEMPT_ID
-    assert response.transcript.blocks[1].type == "math"
-    assert response.metadata.provider == "application-owned-synthetic-mock"
-
-
-def test_mock_transcription_stops_after_one_schema_retry_without_fabricating_output() -> None:
-    source = TranscriptSequenceSource(
-        [
-            {"schemaVersion": "2.0.0", "attemptId": str(ATTEMPT_ID), "blocks": []},
-            {"schemaVersion": "2.0.0", "attemptId": str(ATTEMPT_ID), "blocks": []},
-            {
-                "schemaVersion": "2.0.0",
-                "attemptId": str(ATTEMPT_ID),
-                "blocks": [{"id": "too-late", "type": "text", "text": "Do not use."}],
-            },
-        ]
-    )
-
-    with pytest.raises(MockPayloadInvalidError):
-        DeterministicMockBoundary(source).transcribe(ATTEMPT_ID)
 
 
 def test_mock_evaluation_fingerprints_only_the_confirmed_transcript_and_preserves_uncertainty() -> (
@@ -123,43 +63,45 @@ def test_mock_evaluation_fingerprints_only_the_confirmed_transcript_and_preserve
 ):
     transcript = TranscriptDocument.model_validate(
         {
-            "schemaVersion": "2.0.0",
+            "schemaVersion": "3.0.0",
             "attemptId": str(ATTEMPT_ID),
             "blocks": [{"id": "synthetic-text-1", "type": "text", "text": "Reviewed."}],
+            "warnings": [],
         }
     )
-    confirmed = ConfirmedTranscript(
-        confirmation_status="confirmed",
-        transcript=transcript,
-    )
 
-    response = DeterministicMockBoundary(UncertainEvaluationSource()).evaluate(confirmed)
+    response = DeterministicMockBoundary(UncertainEvaluationSource()).evaluate(transcript)
 
     assert response.outcome == "uncertain"
     assert response.transcript_fingerprint == (
-        "f9e5bc3312a24cb01007b1ff5b7b84bb3ffcb3f71c4f040a521ee6137a9d4400"
+        "3a2bac73909692637259bf7b7fbbfa942c03f87416321b5c3806ffbbed2b66e8"
     )
 
 
 def test_mock_evaluation_rejects_a_payload_for_a_different_confirmed_transcript() -> None:
     transcript = TranscriptDocument.model_validate(
         {
-            "schemaVersion": "2.0.0",
+            "schemaVersion": "3.0.0",
             "attemptId": str(ATTEMPT_ID),
             "blocks": [{"id": "synthetic-text-1", "type": "text", "text": "Reviewed."}],
+            "warnings": [],
         }
-    )
-    confirmed = ConfirmedTranscript(
-        confirmation_status="confirmed",
-        transcript=transcript,
     )
 
     with pytest.raises(MockPayloadInvalidError):
-        DeterministicMockBoundary(WrongFingerprintSource()).evaluate(confirmed)
+        DeterministicMockBoundary(WrongFingerprintSource()).evaluate(transcript)
 
 
 def test_mock_source_failure_never_turns_into_a_fixture_success() -> None:
     boundary = DeterministicMockBoundary(FailedSource())
+    transcript = TranscriptDocument.model_validate(
+        {
+            "schemaVersion": "3.0.0",
+            "attemptId": str(ATTEMPT_ID),
+            "blocks": [{"id": "visible", "type": "text", "text": "Visible work"}],
+            "warnings": [],
+        }
+    )
 
-    with pytest.raises(MockSourceError, match="retryable"):
-        boundary.transcribe(ATTEMPT_ID)
+    with pytest.raises(MockSourceError, match="permanent"):
+        boundary.evaluate(transcript)

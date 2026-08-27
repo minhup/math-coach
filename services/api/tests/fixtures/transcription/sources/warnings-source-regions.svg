@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
+  <rect width="900" height="1200" fill="#fffdf7"/>
+  <text x="48" y="72" fill="#a13f35" font-family="sans-serif" font-size="24" font-weight="700">SYNTHETIC TEST FIXTURE — NO PERSON</text>
+  <g fill="#18343b" font-family="Comic Sans MS, cursive" font-size="45">
+    <text x="75" y="215">Let n be odd.</text>
+    <text x="110" y="365" opacity="0.58">n = 2k + 1</text>
+    <text x="75" y="535">Then n² is odd.</text>
+  </g>
+  <rect x="95" y="305" width="390" height="95" fill="none" stroke="#e86945" stroke-width="4" stroke-dasharray="10 9"/>
+  <text x="510" y="365" fill="#a13f35" font-family="sans-serif" font-size="25">synthetic low contrast</text>
+</svg>

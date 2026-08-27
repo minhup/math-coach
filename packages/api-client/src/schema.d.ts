@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/attempts/{attempt_id}/confirm-transcript": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Transcript Confirmation */
+        post: operations["post_transcript_confirmation_api_v1_attempts__attempt_id__confirm_transcript_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/attempts/{attempt_id}/hints/next": {
         parameters: {
             query?: never;
@@ -72,7 +89,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/attempts/{attempt_id}/mock-transcription": {
+    "/api/v1/attempts/{attempt_id}/transcribe": {
         parameters: {
             query?: never;
             header?: never;
@@ -81,8 +98,42 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Post Mock Transcription */
-        post: operations["post_mock_transcription_api_v1_attempts__attempt_id__mock_transcription_post"];
+        /** Post Transcription */
+        post: operations["post_transcription_api_v1_attempts__attempt_id__transcribe_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attempts/{attempt_id}/transcription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Transcription State */
+        get: operations["get_transcription_state_api_v1_attempts__attempt_id__transcription_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/attempts/{attempt_id}/transcripts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Post Transcript Version */
+        post: operations["post_transcript_version_api_v1_attempts__attempt_id__transcripts_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -348,6 +399,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/uploads/{upload_id}/download-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Get Upload Download Url */
+        post: operations["get_upload_download_url_api_v1_uploads__upload_id__download_url_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -493,15 +561,6 @@ export interface components {
             name: string;
             /** Version */
             version: number;
-        };
-        /** ConfirmedTranscript */
-        ConfirmedTranscript: {
-            /**
-             * Confirmationstatus
-             * @constant
-             */
-            confirmationStatus: "confirmed";
-            transcript: components["schemas"]["TranscriptDocument"];
         };
         /** ContentPreviewListResponse */
         ContentPreviewListResponse: {
@@ -796,7 +855,11 @@ export interface components {
         };
         /** MockEvaluationRequest */
         MockEvaluationRequest: {
-            confirmedTranscript: components["schemas"]["ConfirmedTranscript"];
+            /**
+             * Confirmedtranscriptversionid
+             * Format: uuid
+             */
+            confirmedTranscriptVersionId: string;
         };
         /** MockEvaluationResponse */
         MockEvaluationResponse: {
@@ -854,19 +917,6 @@ export interface components {
              * @constant
              */
             schemaVersion: "1.0.0";
-        };
-        /** MockTranscriptionRequest */
-        MockTranscriptionRequest: {
-            /**
-             * Uploadid
-             * Format: uuid
-             */
-            uploadId: string;
-        };
-        /** MockTranscriptionResponse */
-        MockTranscriptionResponse: {
-            metadata: components["schemas"]["MockRunMetadata"];
-            transcript: components["schemas"]["TranscriptDocument"];
         };
         /** NextHintRequest */
         NextHintRequest: {
@@ -1100,6 +1150,16 @@ export interface components {
             /** Translationdescription */
             translationDescription: string | null;
         };
+        /** ReadyTranscriptionResponse */
+        ReadyTranscriptionResponse: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            outcome: "ready";
+            run: components["schemas"]["TranscriptionRunResponse"];
+            transcriptVersion: components["schemas"]["TranscriptVersionResponse"];
+        };
         /** RichLineBlock */
         RichLineBlock: {
             /** Id */
@@ -1130,6 +1190,28 @@ export interface components {
              * @enum {string}
              */
             type: "show";
+        };
+        /** SourceRegion */
+        SourceRegion: {
+            /**
+             * Attemptassetid
+             * Format: uuid
+             */
+            attemptAssetId: string;
+            /** Height */
+            height: number;
+            /**
+             * Units
+             * @default normalized
+             * @constant
+             */
+            units: "normalized";
+            /** Width */
+            width: number;
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
         };
         /** StaticDailyPlanResponse */
         StaticDailyPlanResponse: {
@@ -1281,6 +1363,54 @@ export interface components {
              */
             type: "text";
         };
+        /** TranscribeRequest */
+        TranscribeRequest: {
+            /**
+             * Idempotencykey
+             * Format: uuid
+             */
+            idempotencyKey: string;
+            /**
+             * Uploadid
+             * Format: uuid
+             */
+            uploadId: string;
+        };
+        /** TranscriptConfirmRequest */
+        TranscriptConfirmRequest: {
+            /** Transcripthash */
+            transcriptHash: string;
+            /**
+             * Transcriptversionid
+             * Format: uuid
+             */
+            transcriptVersionId: string;
+        };
+        /** TranscriptConfirmationResponse */
+        TranscriptConfirmationResponse: {
+            /**
+             * Attemptid
+             * Format: uuid
+             */
+            attemptId: string;
+            /**
+             * Confirmedat
+             * Format: date-time
+             */
+            confirmedAt: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Transcripthash */
+            transcriptHash: string;
+            /**
+             * Transcriptversionid
+             * Format: uuid
+             */
+            transcriptVersionId: string;
+        };
         /** TranscriptDocument */
         TranscriptDocument: {
             /**
@@ -1294,7 +1424,12 @@ export interface components {
              * Schemaversion
              * @constant
              */
-            schemaVersion: "2.0.0";
+            schemaVersion: "3.0.0";
+            /**
+             * Warnings
+             * @default []
+             */
+            warnings: components["schemas"]["TranscriptWarning"][];
         };
         /** TranscriptMathBlock */
         TranscriptMathBlock: {
@@ -1302,6 +1437,7 @@ export interface components {
             id: string;
             /** Latex */
             latex: string;
+            sourceRegion?: components["schemas"]["SourceRegion"] | null;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -1312,6 +1448,7 @@ export interface components {
         TranscriptTextBlock: {
             /** Id */
             id: string;
+            sourceRegion?: components["schemas"]["SourceRegion"] | null;
             /** Text */
             text: string;
             /**
@@ -1319,6 +1456,180 @@ export interface components {
              * @enum {string}
              */
             type: "text";
+        };
+        /** TranscriptVersionCreateRequest */
+        TranscriptVersionCreateRequest: {
+            /**
+             * Basetranscriptversionid
+             * Format: uuid
+             */
+            baseTranscriptVersionId: string;
+            document: components["schemas"]["TranscriptDocument"];
+        };
+        /** TranscriptVersionResponse */
+        TranscriptVersionResponse: {
+            /**
+             * Attemptid
+             * Format: uuid
+             */
+            attemptId: string;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            document: components["schemas"]["TranscriptDocument"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Origin
+             * @enum {string}
+             */
+            origin: "provider" | "learner";
+            /** Parenttranscriptversionid */
+            parentTranscriptVersionId: string | null;
+            /**
+             * Sourcerunid
+             * Format: uuid
+             */
+            sourceRunId: string;
+            /** Transcripthash */
+            transcriptHash: string;
+            /** Version */
+            version: number;
+        };
+        /** TranscriptWarning */
+        TranscriptWarning: {
+            /** Blockid */
+            blockId?: string | null;
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "low_confidence_text" | "low_confidence_math" | "ambiguous_cross_out" | "ambiguous_insertion" | "ordering_uncertain" | "source_region_unavailable";
+            /** Message */
+            message: string;
+        };
+        /** TranscriptionFailureState */
+        TranscriptionFailureState: {
+            run: components["schemas"]["TranscriptionRunResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "invalid_schema" | "permanent_failure" | "retryable_failure";
+        };
+        /** TranscriptionNotStartedState */
+        TranscriptionNotStartedState: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "not_started";
+        };
+        /** TranscriptionProcessingState */
+        TranscriptionProcessingState: {
+            run: components["schemas"]["TranscriptionRunResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "processing";
+        };
+        /** TranscriptionReadyState */
+        TranscriptionReadyState: {
+            confirmation: components["schemas"]["TranscriptConfirmationResponse"] | null;
+            run: components["schemas"]["TranscriptionRunResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "ready";
+            transcriptVersion: components["schemas"]["TranscriptVersionResponse"];
+        };
+        /** TranscriptionRunResponse */
+        TranscriptionRunResponse: {
+            /** Completedat */
+            completedAt: string | null;
+            /** Costusd */
+            costUsd: string | null;
+            /** Errorcode */
+            errorCode: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Inputtokens */
+            inputTokens: number | null;
+            /** Latencyms */
+            latencyMs: number | null;
+            /** Modelsnapshot */
+            modelSnapshot: string;
+            /** Outputtokens */
+            outputTokens: number | null;
+            /** Pricingversion */
+            pricingVersion: string;
+            /** Prompthash */
+            promptHash: string;
+            /** Promptversion */
+            promptVersion: string;
+            /** Provider */
+            provider: string;
+            /** Schemaattempts */
+            schemaAttempts: number;
+            /** Schemaversion */
+            schemaVersion: string;
+            /**
+             * Startedat
+             * Format: date-time
+             */
+            startedAt: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "processing" | "succeeded" | "uncertain" | "retryable_failure" | "permanent_failure" | "invalid_schema";
+        };
+        /** TranscriptionUncertainState */
+        TranscriptionUncertainState: {
+            run: components["schemas"]["TranscriptionRunResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "uncertain";
+            /** Warnings */
+            warnings: components["schemas"]["TranscriptWarning"][];
+        };
+        /** UncertainTranscriptionResponse */
+        UncertainTranscriptionResponse: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            outcome: "uncertain";
+            run: components["schemas"]["TranscriptionRunResponse"];
+            /** Warnings */
+            warnings: components["schemas"]["TranscriptWarning"][];
+        };
+        /** UploadDownloadResponse */
+        UploadDownloadResponse: {
+            /** Downloadurl */
+            downloadUrl: string;
+            /**
+             * Expiresat
+             * Format: date-time
+             */
+            expiresAt: string;
+            /**
+             * Uploadid
+             * Format: uuid
+             */
+            uploadId: string;
         };
         /** UploadResponse */
         UploadResponse: {
@@ -1444,7 +1755,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -1529,7 +1840,96 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    post_transcript_confirmation_api_v1_attempts__attempt_id__confirm_transcript_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TranscriptConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranscriptConfirmationResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -1618,7 +2018,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -1707,7 +2107,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -1727,7 +2127,7 @@ export interface operations {
             };
         };
     };
-    post_mock_transcription_api_v1_attempts__attempt_id__mock_transcription_post: {
+    post_transcription_api_v1_attempts__attempt_id__transcribe_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -1738,7 +2138,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MockTranscriptionRequest"];
+                "application/json": components["schemas"]["TranscribeRequest"];
             };
         };
         responses: {
@@ -1748,7 +2148,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MockTranscriptionResponse"];
+                    "application/json": components["schemas"]["ReadyTranscriptionResponse"] | components["schemas"]["UncertainTranscriptionResponse"];
                 };
             };
             /** @description Authentication failed or is required */
@@ -1796,7 +2196,181 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_transcription_state_api_v1_attempts__attempt_id__transcription_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranscriptionNotStartedState"] | components["schemas"]["TranscriptionProcessingState"] | components["schemas"]["TranscriptionReadyState"] | components["schemas"]["TranscriptionUncertainState"] | components["schemas"]["TranscriptionFailureState"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An upstream structured response was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    post_transcript_version_api_v1_attempts__attempt_id__transcripts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TranscriptVersionCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TranscriptVersionResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -1877,7 +2451,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -1960,7 +2534,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2047,7 +2621,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2132,7 +2706,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2215,7 +2789,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2298,7 +2872,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2385,7 +2959,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2468,7 +3042,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2557,7 +3131,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2640,7 +3214,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2723,7 +3297,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2808,7 +3382,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2891,7 +3465,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -2974,7 +3548,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -3061,7 +3635,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -3148,7 +3722,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -3235,7 +3809,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -3320,7 +3894,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -3405,7 +3979,92 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorEnvelope"];
                 };
             };
-            /** @description A structured mock payload was invalid */
+            /** @description An upstream structured response was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    get_upload_download_url_api_v1_uploads__upload_id__download_url_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                upload_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadDownloadResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An upstream structured response was invalid */
             502: {
                 headers: {
                     [name: string]: unknown;

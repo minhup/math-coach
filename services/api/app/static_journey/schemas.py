@@ -17,42 +17,6 @@ class StaticJourneyModel(BaseModel):
     )
 
 
-class TranscriptTextBlock(StaticJourneyModel):
-    id: Annotated[str, Field(min_length=1, max_length=120)]
-    type: Literal["text"]
-    text: Annotated[str, Field(max_length=20_000)]
-
-
-class TranscriptMathBlock(StaticJourneyModel):
-    id: Annotated[str, Field(min_length=1, max_length=120)]
-    type: Literal["math"]
-    latex: Annotated[str, Field(max_length=2_000)]
-
-
-TranscriptBlock = Annotated[
-    TranscriptTextBlock | TranscriptMathBlock,
-    Field(discriminator="type"),
-]
-
-
-class TranscriptDocument(StaticJourneyModel):
-    schema_version: Literal["2.0.0"]
-    attempt_id: uuid.UUID
-    blocks: Annotated[list[TranscriptBlock], Field(min_length=1, max_length=500)]
-
-    @model_validator(mode="after")
-    def unique_block_ids(self) -> Self:
-        ids = [block.id for block in self.blocks]
-        if len(ids) != len(set(ids)):
-            raise ValueError("Transcript block IDs must be unique")
-        return self
-
-
-class ConfirmedTranscript(StaticJourneyModel):
-    confirmation_status: Literal["confirmed"]
-    transcript: TranscriptDocument
-
-
 class MockRunMetadata(StaticJourneyModel):
     provider: Literal["application-owned-synthetic-mock"]
     model_snapshot: Literal["m5-static-fixture-v1"]
@@ -64,17 +28,8 @@ class MockRunMetadata(StaticJourneyModel):
     cost_usd: Annotated[Decimal, Field(ge=0)]
 
 
-class MockTranscriptionRequest(StaticJourneyModel):
-    upload_id: uuid.UUID
-
-
-class MockTranscriptionResponse(StaticJourneyModel):
-    transcript: TranscriptDocument
-    metadata: MockRunMetadata
-
-
 class MockEvaluationRequest(StaticJourneyModel):
-    confirmed_transcript: ConfirmedTranscript
+    confirmed_transcript_version_id: uuid.UUID
 
 
 class MockEvaluationResponse(StaticJourneyModel):

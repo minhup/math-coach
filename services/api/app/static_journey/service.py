@@ -41,13 +41,12 @@ from app.static_journey.schemas import (
     ConceptVersionResponse,
     MockEvaluationRequest,
     MockEvaluationResponse,
-    MockTranscriptionRequest,
-    MockTranscriptionResponse,
     NextHintRequest,
     NextHintResponse,
     StaticDailyPlanResponse,
 )
-from app.uploads import owned_upload
+from app.transcription.models import TranscriptConfirmation, TranscriptVersion
+from app.transcription.schemas import TranscriptDocument, canonical_transcript_hash
 
 CONCEPT_CODE = "SYN-MIDPOINT-COORDINATES"
 blocks_adapter = TypeAdapter(list[ContentBlock])
@@ -180,41 +179,6 @@ async def static_daily_plan(
     )
 
 
-async def mock_transcription(
-    *,
-    attempt_id: uuid.UUID,
-    payload: MockTranscriptionRequest,
-    user: User,
-    database: AsyncSession,
-    boundary: DeterministicMockBoundary,
-) -> MockTranscriptionResponse:
-    await owned_attempt(attempt_id, user, database)
-    upload = await owned_upload(payload.upload_id, user, database)
-    if upload.status != "ready":
-        raise AppError(
-            status_code=409,
-            code="upload_not_ready",
-            message="Finish the synthetic image upload before transcription.",
-        )
-    try:
-        response = boundary.transcribe(attempt_id)
-    except MockSourceError as error:
-        raise _mock_source_failure(error) from error
-    except MockPayloadInvalidError as error:
-        raise AppError(
-            status_code=502,
-            code="mock_payload_invalid",
-            message="The synthetic transcript was invalid after one retry.",
-        ) from error
-    if response.transcript.attempt_id != attempt_id:
-        raise AppError(
-            status_code=502,
-            code="mock_payload_invalid",
-            message="The synthetic transcript was invalid after one retry.",
-        )
-    return response
-
-
 async def mock_evaluation(
     *,
     attempt_id: uuid.UUID,
@@ -224,14 +188,30 @@ async def mock_evaluation(
     boundary: DeterministicMockBoundary,
 ) -> MockEvaluationResponse:
     await owned_attempt(attempt_id, user, database)
-    if payload.confirmed_transcript.transcript.attempt_id != attempt_id:
+    confirmation = await database.scalar(
+        select(TranscriptConfirmation).where(
+            TranscriptConfirmation.attempt_id == attempt_id,
+            TranscriptConfirmation.transcript_version_id == payload.confirmed_transcript_version_id,
+        )
+    )
+    if confirmation is None:
         raise AppError(
             status_code=409,
-            code="transcript_attempt_mismatch",
-            message="The confirmed transcript does not match this attempt.",
+            code="transcript_not_confirmed",
+            message="Confirm this exact transcript version before evaluation.",
         )
+    version = await database.get(TranscriptVersion, confirmation.transcript_version_id)
+    if version is None or version.attempt_id != attempt_id:
+        raise RuntimeError("Confirmed transcript relationship is invalid")
+    transcript = TranscriptDocument.model_validate(version.document_json)
+    if (
+        transcript.attempt_id != attempt_id
+        or canonical_transcript_hash(transcript) != confirmation.transcript_sha256
+        or version.transcript_sha256 != confirmation.transcript_sha256
+    ):
+        raise RuntimeError("Confirmed transcript identity is invalid")
     try:
-        return boundary.evaluate(payload.confirmed_transcript)
+        return boundary.evaluate(transcript)
     except MockSourceError as error:
         raise _mock_source_failure(error) from error
     except MockPayloadInvalidError as error:

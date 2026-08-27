@@ -16,6 +16,7 @@ import {
   deleteMathBlock,
   insertMathAtTextOffset,
   moveBlock,
+  type TranscriptBlock,
   type TranscriptState,
   updateBlockValue,
   validateTranscriptState,
@@ -25,7 +26,9 @@ import { MathRenderer } from "../math/math-renderer";
 
 type TranscriptEditorProps = {
   initialState: TranscriptState;
-  onConfirm?: (snapshot: ConfirmedTranscriptSnapshot) => void;
+  onConfirm?: (snapshot: ConfirmedTranscriptSnapshot) => Promise<void> | void;
+  onSourceRegionChange?: (region: NonNullable<TranscriptBlock["sourceRegion"]>) => void;
+  sourceLabel?: string;
 };
 
 type CaretPosition = {
@@ -104,12 +107,19 @@ function formulaDeletionCaret(state: TranscriptState, mathBlockId: string, repla
   return { blockId: replacementId, offset: 0 };
 }
 
-export function TranscriptEditor({ initialState, onConfirm }: TranscriptEditorProps) {
+export function TranscriptEditor({
+  initialState,
+  onConfirm,
+  onSourceRegionChange,
+  sourceLabel = "Simulated OCR transcript",
+}: TranscriptEditorProps) {
   const [transcript, setTranscript] = useState(() => validateTranscriptState(initialState));
   const transcriptRef = useRef(transcript);
   const [activeMathBlockId, setActiveMathBlockId] = useState<string | null>(null);
   const [pendingDeleteMathId, setPendingDeleteMathId] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState<ConfirmedTranscriptSnapshot | null>(null);
+  const [confirmationError, setConfirmationError] = useState<string | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
   const lastCaretRef = useRef<CaretPosition | null>(null);
   const pendingCaretRestoreRef = useRef<CaretPosition | null>(null);
@@ -120,6 +130,7 @@ export function TranscriptEditor({ initialState, onConfirm }: TranscriptEditorPr
     transcriptRef.current = next;
     setTranscript(next);
     setConfirmed(null);
+    setConfirmationError(null);
   }
 
   function nextUniqueId(kind: "math" | "text") {
@@ -158,6 +169,7 @@ export function TranscriptEditor({ initialState, onConfirm }: TranscriptEditorPr
     transcriptRef.current = next;
     setTranscript(next);
     setConfirmed(null);
+    setConfirmationError(null);
     return next;
   }
 
@@ -310,26 +322,68 @@ export function TranscriptEditor({ initialState, onConfirm }: TranscriptEditorPr
     setPendingDeleteMathId(null);
   }
 
-  function confirmVisibleTranscript() {
+  async function confirmVisibleTranscript() {
     const root = editorRef.current;
     const visible =
       root === null ? transcriptRef.current : syncTextRuns(root, transcriptRef.current);
     transcriptRef.current = visible;
     setTranscript(visible);
     const snapshot = confirmTranscript(visible);
-    setConfirmed(snapshot);
-    onConfirm?.(snapshot);
+    setConfirmationError(null);
+    setIsConfirming(true);
+    try {
+      await onConfirm?.(snapshot);
+      setConfirmed(snapshot);
+    } catch {
+      setConfirmationError("The exact transcript version could not be confirmed. Try again.");
+    } finally {
+      setIsConfirming(false);
+    }
   }
 
   return (
     <section className="transcript-editor" aria-labelledby="transcript-editor-title">
       <div className="transcript-editor-heading">
         <div>
-          <p className="eyebrow">Simulated OCR transcript</p>
+          <p className="eyebrow">{sourceLabel}</p>
           <h2 id="transcript-editor-title">Review the transcript</h2>
         </div>
         <p>Place the caret, type naturally, or insert and correct a formula before confirming.</p>
       </div>
+
+      {transcript.warnings.length > 0 ? (
+        <section aria-label="Transcription warnings" className="transcription-warnings">
+          <strong>Review these uncertain parts</strong>
+          <ul>
+            {transcript.warnings.map((warning) => (
+              <li key={`${warning.code}-${warning.blockId ?? "document"}`}>{warning.message}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {onSourceRegionChange === undefined ||
+      transcript.blocks.every(({ sourceRegion }) => sourceRegion == null) ? null : (
+        <section aria-label="Transcript source regions" className="transcript-source-regions">
+          <strong>Compare with the image</strong>
+          <div>
+            {transcript.blocks.map((block, index) => {
+              const region = block.sourceRegion;
+              return region == null ? null : (
+                <button
+                  aria-label={`Show source region for block ${index + 1}`}
+                  className="transcript-source-region-button"
+                  key={block.id}
+                  onClick={() => onSourceRegionChange(region)}
+                  type="button"
+                >
+                  Block {index + 1} · {block.type === "math" ? "formula" : "text"}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <div className="transcript-toolbar" aria-label="Transcript tools" role="toolbar">
         <button
@@ -484,17 +538,19 @@ export function TranscriptEditor({ initialState, onConfirm }: TranscriptEditorPr
 
       <div className="transcript-confirmation">
         <button
-          aria-label="Confirm transcript"
+          aria-label="Confirm exact transcript"
           className="primary-button"
-          onClick={confirmVisibleTranscript}
+          disabled={isConfirming}
+          onClick={() => void confirmVisibleTranscript()}
           type="button"
         >
-          Confirm transcript
+          {isConfirming ? "Saving exact version…" : "Confirm exact transcript"}
         </button>
         <p>
-          This confirmed document will be the future authoritative grading input. Reasoning analysis
-          happens later and does not run here.
+          This confirmed version is the authoritative downstream input. The next evaluation remains
+          a clearly labeled deterministic mock; production grading does not run here.
         </p>
+        {confirmationError === null ? null : <p role="alert">{confirmationError}</p>}
       </div>
 
       {confirmed !== null ? (

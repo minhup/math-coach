@@ -20,7 +20,8 @@ const initialState: TranscriptState = {
     { id: "block-text-2", text: "Therefore", type: "text" },
     { id: "block-math-2", latex: "x=2", type: "math" },
   ],
-  schemaVersion: "2.0.0",
+  schemaVersion: "3.0.0",
+  warnings: [],
 };
 
 describe("flat transcript state", () => {
@@ -36,7 +37,8 @@ describe("flat transcript state", () => {
         { id: "block-text-2", text: "Therefore", type: "text" },
         { id: "block-math-2", latex: "x=2", type: "math" },
       ],
-      schemaVersion: "2.0.0",
+      schemaVersion: "3.0.0",
+      warnings: [],
     });
     expect(snapshot).not.toHaveProperty("steps");
     expect(snapshot.blocks.every((block) => !("stepId" in block))).toBe(true);
@@ -128,7 +130,8 @@ describe("flat transcript state", () => {
         {
           attemptId: "one-block",
           blocks: [{ id: "only-block", text: "Keep me", type: "text" }],
-          schemaVersion: "2.0.0",
+          schemaVersion: "3.0.0",
+          warnings: [],
         },
         "only-block",
       ),
@@ -240,7 +243,8 @@ describe("flat transcript state", () => {
         {
           attemptId: "formula-only",
           blocks: [{ id: "only-formula", latex: "x=1", type: "math" }],
-          schemaVersion: "2.0.0",
+          schemaVersion: "3.0.0",
+          warnings: [],
         },
         { mathBlockId: "only-formula", replacementTextBlockId: "empty-document-text" },
       ).blocks,

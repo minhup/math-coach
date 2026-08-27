@@ -1,6 +1,6 @@
 import type { components } from "@math-coach/api-client";
 
-export const TRANSCRIPT_SCHEMA_VERSION = "2.0.0" as const;
+export const TRANSCRIPT_SCHEMA_VERSION = "3.0.0" as const;
 
 export type TranscriptState = components["schemas"]["TranscriptDocument"];
 export type TranscriptBlock = TranscriptState["blocks"][number];
@@ -17,8 +17,22 @@ export class TranscriptStateError extends Error {
 }
 
 function cloneBlock(block: TranscriptBlock): TranscriptBlock {
-  return { ...block };
+  return {
+    ...block,
+    ...(block.sourceRegion === undefined || block.sourceRegion === null
+      ? {}
+      : { sourceRegion: { ...block.sourceRegion } }),
+  };
 }
+
+const warningMessages = {
+  ambiguous_cross_out: "A crossed-out part may need review.",
+  ambiguous_insertion: "An inserted part may need review.",
+  low_confidence_math: "A formula may need review.",
+  low_confidence_text: "Some text may need review.",
+  ordering_uncertain: "The reading order may need review.",
+  source_region_unavailable: "A source location is unavailable.",
+} as const;
 
 function findBlockIndex(state: TranscriptState, blockId: string) {
   const index = state.blocks.findIndex(({ id }) => id === blockId);
@@ -48,6 +62,34 @@ export function validateTranscriptState(state: TranscriptState): TranscriptState
       throw new TranscriptStateError(`Duplicate block ID: ${block.id}`);
     }
     blockIds.add(block.id);
+    const region = block.sourceRegion;
+    if (
+      region !== undefined &&
+      region !== null &&
+      (region.attemptAssetId.trim().length === 0 ||
+        region.units !== "normalized" ||
+        ![region.x, region.y, region.width, region.height].every(Number.isFinite) ||
+        region.x < 0 ||
+        region.y < 0 ||
+        region.width <= 0 ||
+        region.height <= 0 ||
+        region.x + region.width > 1 ||
+        region.y + region.height > 1)
+    ) {
+      throw new TranscriptStateError(`Invalid source region for block: ${block.id}`);
+    }
+  }
+  for (const warning of state.warnings) {
+    if (warning.message !== warningMessages[warning.code]) {
+      throw new TranscriptStateError("Transcript warning message is invalid.");
+    }
+    if (
+      warning.blockId !== undefined &&
+      warning.blockId !== null &&
+      !blockIds.has(warning.blockId)
+    ) {
+      throw new TranscriptStateError(`Warning references an unknown block ID: ${warning.blockId}`);
+    }
   }
   return state;
 }
@@ -78,6 +120,7 @@ export function deleteBlock(state: TranscriptState, blockId: string): Transcript
   return validateTranscriptState({
     ...state,
     blocks: state.blocks.filter((_, index) => index !== blockIndex).map(cloneBlock),
+    warnings: state.warnings.filter(({ blockId: warningBlockId }) => warningBlockId !== blockId),
   });
 }
 
@@ -197,7 +240,14 @@ export function deleteMathBlock(
     });
   }
 
-  return validateTranscriptState({ ...state, blocks });
+  const remainingIds = new Set(blocks.map(({ id }) => id));
+  return validateTranscriptState({
+    ...state,
+    blocks,
+    warnings: state.warnings.filter(
+      ({ blockId }) => blockId === undefined || blockId === null || remainingIds.has(blockId),
+    ),
+  });
 }
 
 export function confirmTranscript(state: TranscriptState): ConfirmedTranscriptSnapshot {
@@ -206,5 +256,6 @@ export function confirmTranscript(state: TranscriptState): ConfirmedTranscriptSn
     attemptId: state.attemptId,
     blocks: state.blocks.map(cloneBlock),
     schemaVersion: state.schemaVersion,
+    warnings: state.warnings.map((warning) => ({ ...warning })),
   };
 }

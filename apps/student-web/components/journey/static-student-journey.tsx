@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { summarizeStaticJourney } from "../../features/journey/session-summary";
@@ -8,7 +9,10 @@ import {
   transitionStaticJourney,
   type StaticJourneyEvent,
 } from "../../features/journey/static-journey-state";
-import type { ConfirmedTranscriptSnapshot } from "../../features/transcription/transcript-state";
+import type {
+  ConfirmedTranscriptSnapshot,
+  TranscriptBlock,
+} from "../../features/transcription/transcript-state";
 import { ApiError } from "../../lib/api";
 import {
   addExamTarget,
@@ -19,7 +23,6 @@ import {
   getStaticPlan,
   getStudyProfile,
   requestMockEvaluation,
-  requestMockTranscription,
   requestNextHint,
   type Attempt,
   type AvailableExamCycles,
@@ -29,6 +32,15 @@ import {
   type StaticDailyPlan,
   type StudyProfile,
 } from "../../lib/static-journey-api";
+import {
+  confirmTranscriptVersion,
+  createTranscriptVersion,
+  getUploadDownload,
+  requestTranscription,
+  type TranscriptConfirmation,
+  type TranscriptionRun,
+  type TranscriptVersion,
+} from "../../lib/transcription-api";
 import { GeometryScene } from "../geometry/geometry-scene";
 import { TypedContentBlocks } from "../math/content-blocks";
 import { MathRenderer } from "../math/math-renderer";
@@ -43,9 +55,12 @@ export type StaticJourneyApi = {
   getConceptVersion: typeof getConceptVersion;
   getStaticPlan: typeof getStaticPlan;
   getStudyProfile: typeof getStudyProfile;
+  getUploadDownload: typeof getUploadDownload;
   requestMockEvaluation: typeof requestMockEvaluation;
-  requestMockTranscription: typeof requestMockTranscription;
   requestNextHint: typeof requestNextHint;
+  requestTranscription: typeof requestTranscription;
+  createTranscriptVersion: typeof createTranscriptVersion;
+  confirmTranscriptVersion: typeof confirmTranscriptVersion;
 };
 
 const defaultApi: StaticJourneyApi = {
@@ -56,9 +71,12 @@ const defaultApi: StaticJourneyApi = {
   getConceptVersion,
   getStaticPlan,
   getStudyProfile,
+  getUploadDownload,
   requestMockEvaluation,
-  requestMockTranscription,
   requestNextHint,
+  requestTranscription,
+  createTranscriptVersion,
+  confirmTranscriptVersion,
 };
 
 type LoadStatus = "loading" | "profile_required" | "ready" | "retryable_failure";
@@ -91,9 +109,17 @@ function planReference(plan: StaticDailyPlan) {
   };
 }
 
-function operationFailure(error: unknown): "permanent" | "retryable" {
+function operationFailure(error: unknown): "invalid_schema" | "permanent" | "retryable" {
   if (error instanceof ApiError) {
-    if (error.code === "mock_payload_invalid" || error.code === "mock_permanent_failure") {
+    if (error.code === "transcription_invalid_schema" || error.code === "invalid_response") {
+      return "invalid_schema";
+    }
+    if (
+      error.code === "mock_payload_invalid" ||
+      error.code === "mock_permanent_failure" ||
+      error.code === "transcription_provider_rejected" ||
+      error.code === "transcription_invalid_media"
+    ) {
       return "permanent";
     }
     return error.status >= 500 ? "retryable" : "permanent";
@@ -137,6 +163,14 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
   const [evaluation, setEvaluation] = useState<MockEvaluation | null>(null);
   const [hints, setHints] = useState<NextHint[]>([]);
   const [concept, setConcept] = useState<ConceptVersion | null>(null);
+  const [transcriptVersion, setTranscriptVersion] = useState<TranscriptVersion | null>(null);
+  const [confirmation, setConfirmation] = useState<TranscriptConfirmation | null>(null);
+  const [transcriptionRun, setTranscriptionRun] = useState<TranscriptionRun | null>(null);
+  const [transcriptionWarnings, setTranscriptionWarnings] = useState<string[]>([]);
+  const [selectedSourceRegion, setSelectedSourceRegion] = useState<NonNullable<
+    TranscriptBlock["sourceRegion"]
+  > | null>(null);
+  const [sourceImageUrl, setSourceImageUrl] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [transitionMessage, setTransitionMessage] = useState<string | null>(null);
   const retryOperation = useRef<(() => Promise<void>) | null>(null);
@@ -269,13 +303,34 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
     }
   }
 
-  async function transcribe(uploadId: string) {
+  async function transcribe(uploadId: string, idempotencyKey = crypto.randomUUID()) {
     if (currentAttempt === null) {
       return;
     }
     try {
-      const response = await api.requestMockTranscription(currentAttempt.id, uploadId);
-      dispatch({ transcript: response.transcript, type: "transcript_received" });
+      const source = await api.getUploadDownload(uploadId);
+      setSourceImageUrl(source.downloadUrl);
+      const response = await api.requestTranscription(currentAttempt.id, uploadId, idempotencyKey);
+      setTranscriptionRun(response.run);
+      if (response.outcome === "uncertain") {
+        setTranscriptionWarnings(response.warnings.map(({ message }) => message));
+        dispatch({ type: "transcription_uncertain" });
+        return;
+      }
+      setSelectedSourceRegion(null);
+      setTranscriptVersion(response.transcriptVersion);
+      setTranscriptionWarnings(
+        response.transcriptVersion.document.warnings.map(({ message }) => message),
+      );
+      dispatch({
+        transcript: response.transcriptVersion.document,
+        transcriptVersion: {
+          hash: response.transcriptVersion.transcriptHash,
+          id: response.transcriptVersion.id,
+          version: response.transcriptVersion.version,
+        },
+        type: "transcript_received",
+      });
     } catch (error) {
       recordOperationFailure(error, () => transcribe(uploadId));
     }
@@ -287,21 +342,58 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
       return;
     }
     dispatch({ type: "upload_ready", upload: { id: upload.id, status: "ready" } });
+    setSourceImageUrl(null);
+    setTranscriptionWarnings([]);
     void transcribe(upload.id);
   }
 
-  function confirmCorrectedTranscript(transcript: ConfirmedTranscriptSnapshot) {
-    dispatch({ transcript, type: "transcript_confirmed" });
+  async function confirmCorrectedTranscript(transcript: ConfirmedTranscriptSnapshot) {
+    if (currentAttempt === null || transcriptVersion === null) {
+      throw new Error("No validated transcript version is available.");
+    }
+    try {
+      const selectedVersion =
+        JSON.stringify(transcript) === JSON.stringify(transcriptVersion.document)
+          ? transcriptVersion
+          : await api.createTranscriptVersion(currentAttempt.id, transcriptVersion.id, transcript);
+      const confirmed = await api.confirmTranscriptVersion(
+        currentAttempt.id,
+        selectedVersion.id,
+        selectedVersion.transcriptHash,
+      );
+      setTranscriptVersion(selectedVersion);
+      setConfirmation(confirmed);
+      dispatch({
+        confirmation: {
+          hash: confirmed.transcriptHash,
+          id: confirmed.id,
+          transcriptVersionId: confirmed.transcriptVersionId,
+        },
+        transcript,
+        transcriptVersion: {
+          hash: selectedVersion.transcriptHash,
+          id: selectedVersion.id,
+          version: selectedVersion.version,
+        },
+        type: "transcript_confirmed",
+      });
+    } catch (error) {
+      setErrorMessage(safeErrorMessage(error));
+      throw error;
+    }
   }
 
   async function evaluate() {
-    const transcript = journey.data.confirmedTranscript;
-    if (currentAttempt === null || transcript === undefined) {
+    const confirmed = journey.data.confirmation;
+    if (currentAttempt === null || confirmed === undefined) {
       dispatch({ type: "evaluation_requested" });
       return;
     }
     try {
-      const response = await api.requestMockEvaluation(currentAttempt.id, transcript);
+      const response = await api.requestMockEvaluation(
+        currentAttempt.id,
+        confirmed.transcriptVersionId,
+      );
       setEvaluation(response);
       dispatch({
         evaluation: {
@@ -444,15 +536,28 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
     );
   }
 
-  if (journey.status === "retryable_failure" || journey.status === "permanent_failure") {
+  if (
+    journey.status === "retryable_failure" ||
+    journey.status === "permanent_failure" ||
+    journey.status === "invalid_schema"
+  ) {
     const retryable = journey.status === "retryable_failure";
+    const invalidSchema = journey.status === "invalid_schema";
     return (
       <section
         className="journey-card journey-status-card"
         aria-labelledby="journey-operation-error"
       >
-        <p className="eyebrow">{retryable ? "Retryable failure" : "Permanent failure"}</p>
-        <h2 id="journey-operation-error">This step could not finish.</h2>
+        <p className="eyebrow">
+          {retryable
+            ? "Retryable failure"
+            : invalidSchema
+              ? "Invalid provider response"
+              : "Permanent failure"}
+        </p>
+        <h2 id="journey-operation-error">
+          {invalidSchema ? "No transcript was accepted." : "This step could not finish."}
+        </h2>
         <p role="alert">{errorMessage}</p>
         {retryable ? (
           <button className="primary-button" onClick={retryFailedOperation} type="button">
@@ -591,19 +696,83 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
     );
   } else if (journey.phase === "upload") {
     panel = <UploadWorkspace onContinue={useUpload} />;
-  } else if (journey.phase === "mock_transcription") {
+  } else if (journey.phase === "transcription" && journey.status === "loading") {
     panel = (
       <p className="journey-status" role="status">
-        Creating the structured mock transcript…
+        Loading and validating the complete image transcription…
       </p>
+    );
+  } else if (journey.phase === "transcription" && journey.status === "uncertain") {
+    panel = (
+      <section className="journey-card journey-status-card" aria-labelledby="uncertain-transcript">
+        <p className="eyebrow">Transcription uncertainty</p>
+        <h2 id="uncertain-transcript">No transcript was created.</h2>
+        <p>The service could not produce a faithful complete document from this image.</p>
+        <ul className="transcription-warning-list">
+          {transcriptionWarnings.map((warning) => (
+            <li key={warning}>{warning}</li>
+          ))}
+        </ul>
+        <button
+          className="primary-button"
+          onClick={() => dispatch({ type: "transcription_retake" })}
+          type="button"
+        >
+          Upload a clearer synthetic image
+        </button>
+      </section>
     );
   } else if (journey.phase === "correction" && journey.data.transcript !== undefined) {
     panel = (
-      <TranscriptEditor
-        initialState={journey.data.transcript}
-        key={journey.data.transcript.attemptId}
-        onConfirm={confirmCorrectedTranscript}
-      />
+      <section className="transcription-review-layout" aria-label="Image and transcript review">
+        <figure className="transcription-source-card">
+          <p className="eyebrow">Owned verified upload</p>
+          {sourceImageUrl === null ? (
+            <p role="status">Loading the synthetic source image…</p>
+          ) : (
+            <div className="transcription-source-image-frame">
+              <Image
+                alt="Clearly synthetic uploaded mathematics solution"
+                height={900}
+                src={sourceImageUrl}
+                unoptimized
+                width={1200}
+              />
+              {selectedSourceRegion === null ? null : (
+                <span
+                  aria-label="Selected transcript source region"
+                  className="transcription-source-region-overlay"
+                  role="img"
+                  style={{
+                    height: `${selectedSourceRegion.height * 100}%`,
+                    left: `${selectedSourceRegion.x * 100}%`,
+                    top: `${selectedSourceRegion.y * 100}%`,
+                    width: `${selectedSourceRegion.width * 100}%`,
+                  }}
+                />
+              )}
+            </div>
+          )}
+          <figcaption>
+            Compare every visible line. Mathematical mistakes must stay as written.
+          </figcaption>
+        </figure>
+        <div>
+          {transcriptionRun === null ? null : (
+            <p className="transcription-run-note">
+              Validated with {transcriptionRun.provider} · {transcriptionRun.modelSnapshot} · schema{" "}
+              {transcriptionRun.schemaVersion}
+            </p>
+          )}
+          <TranscriptEditor
+            initialState={journey.data.transcript}
+            key={journey.data.transcript.attemptId}
+            onConfirm={confirmCorrectedTranscript}
+            onSourceRegionChange={setSelectedSourceRegion}
+            sourceLabel="Validated image transcription"
+          />
+        </div>
+      </section>
     );
   } else if (journey.phase === "confirmation" && journey.data.confirmedTranscript !== undefined) {
     panel = (
@@ -613,9 +782,13 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
         <p>
           This locked snapshot—and no earlier draft—is sent to the deterministic mock evaluation.
         </p>
+        <p className="identifier">
+          Transcript version {transcriptVersion?.version} · {confirmation?.transcriptVersionId}
+        </p>
+        <p className="identifier">SHA-256 {confirmation?.transcriptHash}</p>
         <ConfirmedTranscriptView transcript={journey.data.confirmedTranscript} />
         <button className="primary-button" onClick={startEvaluation} type="button">
-          Evaluate confirmed transcript
+          Run clearly mocked evaluation
         </button>
       </section>
     );

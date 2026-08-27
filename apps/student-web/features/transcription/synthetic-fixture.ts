@@ -39,5 +39,6 @@ export const SYNTHETIC_CORRECTION_TRANSCRIPT: TranscriptState = {
       type: "text",
     },
   ],
-  schemaVersion: "2.0.0",
+  schemaVersion: "3.0.0",
+  warnings: [],
 };

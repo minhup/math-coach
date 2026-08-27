@@ -1,0 +1,180 @@
+{
+  "schemaVersion": "1.0.0",
+  "provenance": {
+    "classification": "original_synthetic_non_personal",
+    "createdAt": "2026-08-28",
+    "creator": "Math Coach application team",
+    "generator": "Committed SVG source rendered with FFmpeg 6.1.1-3ubuntu5 and librsvg",
+    "personalData": false,
+    "providerResponse": false,
+    "realExaminationContent": false,
+    "realLearnerWork": false
+  },
+  "fixtures": [
+    {
+      "name": "clean-handwritten-math",
+      "category": "clean_handwritten_mathematics",
+      "imagePath": "clean-handwritten-math.png",
+      "sourcePath": "sources/clean-handwritten-math.svg",
+      "sha256": "44c8df5c82a95e6cdb82ca099a1914c4061a93380455eaefd068b34c806d2415",
+      "expectedBlocks": [
+        { "type": "text", "text": "Let " },
+        { "type": "math", "latex": "x+3=8" },
+        { "type": "text", "text": ". " },
+        { "type": "math", "latex": "x=8-3" },
+        { "type": "text", "text": ". " },
+        { "type": "math", "latex": "x=5" },
+        { "type": "text", "text": ". Check: " },
+        { "type": "math", "latex": "5+3=8" },
+        { "type": "text", "text": "." }
+      ]
+    },
+    {
+      "name": "messy-readable-math",
+      "category": "messy_but_readable_mathematics",
+      "imagePath": "messy-readable-math.png",
+      "sourcePath": "sources/messy-readable-math.svg",
+      "sha256": "b13d6f0a3df4d8d6278a755e59b64dd3bbf15679d3ad227b1120fb12c8b4720a",
+      "expectedBlocks": [
+        { "type": "math", "latex": "3(y-2)=15" },
+        { "type": "math", "latex": "3y-6=15" },
+        { "type": "math", "latex": "3y=21" },
+        { "type": "math", "latex": "y=7" }
+      ]
+    },
+    {
+      "name": "mixed-vietnamese-math",
+      "category": "mixed_vietnamese_text_and_mathematics",
+      "imagePath": "mixed-vietnamese-math.png",
+      "sourcePath": "sources/mixed-vietnamese-math.svg",
+      "sha256": "de4f78997cd82e52ca8635cef89957019b575c8bc95979c416d1c33f71ca1046",
+      "expectedBlocks": [
+        { "type": "text", "text": "Gọi M là trung điểm của AB. " },
+        { "type": "math", "latex": "M=((x_1+x_2)/2,(y_1+y_2)/2)" },
+        { "type": "text", "text": ". Thay A(1, 2), B(5, 4), ta có " },
+        { "type": "math", "latex": "M=(3,3)" },
+        { "type": "text", "text": ". Vậy tọa độ trung điểm là M(3, 3)." }
+      ]
+    },
+    {
+      "name": "cross-outs-insertions",
+      "category": "cross_outs_and_insertions",
+      "imagePath": "cross-outs-insertions.png",
+      "sourcePath": "sources/cross-outs-insertions.svg",
+      "sha256": "a4b4c4722251845cfaf628e0315ba35fdc24d229498fc0f28c56de20c4aa0d11",
+      "expectedBlocks": [
+        { "type": "math", "latex": "2x+4=14" },
+        { "type": "math", "latex": "2x=10" },
+        { "type": "math", "latex": "x=6" },
+        { "type": "text", "text": "Crossed out; inserted " },
+        { "type": "math", "latex": "5" },
+        { "type": "text", "text": ". Check: " },
+        { "type": "math", "latex": "2(5)+4=14" }
+      ],
+      "expectedWarningCodes": ["ambiguous_cross_out", "ambiguous_insertion"]
+    },
+    {
+      "name": "correct-standard-solution",
+      "category": "correct_standard_solution",
+      "imagePath": "correct-standard-solution.png",
+      "sourcePath": "sources/correct-standard-solution.svg",
+      "sha256": "84e1bacb22c72831415aa99c34858d4b2911c984bf21fde3f12919a773ae810e",
+      "expectedBlocks": [
+        { "type": "text", "text": "Solve " },
+        { "type": "math", "latex": "x^2-5x+6=0" },
+        { "type": "text", "text": ". " },
+        { "type": "math", "latex": "(x-2)(x-3)=0" },
+        { "type": "math", "latex": "x-2=0\\text{ or }x-3=0" },
+        { "type": "math", "latex": "x=2\\text{ or }x=3" }
+      ]
+    },
+    {
+      "name": "correct-alternative-solution",
+      "category": "correct_alternative_solution",
+      "imagePath": "correct-alternative-solution.png",
+      "sourcePath": "sources/correct-alternative-solution.svg",
+      "sha256": "3dfb02009039109e49533b6950021fa17860c96299427d2436ad0c7b953ed4e7",
+      "expectedBlocks": [
+        { "type": "text", "text": "For " },
+        { "type": "math", "latex": "x^2-5x+6=0" },
+        { "type": "text", "text": ", use the formula. " },
+        { "type": "math", "latex": "\\Delta=(-5)^2-4(1)(6)=1" },
+        { "type": "math", "latex": "x=(5\\pm\\sqrt{1})/2" },
+        { "type": "math", "latex": "x=2\\text{ or }x=3" }
+      ]
+    },
+    {
+      "name": "subtle-error-preserved",
+      "category": "subtle_mathematical_error",
+      "imagePath": "subtle-error-preserved.png",
+      "sourcePath": "sources/subtle-error-preserved.svg",
+      "sha256": "fddd57e0c05200109d980d6e70aad19abfdf3c8fd3c5b7b104eea01144d66280",
+      "expectedBlocks": [
+        { "type": "text", "text": "Expand " },
+        { "type": "math", "latex": "(a+b)^2" },
+        { "type": "text", "text": ". " },
+        { "type": "math", "latex": "(a+b)^2=a^2+b^2" },
+        { "type": "text", "text": ". For a = 2 and b = 3: " },
+        { "type": "math", "latex": "(2+3)^2=2^2+3^2=13" }
+      ],
+      "mathematicalErrorMustRemain": true
+    },
+    {
+      "name": "incomplete-solution",
+      "category": "incomplete_solution",
+      "imagePath": "incomplete-solution.png",
+      "sourcePath": "sources/incomplete-solution.svg",
+      "sha256": "899cea31cb961554e1e4dc540aad4e601642d69f23f28444abdca73b5bd1430a",
+      "expectedBlocks": [
+        { "type": "math", "latex": "2x+5=17" },
+        { "type": "math", "latex": "2x=12" },
+        { "type": "math", "latex": "x=" }
+      ]
+    },
+    {
+      "name": "geometry-solution",
+      "category": "geometry_solution",
+      "imagePath": "geometry-solution.png",
+      "sourcePath": "sources/geometry-solution.svg",
+      "sha256": "094e308793d351b267d1df07286c3f18ac50282ff6e10269d0c051b6159a02d4",
+      "expectedBlocks": [
+        { "type": "text", "text": "M is the midpoint of BC, so " },
+        { "type": "math", "latex": "BM=MC" },
+        { "type": "text", "text": ". " },
+        { "type": "math", "latex": "AM^2+BM^2=AB^2" }
+      ]
+    },
+    {
+      "name": "alternating-text-math",
+      "category": "alternating_text_and_math_on_one_line",
+      "imagePath": "alternating-text-math.png",
+      "sourcePath": "sources/alternating-text-math.svg",
+      "sha256": "924b32743cb72e51af10e2e28623a515f6eed6bbbdcdd94121c83d1d4c973efc",
+      "expectedBlocks": [
+        { "type": "text", "text": "Since " },
+        { "type": "math", "latex": "x=4" },
+        { "type": "text", "text": ", then " },
+        { "type": "math", "latex": "2x+1=9" },
+        { "type": "text", "text": ", so " },
+        { "type": "math", "latex": "y=9" },
+        { "type": "text", "text": "." }
+      ]
+    },
+    {
+      "name": "warnings-source-regions",
+      "category": "warnings_and_optional_source_regions",
+      "imagePath": "warnings-source-regions.png",
+      "sourcePath": "sources/warnings-source-regions.svg",
+      "sha256": "f0ba3a02b35369a27c2f0f08a53ba89522a6a4c7f014593ae00e3dd22e0eb592",
+      "expectedBlocks": [
+        { "type": "text", "text": "Let n be odd. " },
+        { "type": "math", "latex": "n=2k+1" },
+        { "type": "text", "text": ". Then " },
+        { "type": "math", "latex": "n^2" },
+        { "type": "text", "text": " is odd." }
+      ],
+      "expectedWarningCodes": ["low_confidence_math"],
+      "sourceRegionsExpected": true
+    }
+  ]
+}

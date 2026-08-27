@@ -106,6 +106,65 @@ const metadata = {
   schemaVersion: "1.0.0" as const,
 };
 
+const transcriptDocument = {
+  attemptId: "attempt-1",
+  blocks: [
+    {
+      id: "text-1",
+      sourceRegion: {
+        attemptAssetId: "asset-1",
+        height: 0.1,
+        units: "normalized" as const,
+        width: 0.4,
+        x: 0.1,
+        y: 0.2,
+      },
+      text: "The synthetic midpoint is ",
+      type: "text" as const,
+    },
+    { id: "math-1", latex: "M=(2,0", type: "math" as const },
+  ],
+  schemaVersion: "3.0.0" as const,
+  warnings: [
+    {
+      blockId: "math-1",
+      code: "low_confidence_math" as const,
+      message: "A formula may need review.",
+    },
+  ],
+};
+
+const transcriptionRun = {
+  completedAt: "2026-08-27T00:00:01Z",
+  costUsd: "0.000000",
+  errorCode: null,
+  id: "run-1",
+  inputTokens: 0,
+  latencyMs: 0,
+  modelSnapshot: "m6-transcription-fixture-v1",
+  outputTokens: 0,
+  pricingVersion: "fake-zero-v1",
+  promptHash: "a".repeat(64),
+  promptVersion: "m6-faithful-transcription-v1",
+  provider: "application-owned-deterministic-fake",
+  schemaAttempts: 1,
+  schemaVersion: "m6-provider-transcript-v1",
+  startedAt: "2026-08-27T00:00:00Z",
+  status: "succeeded" as const,
+};
+
+const transcriptVersion = {
+  attemptId: "attempt-1",
+  createdAt: "2026-08-27T00:00:01Z",
+  document: transcriptDocument,
+  id: "transcript-version-1",
+  origin: "provider" as const,
+  parentTranscriptVersionId: null,
+  sourceRunId: transcriptionRun.id,
+  transcriptHash: "b".repeat(64),
+  version: 1,
+};
+
 function createApi(): StaticJourneyApi {
   return {
     addExamTarget: vi.fn(),
@@ -138,6 +197,11 @@ function createApi(): StaticJourneyApi {
     }),
     getStaticPlan: vi.fn().mockResolvedValue(plan),
     getStudyProfile: vi.fn().mockResolvedValue(profile),
+    getUploadDownload: vi.fn().mockResolvedValue({
+      downloadUrl: "http://storage.test/synthetic-source.png?signature=safe",
+      expiresAt: "2026-08-27T00:05:00Z",
+      uploadId: "upload-1",
+    }),
     requestMockEvaluation: vi.fn().mockResolvedValue({
       feedback: [{ id: "feedback", text: "Deterministic synthetic feedback.", type: "text" }],
       metadata,
@@ -146,16 +210,18 @@ function createApi(): StaticJourneyApi {
       referenceSolutionsNonExhaustive: true,
       transcriptFingerprint: "a".repeat(64),
     }),
-    requestMockTranscription: vi.fn().mockResolvedValue({
-      metadata,
-      transcript: {
-        attemptId: "attempt-1",
-        blocks: [
-          { id: "text-1", text: "The synthetic midpoint is ", type: "text" },
-          { id: "math-1", latex: "M=(2,0", type: "math" },
-        ],
-        schemaVersion: "2.0.0",
-      },
+    requestTranscription: vi.fn().mockResolvedValue({
+      outcome: "ready",
+      run: transcriptionRun,
+      transcriptVersion,
+    }),
+    createTranscriptVersion: vi.fn().mockResolvedValue(transcriptVersion),
+    confirmTranscriptVersion: vi.fn().mockResolvedValue({
+      attemptId: "attempt-1",
+      confirmedAt: "2026-08-27T00:00:02Z",
+      id: "confirmation-1",
+      transcriptHash: transcriptVersion.transcriptHash,
+      transcriptVersionId: transcriptVersion.id,
     }),
     requestNextHint: vi
       .fn()
@@ -178,6 +244,47 @@ function createApi(): StaticJourneyApi {
   };
 }
 
+function mockSuccessfulUpload() {
+  return vi
+    .spyOn(globalThis, "fetch")
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          expiresAt: "2026-08-27T00:05:00Z",
+          uploadId: "upload-1",
+          uploadUrl: "http://storage.test/upload",
+        }),
+      ),
+    )
+    .mockResolvedValueOnce(new Response(null, { status: 200 }))
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          contentType: "image/png",
+          createdAt: "2026-08-27T00:00:00Z",
+          fileName: "synthetic-solution.png",
+          id: "upload-1",
+          sizeBytes: 4,
+          status: "ready",
+        }),
+      ),
+    );
+}
+
+async function reachReadyUpload(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByRole("button", { name: "Build today's combined plan" }));
+  await user.click(await screen.findByRole("button", { name: "Open SYN-M4-GEO-001" }));
+  await user.click(screen.getByRole("button", { name: "Upload a synthetic solution" }));
+  await user.upload(
+    screen.getByLabelText("Choose image"),
+    new File([new Uint8Array([1, 2, 3, 4])], "synthetic-solution.png", {
+      type: "image/png",
+    }),
+  );
+  await user.click(screen.getByRole("button", { name: "Upload solution" }));
+  return screen.findByRole("button", { name: "Use this upload" });
+}
+
 beforeEach(() => {
   Object.defineProperty(URL, "createObjectURL", {
     configurable: true,
@@ -191,30 +298,7 @@ afterEach(() => vi.restoreAllMocks());
 describe("StaticStudentJourney", () => {
   it("renders every required phase and derives a deterministic complete summary", async () => {
     const api = createApi();
-    const fetchMock = vi
-      .spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            expiresAt: "2026-08-27T00:05:00Z",
-            uploadId: "upload-1",
-            uploadUrl: "http://storage.test/upload",
-          }),
-        ),
-      )
-      .mockResolvedValueOnce(new Response(null, { status: 200 }))
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            contentType: "image/png",
-            createdAt: "2026-08-27T00:00:00Z",
-            fileName: "synthetic-solution.png",
-            id: "upload-1",
-            sizeBytes: 4,
-            status: "ready",
-          }),
-        ),
-      );
+    const fetchMock = mockSuccessfulUpload();
     const user = userEvent.setup();
     render(<StaticStudentJourney api={api} />);
 
@@ -245,12 +329,20 @@ describe("StaticStudentJourney", () => {
     expect(
       await screen.findByRole("heading", { name: "Review the transcript" }),
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Confirm transcript" }));
+    expect(screen.getByText("A formula may need review.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Show source region for block 1" }));
+    expect(screen.getByRole("img", { name: "Selected transcript source region" })).toHaveStyle({
+      height: "10%",
+      left: "10%",
+      top: "20%",
+      width: "40%",
+    });
+    await user.click(screen.getByRole("button", { name: "Confirm exact transcript" }));
 
     expect(
       await screen.findByRole("heading", { name: "Authoritative evaluation input" }),
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Evaluate confirmed transcript" }));
+    await user.click(screen.getByRole("button", { name: "Run clearly mocked evaluation" }));
     expect(await screen.findByText("Deterministic synthetic feedback.")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Evaluation is uncertain" })).toBeInTheDocument();
     expect(screen.getByText(/Reference solutions are non-exhaustive/)).toBeInTheDocument();
@@ -364,4 +456,90 @@ describe("StaticStudentJourney", () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Retry this step" })).not.toBeInTheDocument();
   });
+
+  it("shows complete-response loading and terminal uncertainty without a transcript", async () => {
+    const api = createApi();
+    type ApiTranscription = Awaited<ReturnType<StaticJourneyApi["requestTranscription"]>>;
+    let resolveTranscription: ((value: ApiTranscription) => void) | undefined;
+    api.requestTranscription = vi.fn<StaticJourneyApi["requestTranscription"]>(
+      () =>
+        new Promise<ApiTranscription>((resolve) => {
+          resolveTranscription = resolve;
+        }),
+    );
+    mockSuccessfulUpload();
+    const user = userEvent.setup();
+    render(<StaticStudentJourney api={api} />);
+
+    await user.click(await reachReadyUpload(user));
+    expect(
+      await screen.findByText("Loading and validating the complete image transcription…"),
+    ).toHaveAttribute("role", "status");
+
+    resolveTranscription?.({
+      outcome: "uncertain",
+      run: { ...transcriptionRun, status: "uncertain" },
+      warnings: [
+        {
+          blockId: null,
+          code: "ordering_uncertain",
+          message: "The reading order may need review.",
+        },
+      ],
+    });
+
+    expect(
+      await screen.findByRole("heading", { name: "No transcript was created." }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("The reading order may need review.")).toBeInTheDocument();
+    expect(screen.queryByText("The synthetic midpoint is")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Upload a clearer synthetic image" }));
+    expect(screen.getByLabelText("Choose image")).toBeInTheDocument();
+  });
+
+  it.each([
+    {
+      code: "transcription_timeout",
+      heading: "This step could not finish.",
+      message: "Transcription timed out. Try again.",
+      retryable: true,
+      status: 503,
+    },
+    {
+      code: "transcription_provider_rejected",
+      heading: "This step could not finish.",
+      message: "The transcription service rejected this image.",
+      retryable: false,
+      status: 502,
+    },
+    {
+      code: "transcription_invalid_schema",
+      heading: "No transcript was accepted.",
+      message: "The transcription response was invalid after one retry.",
+      retryable: false,
+      status: 502,
+    },
+  ])(
+    "renders the terminal $code transcription state without fabricated output",
+    async ({ code, heading, message, retryable, status }) => {
+      const api = createApi();
+      api.requestTranscription = vi.fn().mockRejectedValue(new ApiError(code, message, status));
+      mockSuccessfulUpload();
+      const user = userEvent.setup();
+      render(<StaticStudentJourney api={api} />);
+
+      await user.click(await reachReadyUpload(user));
+
+      expect(await screen.findByRole("heading", { name: heading })).toBeInTheDocument();
+      expect(screen.getByText(message)).toHaveAttribute("role", "alert");
+      expect(screen.queryByText("The synthetic midpoint is")).not.toBeInTheDocument();
+      if (retryable) {
+        expect(screen.getByRole("button", { name: "Retry this step" })).toBeEnabled();
+      } else {
+        expect(
+          screen.getByText("The application did not fabricate a replacement result."),
+        ).toBeInTheDocument();
+      }
+    },
+  );
 });

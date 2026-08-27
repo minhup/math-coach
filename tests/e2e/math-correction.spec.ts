@@ -143,7 +143,7 @@ test("internal learner edits one inline simulated-OCR document", async ({ page }
   await page.getByRole("button", { name: "Move formula 3 earlier" }).click();
   await page.getByRole("button", { name: "Done editing formula 3" }).click();
 
-  await page.getByRole("button", { name: "Confirm transcript" }).click();
+  await page.getByRole("button", { name: "Confirm exact transcript" }).click();
   const confirmation = page.getByRole("status", { name: "Confirmed transcript" });
   await expect(confirmation).toContainText("Future authoritative grading input");
   const confirmedContent = confirmation.locator(".transcript-confirmed-document > *");

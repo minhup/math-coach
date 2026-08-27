@@ -53,8 +53,6 @@ from app.static_journey.schemas import (
     ConceptVersionResponse,
     MockEvaluationRequest,
     MockEvaluationResponse,
-    MockTranscriptionRequest,
-    MockTranscriptionResponse,
     NextHintRequest,
     NextHintResponse,
     StaticDailyPlanResponse,
@@ -63,11 +61,29 @@ from app.static_journey.service import (
     available_exam_cycles,
     concept_version,
     mock_evaluation,
-    mock_transcription,
     next_hint,
     static_daily_plan,
 )
 from app.storage import ObjectStorage, get_object_storage
+from app.transcription.provider import StrictTranscriptionProvider
+from app.transcription.schemas import (
+    TranscribeRequest,
+    TranscriptConfirmationResponse,
+    TranscriptConfirmRequest,
+    TranscriptionResponse,
+    TranscriptionStateResponse,
+    TranscriptVersionCreateRequest,
+    TranscriptVersionResponse,
+    UploadDownloadResponse,
+)
+from app.transcription.service import (
+    confirm_transcript,
+    create_transcript_version,
+    get_transcription_provider,
+    transcribe_attempt,
+    transcription_state,
+    upload_download_url,
+)
 from app.uploads import complete_upload, create_upload, owned_upload, upload_response
 
 error_responses: dict[int | str, dict[str, Any]] = {
@@ -75,7 +91,7 @@ error_responses: dict[int | str, dict[str, Any]] = {
     401: {"model": ErrorEnvelope, "description": "Authentication failed or is required"},
     404: {"model": ErrorEnvelope, "description": "Owned resource was not found"},
     409: {"model": ErrorEnvelope, "description": "Request conflicts with current state"},
-    502: {"model": ErrorEnvelope, "description": "A structured mock payload was invalid"},
+    502: {"model": ErrorEnvelope, "description": "An upstream structured response was invalid"},
     422: {"model": ErrorEnvelope, "description": "Request or upload validation failed"},
     503: {"model": ErrorEnvelope, "description": "A required service is unavailable"},
 }
@@ -139,27 +155,6 @@ async def get_static_daily_plan(
     database: Annotated[AsyncSession, Depends(get_database_session)],
 ) -> StaticDailyPlanResponse:
     return await static_daily_plan(user, database, utc_now().date())
-
-
-@router.post(
-    "/attempts/{attempt_id}/mock-transcription",
-    response_model=MockTranscriptionResponse,
-    tags=["static-journey"],
-)
-async def post_mock_transcription(
-    attempt_id: uuid.UUID,
-    payload: MockTranscriptionRequest,
-    user: CurrentUser,
-    database: Annotated[AsyncSession, Depends(get_database_session)],
-    boundary: Annotated[DeterministicMockBoundary, Depends(get_mock_boundary)],
-) -> MockTranscriptionResponse:
-    return await mock_transcription(
-        attempt_id=attempt_id,
-        payload=payload,
-        user=user,
-        database=database,
-        boundary=boundary,
-    )
 
 
 @router.post(
@@ -248,6 +243,108 @@ async def get_upload(
 ) -> UploadResponse:
     upload = await owned_upload(upload_id, user, database)
     return upload_response(upload)
+
+
+@router.post(
+    "/uploads/{upload_id}/download-url",
+    response_model=UploadDownloadResponse,
+    tags=["uploads"],
+)
+async def get_upload_download_url(
+    upload_id: uuid.UUID,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+    storage: Annotated[ObjectStorage, Depends(get_object_storage)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> UploadDownloadResponse:
+    return await upload_download_url(
+        upload_id=upload_id,
+        user=user,
+        database=database,
+        storage=storage,
+        settings=settings,
+    )
+
+
+@router.post(
+    "/attempts/{attempt_id}/transcribe",
+    response_model=TranscriptionResponse,
+    tags=["transcription"],
+)
+async def post_transcription(
+    attempt_id: uuid.UUID,
+    payload: TranscribeRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+    storage: Annotated[ObjectStorage, Depends(get_object_storage)],
+    settings: Annotated[Settings, Depends(get_settings)],
+    provider: Annotated[StrictTranscriptionProvider, Depends(get_transcription_provider)],
+) -> TranscriptionResponse:
+    return await transcribe_attempt(
+        attempt_id=attempt_id,
+        payload=payload,
+        user=user,
+        database=database,
+        storage=storage,
+        settings=settings,
+        provider=provider,
+    )
+
+
+@router.get(
+    "/attempts/{attempt_id}/transcription",
+    response_model=TranscriptionStateResponse,
+    tags=["transcription"],
+)
+async def get_transcription_state(
+    attempt_id: uuid.UUID,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> TranscriptionStateResponse:
+    return await transcription_state(
+        attempt_id=attempt_id,
+        user=user,
+        database=database,
+    )
+
+
+@router.post(
+    "/attempts/{attempt_id}/transcripts",
+    response_model=TranscriptVersionResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["transcription"],
+)
+async def post_transcript_version(
+    attempt_id: uuid.UUID,
+    payload: TranscriptVersionCreateRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> TranscriptVersionResponse:
+    return await create_transcript_version(
+        attempt_id=attempt_id,
+        payload=payload,
+        user=user,
+        database=database,
+    )
+
+
+@router.post(
+    "/attempts/{attempt_id}/confirm-transcript",
+    response_model=TranscriptConfirmationResponse,
+    tags=["transcription"],
+)
+async def post_transcript_confirmation(
+    attempt_id: uuid.UUID,
+    payload: TranscriptConfirmRequest,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> TranscriptConfirmationResponse:
+    return await confirm_transcript(
+        attempt_id=attempt_id,
+        payload=payload,
+        user=user,
+        database=database,
+    )
 
 
 @router.get("/study-profile", response_model=StudyProfileResponse, tags=["study-profile"])

@@ -1,16 +1,11 @@
 import type { components } from "@math-coach/api-client";
 
-import {
-  validateTranscriptState,
-  type TranscriptState,
-} from "../features/transcription/transcript-state";
 import { invalidResponse, isGeometryAction, isGeometryScene } from "./api";
 import { apiRequest } from "./api-transport";
 
 export type AvailableExamCycles = components["schemas"]["AvailableExamCycleListResponse"];
 export type StaticDailyPlan = components["schemas"]["StaticDailyPlanResponse"];
 export type MockEvaluation = components["schemas"]["MockEvaluationResponse"];
-export type MockTranscription = components["schemas"]["MockTranscriptionResponse"];
 export type NextHint = components["schemas"]["NextHintResponse"];
 export type ConceptVersion = components["schemas"]["ConceptVersionResponse"];
 export type StudyProfile = components["schemas"]["StudyProfileResponse"];
@@ -140,39 +135,6 @@ function parseAttempt(value: unknown): Attempt {
     status: value.status,
     studyProfileId: value.studyProfileId,
   };
-}
-
-function isTranscript(value: unknown): value is TranscriptState {
-  if (
-    !isObject(value) ||
-    !hasOnlyKeys(value, ["attemptId", "blocks", "schemaVersion"]) ||
-    typeof value.attemptId !== "string" ||
-    value.schemaVersion !== "2.0.0" ||
-    !Array.isArray(value.blocks) ||
-    value.blocks.length === 0
-  ) {
-    return false;
-  }
-  const ids = new Set<string>();
-  return value.blocks.every((block) => {
-    if (
-      !isObject(block) ||
-      typeof block.id !== "string" ||
-      block.id.length === 0 ||
-      ids.has(block.id)
-    ) {
-      return false;
-    }
-    ids.add(block.id);
-    return (
-      (block.type === "text" &&
-        hasOnlyKeys(block, ["id", "text", "type"]) &&
-        typeof block.text === "string") ||
-      (block.type === "math" &&
-        hasOnlyKeys(block, ["id", "latex", "type"]) &&
-        typeof block.latex === "string")
-    );
-  });
 }
 
 function isStrictContentBlock(value: unknown): value is JourneyContentBlock {
@@ -397,18 +359,6 @@ function parseMockEvaluation(value: unknown): MockEvaluation {
   return value;
 }
 
-function parseMockTranscription(value: unknown): MockTranscription {
-  if (
-    !isObject(value) ||
-    !hasOnlyKeys(value, ["metadata", "transcript"]) ||
-    !isMetadata(value.metadata) ||
-    !isTranscript(value.transcript)
-  ) {
-    return invalidResponse();
-  }
-  return { metadata: value.metadata, transcript: value.transcript };
-}
-
 function parseNextHint(value: unknown): NextHint {
   if (
     !isObject(value) ||
@@ -506,13 +456,10 @@ export function getStaticPlan(): Promise<StaticDailyPlan> {
 
 export function requestMockEvaluation(
   attemptId: string,
-  transcript: TranscriptState,
+  confirmedTranscriptVersionId: string,
 ): Promise<MockEvaluation> {
-  const confirmed = validateTranscriptState(transcript);
   return apiRequest(`/api/v1/attempts/${attemptId}/mock-evaluation`, parseMockEvaluation, {
-    body: JSON.stringify({
-      confirmedTranscript: { confirmationStatus: "confirmed", transcript: confirmed },
-    }),
+    body: JSON.stringify({ confirmedTranscriptVersionId }),
     method: "POST",
   });
 }
@@ -520,16 +467,6 @@ export function requestMockEvaluation(
 export function createAttempt(problemVersionId: string): Promise<Attempt> {
   return apiRequest("/api/v1/attempts", parseAttempt, {
     body: JSON.stringify({ problemVersionId }),
-    method: "POST",
-  });
-}
-
-export function requestMockTranscription(
-  attemptId: string,
-  uploadId: string,
-): Promise<MockTranscription> {
-  return apiRequest(`/api/v1/attempts/${attemptId}/mock-transcription`, parseMockTranscription, {
-    body: JSON.stringify({ uploadId }),
     method: "POST",
   });
 }

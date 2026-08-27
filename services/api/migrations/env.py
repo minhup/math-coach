@@ -6,6 +6,7 @@ from app import attempt_models, profile_models  # noqa: F401
 from app.config import get_settings
 from app.content import models as content_models  # noqa: F401
 from app.models import Base
+from app.transcription import models as transcription_models  # noqa: F401
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 config = context.config

@@ -9,7 +9,6 @@ import {
   getStaticPlan,
   getStudyProfile,
   requestMockEvaluation,
-  requestMockTranscription,
   requestNextHint,
 } from "./static-journey-api";
 
@@ -113,20 +112,12 @@ describe("static journey API boundary", () => {
         }),
       ),
     );
-    const transcript = {
-      attemptId: "attempt-1",
-      blocks: [{ id: "text-1", text: "Reviewed.", type: "text" as const }],
-      schemaVersion: "2.0.0" as const,
-    };
-
-    await requestMockEvaluation("attempt-1", transcript);
+    await requestMockEvaluation("attempt-1", "transcript-version-1");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/attempts/attempt-1/mock-evaluation",
       expect.objectContaining({
-        body: JSON.stringify({
-          confirmedTranscript: { confirmationStatus: "confirmed", transcript },
-        }),
+        body: JSON.stringify({ confirmedTranscriptVersionId: "transcript-version-1" }),
         method: "POST",
       }),
     );
@@ -154,16 +145,6 @@ describe("static journey API boundary", () => {
       updatedAt: "2026-08-27T00:00:00Z",
       weeklyStudyMinutes: 240,
     };
-    const metadata = {
-      costUsd: "0.000000",
-      inputTokens: 0,
-      latencyMs: 0,
-      modelSnapshot: "m5-static-fixture-v1",
-      outputTokens: 0,
-      promptVersion: "m5-no-provider-prompt-v1",
-      provider: "application-owned-synthetic-mock",
-      schemaVersion: "1.0.0",
-    };
     const fetchMock = vi.spyOn(globalThis, "fetch");
     for (const response of [
       profile,
@@ -188,14 +169,6 @@ describe("static journey API boundary", () => {
         problemVersionId: "problem-version-1",
         status: "draft",
         studyProfileId: "profile-1",
-      },
-      {
-        metadata,
-        transcript: {
-          attemptId: "attempt-1",
-          blocks: [{ id: "text-1", text: "Synthetic transcript.", type: "text" }],
-          schemaVersion: "2.0.0",
-        },
       },
       {
         conceptVersionId: null,
@@ -229,48 +202,9 @@ describe("static journey API boundary", () => {
       items: [{ cycleCode: "SYN-AURORA-2027" }],
     });
     await expect(createAttempt("problem-version-1")).resolves.toMatchObject({ id: "attempt-1" });
-    await expect(requestMockTranscription("attempt-1", "upload-1")).resolves.toMatchObject({
-      transcript: { attemptId: "attempt-1" },
-    });
     await expect(requestNextHint("attempt-1", 0)).resolves.toMatchObject({ hintLevel: 1 });
     await expect(getConceptVersion("concept-version-1")).resolves.toMatchObject({
       code: "SYN-MIDPOINT-COORDINATES",
-    });
-  });
-
-  it("rejects an invalid mock transcript before correction UI can use it", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          metadata: {
-            costUsd: "0.000000",
-            inputTokens: 0,
-            latencyMs: 0,
-            modelSnapshot: "m5-static-fixture-v1",
-            outputTokens: 0,
-            promptVersion: "m5-no-provider-prompt-v1",
-            provider: "application-owned-synthetic-mock",
-            schemaVersion: "1.0.0",
-          },
-          transcript: {
-            attemptId: "attempt-1",
-            blocks: [
-              {
-                html: "<script>unsafe()</script>",
-                id: "text-1",
-                text: "Synthetic transcript.",
-                type: "text",
-              },
-            ],
-            schemaVersion: "2.0.0",
-          },
-        }),
-      ),
-    );
-
-    await expect(requestMockTranscription("attempt-1", "upload-1")).rejects.toMatchObject({
-      code: "invalid_response",
-      status: 502,
     });
   });
 });

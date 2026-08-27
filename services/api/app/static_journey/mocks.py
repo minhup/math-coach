@@ -1,6 +1,5 @@
 import hashlib
 import json
-import uuid
 from collections.abc import Callable
 from decimal import Decimal
 from functools import lru_cache
@@ -9,17 +8,13 @@ from typing import Protocol
 from pydantic import BaseModel, ValidationError
 
 from app.static_journey.schemas import (
-    ConfirmedTranscript,
     MockEvaluationResponse,
     MockRunMetadata,
-    MockTranscriptionResponse,
-    TranscriptDocument,
 )
+from app.transcription.schemas import TranscriptDocument
 
 
 class RawMockSource(Protocol):
-    def transcript_payload(self, attempt_id: uuid.UUID) -> object: ...
-
     def evaluation_payload(self, transcript_fingerprint: str) -> object: ...
 
 
@@ -36,29 +31,6 @@ class MockSourceError(Exception):
 
 
 class StaticFixtureSource:
-    def transcript_payload(self, attempt_id: uuid.UUID) -> object:
-        return {
-            "schemaVersion": "2.0.0",
-            "attemptId": str(attempt_id),
-            "blocks": [
-                {
-                    "id": "m5-synthetic-text-1",
-                    "type": "text",
-                    "text": "The synthetic draft gives the midpoint as ",
-                },
-                {
-                    "id": "m5-synthetic-math-1",
-                    "type": "math",
-                    "latex": "M=(2,0",
-                },
-                {
-                    "id": "m5-synthetic-text-2",
-                    "type": "text",
-                    "text": ". Review both the wording and mathematics before confirmation.",
-                },
-            ],
-        }
-
     def evaluation_payload(self, transcript_fingerprint: str) -> object:
         return {
             "outcome": "ready",
@@ -125,9 +97,6 @@ class FailedFixtureSource(StaticFixtureSource):
     def __init__(self, *, retryable: bool) -> None:
         self._retryable = retryable
 
-    def transcript_payload(self, attempt_id: uuid.UUID) -> object:
-        raise MockSourceError(retryable=self._retryable)
-
     def evaluation_payload(self, transcript_fingerprint: str) -> object:
         raise MockSourceError(retryable=self._retryable)
 
@@ -165,17 +134,9 @@ class DeterministicMockBoundary:
     def __init__(self, source: RawMockSource) -> None:
         self._source = source
 
-    def transcribe(self, attempt_id: uuid.UUID) -> MockTranscriptionResponse:
-        transcript = validate_mock_payload(
-            TranscriptDocument,
-            lambda: self._source.transcript_payload(attempt_id),
-            lambda item: item.attempt_id == attempt_id,
-        )
-        return MockTranscriptionResponse(transcript=transcript, metadata=mock_metadata())
-
-    def evaluate(self, confirmed: ConfirmedTranscript) -> MockEvaluationResponse:
+    def evaluate(self, transcript: TranscriptDocument) -> MockEvaluationResponse:
         canonical = json.dumps(
-            confirmed.transcript.model_dump(by_alias=True, mode="json"),
+            transcript.model_dump(by_alias=True, mode="json"),
             separators=(",", ":"),
             sort_keys=True,
         ).encode()

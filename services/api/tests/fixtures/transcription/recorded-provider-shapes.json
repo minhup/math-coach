@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "1.0.0",
+  "provenance": {
+    "classification": "hand_authored_synthetic_contract_shape",
+    "createdAt": "2026-08-28",
+    "containsRealProviderResponse": false,
+    "containsPersonalData": false
+  },
+  "applicationPayloads": {
+    "valid": {
+      "outcome": "ready",
+      "blocks": [
+        { "type": "text", "text": "The learner wrote " },
+        { "type": "math", "latex": "x=-2" }
+      ],
+      "warnings": []
+    },
+    "unknownField": {
+      "outcome": "ready",
+      "blocks": [{ "type": "text", "text": "Visible", "providerControl": "reject" }],
+      "warnings": []
+    },
+    "unsupportedVariant": {
+      "outcome": "ready",
+      "blocks": [{ "type": "markdown", "markdown": "**reject**" }],
+      "warnings": []
+    },
+    "empty": { "outcome": "ready", "blocks": [], "warnings": [] },
+    "malformedMathPreservedForVisualCorrection": {
+      "outcome": "ready",
+      "blocks": [{ "type": "math", "latex": "\\frac{" }],
+      "warnings": [{ "code": "low_confidence_math", "blockIndex": 0 }]
+    },
+    "invalidSourceRegion": {
+      "outcome": "ready",
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Outside",
+          "sourceRegion": { "x": 0.9, "y": 0.1, "width": 0.2, "height": 0.2 }
+        }
+      ],
+      "warnings": []
+    },
+    "uncertain": {
+      "outcome": "uncertain",
+      "warnings": [{ "code": "ordering_uncertain" }]
+    }
+  },
+  "providerEnvelopes": {
+    "gemini": {
+      "candidates": [
+        {
+          "content": {
+            "parts": [
+              {
+                "text": "{\"outcome\":\"ready\",\"blocks\":[{\"type\":\"text\",\"text\":\"The learner wrote \"},{\"type\":\"math\",\"latex\":\"x=-2\"}],\"warnings\":[]}"
+              }
+            ]
+          }
+        }
+      ],
+      "usageMetadata": { "promptTokenCount": 101, "candidatesTokenCount": 29 }
+    },
+    "openai": {
+      "output": [
+        {
+          "content": [
+            {
+              "type": "output_text",
+              "text": "{\"outcome\":\"ready\",\"blocks\":[{\"type\":\"text\",\"text\":\"The learner wrote \"},{\"type\":\"math\",\"latex\":\"x=-2\"}],\"warnings\":[]}"
+            }
+          ]
+        }
+      ],
+      "usage": { "input_tokens": 80, "output_tokens": 20 }
+    },
+    "anthropic": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"outcome\":\"ready\",\"blocks\":[{\"type\":\"text\",\"text\":\"The learner wrote \"},{\"type\":\"math\",\"latex\":\"x=-2\"}],\"warnings\":[]}"
+        }
+      ],
+      "usage": { "input_tokens": 90, "output_tokens": 25 }
+    }
+  },
+  "stableFailureCodes": [
+    "timeout",
+    "rate_limited",
+    "transport_failed",
+    "invalid_media",
+    "provider_rejected",
+    "invalid_schema"
+  ]
+}
