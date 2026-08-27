@@ -68,8 +68,9 @@ selection prompts use the discriminated `ContentBlock` union:
 - a typed callout containing more content blocks.
 
 Arbitrary Markdown and HTML are not package fields and are rejected as unknown data. Preview code
-switches on the generated union and never injects HTML. MathLive, student visual editing, KaTeX, and
-interactive geometry rendering remain later milestones.
+switches on the generated union and never injects HTML. Milestone 3 routes preview mathematics through
+the [controlled KaTeX and visual-correction boundary](math-rendering-and-transcript-state.md).
+Interactive geometry rendering remains a later milestone.
 
 Geometry scene versions are declarative JSON. Their finite object vocabulary contains IDs,
 construction parents, free-point coordinates, labels, viewport, initial visibility, approved

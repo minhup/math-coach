@@ -288,6 +288,8 @@ Proposed and owned by this branch:
 - `docs/changes/2026-08-26-m3-math-rendering-correction-spike.md` — living execution record.
 - `docs/architecture/math-rendering-and-transcript-state.md` — permanent controlled-renderer,
   MathLive, transcript-state, confirmation, security, and rollback contract.
+- `docs/architecture/versioned-content-and-multi-exam.md` — replace its now-stale statement that
+  KaTeX and MathLive are future milestones with a link to the Milestone 3 boundary.
 - `docs/evaluation/m3-math-rendering-device-report.md` — committed corpus and exact five-project
   phone/tablet regression results.
 - `README.md` — internal correction route and focused verification commands.
@@ -563,7 +565,7 @@ contract will be documented and resolved deliberately, followed by affected focu
 - [x] Branch created from current main
 - [x] Tests written or updated
 - [x] Implementation complete
-- [ ] Documentation updated
+- [x] Documentation updated
 - [ ] Relevant checks pass
 - [ ] Diff reviewed
 - [ ] Branch rebased on current main
@@ -686,6 +688,10 @@ components/content-preview.test.tsx --coverage=false` passed 20 focused renderer
 - `docs/evaluation/m3-math-rendering-device-report.md` records the exact environment, assertions,
   results, manual inspection, and isolated-port reason. The temporary base-URL config and generated
   screenshots were not committed.
+- `npm run format` and `npm run format:check` passed after adding all Milestone 3 owned documents to
+  the root formatting contract.
+- The documented focused command `npx vitest run components/math components/transcription
+features/transcription --coverage=false` passed 41 tests across six files.
 
 ## Result
 
