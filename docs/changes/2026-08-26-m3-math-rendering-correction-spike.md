@@ -522,8 +522,8 @@ conflict must be documented and followed by affected focused tests and `make che
 components/transcription/transcript-editor.test.tsx
 components/transcription/correction-spike-app.test.tsx components/math/mathlive-editor.test.tsx
 components/math/math-renderer.test.tsx components/content-preview.test.tsx --coverage=false` — 6
-  files and 44 tests passed in 1.06 seconds before final verification and in 952 ms after the rebase
-  freshness check.
+  files and 44 tests passed in 1.06 seconds before full verification, in 952 ms during diff review,
+  and in 1.14 seconds after the final rebase freshness check.
 - `make lint` and `make typecheck` passed independently during refactor. ESLint caught ref access in
   the first initializer; lazy validated state initialization corrected it without changing behavior.
 - `make check` — passed after the isolated browser harness was corrected. It repeated every
