@@ -4,6 +4,8 @@ import {
   addBlock,
   confirmTranscript,
   deleteBlock,
+  deleteMathBlock,
+  insertMathAtTextOffset,
   moveBlock,
   type TranscriptState,
   updateBlockValue,
@@ -163,5 +165,92 @@ describe("flat transcript state", () => {
     });
     expect(initialState.blocks[0]).not.toBe(text.blocks[0]);
     expect(() => updateBlockValue(initialState, "unknown", "value")).toThrow(/unknown block/i);
+  });
+
+  it("inserts mathematics at an exact text caret without losing surrounding text", () => {
+    const next = insertMathAtTextOffset(initialState, {
+      mathBlockId: "inserted-math",
+      offset: 6,
+      textBlockId: "block-text-1",
+      trailingTextBlockId: "inserted-text",
+    });
+
+    expect(next.blocks).toEqual([
+      { id: "block-text-1", text: "Let x ", type: "text" },
+      { id: "inserted-math", latex: "", type: "math" },
+      { id: "inserted-text", text: "be positive.", type: "text" },
+      { id: "block-math-1", latex: "x^2=4", type: "math" },
+      { id: "block-text-2", text: "Therefore", type: "text" },
+      { id: "block-math-2", latex: "x=2", type: "math" },
+    ]);
+    expect(initialState.blocks[0]).toEqual({
+      id: "block-text-1",
+      text: "Let x be positive.",
+      type: "text",
+    });
+  });
+
+  it("keeps an editable text position after start and end formula insertion", () => {
+    const atStart = insertMathAtTextOffset(initialState, {
+      mathBlockId: "math-at-start",
+      offset: 0,
+      textBlockId: "block-text-1",
+      trailingTextBlockId: "unused-start-text",
+    });
+    const atEnd = insertMathAtTextOffset(initialState, {
+      mathBlockId: "math-at-end",
+      offset: "Let x be positive.".length,
+      textBlockId: "block-text-1",
+      trailingTextBlockId: "text-after-end",
+    });
+
+    expect(atStart.blocks.slice(0, 2)).toEqual([
+      { id: "math-at-start", latex: "", type: "math" },
+      { id: "block-text-1", text: "Let x be positive.", type: "text" },
+    ]);
+    expect(atEnd.blocks.slice(0, 3)).toEqual([
+      { id: "block-text-1", text: "Let x be positive.", type: "text" },
+      { id: "math-at-end", latex: "", type: "math" },
+      { id: "text-after-end", text: "", type: "text" },
+    ]);
+    expect(() =>
+      insertMathAtTextOffset(initialState, {
+        mathBlockId: "bad-offset",
+        offset: 99,
+        textBlockId: "block-text-1",
+        trailingTextBlockId: "bad-offset-text",
+      }),
+    ).toThrow(/caret position/i);
+  });
+
+  it("deletes a confirmed formula and joins surrounding text in reading order", () => {
+    const next = deleteMathBlock(initialState, {
+      mathBlockId: "block-math-1",
+      replacementTextBlockId: "unused-replacement",
+    });
+
+    expect(next.blocks).toEqual([
+      { id: "block-text-1", text: "Let x be positive.Therefore", type: "text" },
+      { id: "block-math-2", latex: "x=2", type: "math" },
+    ]);
+    expect(initialState.blocks).toHaveLength(4);
+
+    expect(
+      deleteMathBlock(
+        {
+          attemptId: "formula-only",
+          blocks: [{ id: "only-formula", latex: "x=1", type: "math" }],
+          schemaVersion: "2.0.0",
+        },
+        { mathBlockId: "only-formula", replacementTextBlockId: "empty-document-text" },
+      ).blocks,
+    ).toEqual([{ id: "empty-document-text", text: "", type: "text" }]);
+
+    expect(() =>
+      deleteMathBlock(initialState, {
+        mathBlockId: "block-text-1",
+        replacementTextBlockId: "replacement",
+      }),
+    ).toThrow(/math block/i);
   });
 });

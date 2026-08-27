@@ -119,6 +119,91 @@ export function updateBlockValue(
   return validateTranscriptState({ ...state, blocks });
 }
 
+export function insertMathAtTextOffset(
+  state: TranscriptState,
+  input: {
+    mathBlockId: string;
+    offset: number;
+    textBlockId: string;
+    trailingTextBlockId: string;
+  },
+): TranscriptState {
+  validateTranscriptState(state);
+  const textBlockIndex = findBlockIndex(state, input.textBlockId);
+  const textBlock = state.blocks[textBlockIndex];
+  if (textBlock.type !== "text") {
+    throw new TranscriptStateError("Mathematics can only be inserted at a text caret.");
+  }
+  if (!Number.isInteger(input.offset) || input.offset < 0 || input.offset > textBlock.text.length) {
+    throw new TranscriptStateError("Text caret position is outside the text block.");
+  }
+
+  for (const id of [input.mathBlockId, input.trailingTextBlockId]) {
+    if (id.trim().length === 0) {
+      throw new TranscriptStateError("Inserted blocks must have non-empty IDs.");
+    }
+    if (state.blocks.some((block) => block.id === id)) {
+      throw new TranscriptStateError(`Duplicate block ID: ${id}`);
+    }
+  }
+  if (input.mathBlockId === input.trailingTextBlockId) {
+    throw new TranscriptStateError(`Duplicate block ID: ${input.mathBlockId}`);
+  }
+
+  const leadingText = textBlock.text.slice(0, input.offset);
+  const trailingText = textBlock.text.slice(input.offset);
+  const inserted: TranscriptBlock[] =
+    input.offset === 0
+      ? [{ id: input.mathBlockId, latex: "", type: "math" }, cloneBlock(textBlock)]
+      : [
+          { ...textBlock, text: leadingText },
+          { id: input.mathBlockId, latex: "", type: "math" },
+          { id: input.trailingTextBlockId, text: trailingText, type: "text" },
+        ];
+  const blocks = state.blocks.map(cloneBlock);
+  blocks.splice(textBlockIndex, 1, ...inserted);
+  return validateTranscriptState({ ...state, blocks });
+}
+
+export function deleteMathBlock(
+  state: TranscriptState,
+  input: { mathBlockId: string; replacementTextBlockId: string },
+): TranscriptState {
+  validateTranscriptState(state);
+  const mathBlockIndex = findBlockIndex(state, input.mathBlockId);
+  if (state.blocks[mathBlockIndex].type !== "math") {
+    throw new TranscriptStateError("Only a math block can be deleted as a formula.");
+  }
+
+  const blocks = state.blocks.map(cloneBlock);
+  const previous = blocks[mathBlockIndex - 1];
+  const next = blocks[mathBlockIndex + 1];
+  if (previous?.type === "text" && next?.type === "text") {
+    blocks.splice(mathBlockIndex - 1, 3, {
+      ...previous,
+      text: previous.text + next.text,
+    });
+  } else {
+    blocks.splice(mathBlockIndex, 1);
+  }
+
+  if (!blocks.some((block) => block.type === "text")) {
+    if (input.replacementTextBlockId.trim().length === 0) {
+      throw new TranscriptStateError("Replacement text block must have a non-empty ID.");
+    }
+    if (blocks.some((block) => block.id === input.replacementTextBlockId)) {
+      throw new TranscriptStateError(`Duplicate block ID: ${input.replacementTextBlockId}`);
+    }
+    blocks.splice(Math.min(mathBlockIndex, blocks.length), 0, {
+      id: input.replacementTextBlockId,
+      text: "",
+      type: "text",
+    });
+  }
+
+  return validateTranscriptState({ ...state, blocks });
+}
+
 export function confirmTranscript(state: TranscriptState): ConfirmedTranscriptSnapshot {
   validateTranscriptState(state);
   return {
