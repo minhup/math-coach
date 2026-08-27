@@ -652,11 +652,20 @@ components/content-preview.test.tsx --coverage=false` passed 20 focused renderer
   `/internal/content-preview` routes with KaTeX CSS bundled.
 - Actual `du -sb` package content sizes exactly matched registry metadata for direct/transitive
   production packages: KaTeX tree 4,185,500 bytes and MathLive tree 27,079,799 bytes.
+- Transcript-state red/green evidence: the focused test first failed because the public state module
+  did not exist, then passed 12 tests covering all documented invariants, typed updates, immutable
+  add/delete/move operations, split/merge/move step operations, and deterministic independent
+  confirmation serialization.
+- `npm run test:unit --workspace @math-coach/student-web` passed 54 tests after adding the pure
+  transcript module to coverage. Aggregate coverage remained above every 80% gate: 93.19%
+  statements, 90.42% branches, 94.91% functions, and 93.01% lines.
+- `npm run typecheck --workspace @math-coach/student-web` passed after the transcript-state slice.
 
 ## Result
 
 In progress. Repository and official documentation inspection is complete, the isolated branch and
 ChangePlan exist, and the project owner confirmed the owned files/public test seams on 2026-08-27.
 All non-browser baseline gates pass; standard-port E2E is currently obstructed by owner-run services
-from the shared checkout and is recorded above. The controlled renderer and existing typed-content
-preview migration are implemented and focused-green; transcript-state work is next.
+from the shared checkout and is recorded above. The controlled renderer, existing typed-content
+preview migration, and deterministic transcript-state operations are implemented and focused-green;
+the MathLive correction workflow is next.
