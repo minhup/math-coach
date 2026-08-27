@@ -160,3 +160,17 @@ Exact results are in
 Rollback reverts this milestone, removes the internal route and its two locked dependencies, and
 restores the prior preview presentation. There is no database downgrade, data backfill, transcript
 recovery, or provider cleanup because the spike creates no persistent or external state.
+
+## Milestone 6 durable extension
+
+Milestone 6 supersedes only the transient transcript boundary described above. Transcript schema
+`3.0.0` keeps the same flat ordered text/math union and adds finite warnings plus optional normalized
+source regions. The MathLive/native-caret/KaTeX correction behavior remains canonical. Existing
+provider block IDs and source provenance cannot be changed during correction; learner-inserted blocks
+cannot claim provider source regions.
+
+Correction now saves an immutable transcript version, and confirmation stores the exact version ID
+and canonical SHA-256 in a separate immutable record. Editing after confirmation is rejected. Only
+that server-loaded confirmed version can enter the still-synthetic M5 evaluator. Provider details,
+persistence, idempotency, and failure behavior are documented in the
+[multimodal transcription architecture](multimodal-transcription.md).

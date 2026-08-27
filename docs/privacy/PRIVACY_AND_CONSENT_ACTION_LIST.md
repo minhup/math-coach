@@ -8,7 +8,7 @@
 - Decision authority: Project owner
 - Legal reviewer: DECISION REQUIRED
 - Security review evidence: DECISION REQUIRED
-- Last updated: 2026-08-25
+- Last updated: 2026-08-28
 
 This is a pre-pilot action register, not legal advice and not a legal conclusion. It does not block internal UI/UX and engineering work that uses synthetic/non-personal fixtures. Qualified reviewers must determine the rules that apply before an external cohort is invited. No minors' data may be collected merely because an engineering milestone is technically complete.
 
@@ -30,35 +30,50 @@ Future implementation must:
 
 These constraints do not resolve the legal basis, retention periods, consent wording, or responsible parties.
 
+## Milestone 6 technical boundary
+
+Milestone 6 integrates server-only adapters for the owner-selected exact models, but this is not
+provider privacy approval. Development, automated tests, and the deferred benchmark are restricted
+to clearly synthetic/non-personal repository fixtures. No real provider call was made during the M6
+implementation, and the 20-call Gemini benchmark was explicitly deferred.
+
+The implementation keeps image bytes in object storage, reads only an owned verified upload through
+the internal endpoint, stores only validated transcript/run metadata, and never stores provider
+secrets, raw provider responses, or hidden reasoning. Run/transcript/confirmation records themselves
+provide immutable operation evidence; the broader cross-product audit-event policy remains
+`DECISION REQUIRED`. Provider, image, transcript, audit, backup, and deletion retention periods also
+remain unapproved. Official provider handling facts and caveats are recorded without suitability
+claims in the [M6 benchmark report](../evaluation/m6-transcription-benchmark-report.md).
+
 ## Pre-pilot action register
 
 Every row must be completed before the external pilot, not before Milestone 1. Each requires dated evidence and the project owner's explicit decision or a documented determination that the item is not applicable. Qualified legal, privacy, or security review remains required where indicated, but reviewers provide supporting evidence rather than separate MVP approval authority.
 
-| Action | Required result | Evidence | Status |
-|---|---|---|---|
-| Determine applicable jurisdictions and rules | Written scope based on cohort location, age, service operator, and data flows | DECISION REQUIRED | DECISION REQUIRED |
-| Establish lawful basis for each processing purpose | Reviewed mapping covering service delivery, safety, operations, analytics, and optional research | DECISION REQUIRED | DECISION REQUIRED |
-| Determine age and identity handling | Approved age-screening and identity-minimization approach | DECISION REQUIRED | DECISION REQUIRED |
-| Determine parent/guardian consent and student assent | Approved applicability decision, collection flow, records, renewal, and withdrawal behavior | DECISION REQUIRED | DECISION REQUIRED |
-| Review automated educational assessment | Approved notices, uncertainty handling, contest/correction path, and any human-review obligations | DECISION REQUIRED | DECISION REQUIRED |
-| Inventory personal and sensitive data | Field-level inventory covering accounts, profiles, targets, photos, transcripts, evaluations, logs, and audit events | DECISION REQUIRED | DECISION REQUIRED |
-| Map processors and data locations | Approved data-flow diagram and processor/subprocessor register | DECISION REQUIRED | DECISION REQUIRED |
-| Review AI provider processing | Approved terms covering retention, training use, data location, subprocessors, deletion, security, and incident notice | DECISION REQUIRED | DECISION REQUIRED |
-| Review object storage and hosting | Approved region, access, encryption, retention, backup, and deletion controls | DECISION REQUIRED | DECISION REQUIRED |
-| Approve image handling | Limits for type/size, signed URL lifetime, malware handling if required, EXIF removal, access, and deletion | DECISION REQUIRED | DECISION REQUIRED |
-| Approve operational retention schedule | Purpose-specific durations and deletion behavior for all production records | DECISION REQUIRED | DECISION REQUIRED |
-| Approve optional research retention | Separate opt-in, dataset boundaries, access, withdrawal, de-identification, and destruction plan | DECISION REQUIRED | DECISION REQUIRED |
-| Define account deletion | Request authentication, deletion scope, exceptions, service level, evidence, and user notice | DECISION REQUIRED | DECISION REQUIRED |
-| Define data export | Request authentication, export scope/format, secure delivery, service level, and audit behavior | DECISION REQUIRED | DECISION REQUIRED |
-| Approve participant notices | Age-appropriate student notice plus parent/guardian notice where required | DECISION REQUIRED | DECISION REQUIRED |
-| Approve consent records | Versioned notice/consent text, actor, timestamp, scope, withdrawal, and re-consent triggers | DECISION REQUIRED | DECISION REQUIRED |
-| Define authorization and support access | Role matrix, least privilege, support elevation, review cadence, and revocation | DECISION REQUIRED | DECISION REQUIRED |
-| Define audit events | Sensitive actions, actor, target, timestamp, reason, access, retention, and tamper controls | DECISION REQUIRED | DECISION REQUIRED |
-| Define incident procedure | Classification, containment, escalation, notification, evidence preservation, and participant support | DECISION REQUIRED | DECISION REQUIRED |
-| Review security controls and threats | Approved threat model and pilot security checklist | DECISION REQUIRED | DECISION REQUIRED |
-| Define complaint and correction route | Student/guardian contact, response target, assessment challenge, correction, and escalation | DECISION REQUIRED | DECISION REQUIRED |
-| Approve pilot data-use boundaries | Written prohibition or authorization for each secondary use | DECISION REQUIRED | DECISION REQUIRED |
-| Define end-of-pilot disposition | Approved archive, return, anonymization, or deletion action for each data class | DECISION REQUIRED | DECISION REQUIRED |
+| Action                                               | Required result                                                                                                        | Evidence          | Status            |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------- | ----------------- |
+| Determine applicable jurisdictions and rules         | Written scope based on cohort location, age, service operator, and data flows                                          | DECISION REQUIRED | DECISION REQUIRED |
+| Establish lawful basis for each processing purpose   | Reviewed mapping covering service delivery, safety, operations, analytics, and optional research                       | DECISION REQUIRED | DECISION REQUIRED |
+| Determine age and identity handling                  | Approved age-screening and identity-minimization approach                                                              | DECISION REQUIRED | DECISION REQUIRED |
+| Determine parent/guardian consent and student assent | Approved applicability decision, collection flow, records, renewal, and withdrawal behavior                            | DECISION REQUIRED | DECISION REQUIRED |
+| Review automated educational assessment              | Approved notices, uncertainty handling, contest/correction path, and any human-review obligations                      | DECISION REQUIRED | DECISION REQUIRED |
+| Inventory personal and sensitive data                | Field-level inventory covering accounts, profiles, targets, photos, transcripts, evaluations, logs, and audit events   | DECISION REQUIRED | DECISION REQUIRED |
+| Map processors and data locations                    | Approved data-flow diagram and processor/subprocessor register                                                         | DECISION REQUIRED | DECISION REQUIRED |
+| Review AI provider processing                        | Approved terms covering retention, training use, data location, subprocessors, deletion, security, and incident notice | DECISION REQUIRED | DECISION REQUIRED |
+| Review object storage and hosting                    | Approved region, access, encryption, retention, backup, and deletion controls                                          | DECISION REQUIRED | DECISION REQUIRED |
+| Approve image handling                               | Limits for type/size, signed URL lifetime, malware handling if required, EXIF removal, access, and deletion            | DECISION REQUIRED | DECISION REQUIRED |
+| Approve operational retention schedule               | Purpose-specific durations and deletion behavior for all production records                                            | DECISION REQUIRED | DECISION REQUIRED |
+| Approve optional research retention                  | Separate opt-in, dataset boundaries, access, withdrawal, de-identification, and destruction plan                       | DECISION REQUIRED | DECISION REQUIRED |
+| Define account deletion                              | Request authentication, deletion scope, exceptions, service level, evidence, and user notice                           | DECISION REQUIRED | DECISION REQUIRED |
+| Define data export                                   | Request authentication, export scope/format, secure delivery, service level, and audit behavior                        | DECISION REQUIRED | DECISION REQUIRED |
+| Approve participant notices                          | Age-appropriate student notice plus parent/guardian notice where required                                              | DECISION REQUIRED | DECISION REQUIRED |
+| Approve consent records                              | Versioned notice/consent text, actor, timestamp, scope, withdrawal, and re-consent triggers                            | DECISION REQUIRED | DECISION REQUIRED |
+| Define authorization and support access              | Role matrix, least privilege, support elevation, review cadence, and revocation                                        | DECISION REQUIRED | DECISION REQUIRED |
+| Define audit events                                  | Sensitive actions, actor, target, timestamp, reason, access, retention, and tamper controls                            | DECISION REQUIRED | DECISION REQUIRED |
+| Define incident procedure                            | Classification, containment, escalation, notification, evidence preservation, and participant support                  | DECISION REQUIRED | DECISION REQUIRED |
+| Review security controls and threats                 | Approved threat model and pilot security checklist                                                                     | DECISION REQUIRED | DECISION REQUIRED |
+| Define complaint and correction route                | Student/guardian contact, response target, assessment challenge, correction, and escalation                            | DECISION REQUIRED | DECISION REQUIRED |
+| Approve pilot data-use boundaries                    | Written prohibition or authorization for each secondary use                                                            | DECISION REQUIRED | DECISION REQUIRED |
+| Define end-of-pilot disposition                      | Approved archive, return, anonymization, or deletion action for each data class                                        | DECISION REQUIRED | DECISION REQUIRED |
 
 ## Required data-flow review
 
@@ -97,17 +112,17 @@ Withdrawal behavior must define future processing, account access, queued jobs, 
 
 ## Image retention decision record
 
-| Item | Approved value |
-|---|---|
-| Maximum image size and allowed types | DECISION REQUIRED |
-| Upload URL lifetime | DECISION REQUIRED |
-| Download URL lifetime | DECISION REQUIRED |
-| EXIF-removal point and verification | DECISION REQUIRED |
-| Original-image operational retention | DECISION REQUIRED |
-| Derived-image retention | DECISION REQUIRED |
+| Item                                      | Approved value    |
+| ----------------------------------------- | ----------------- |
+| Maximum image size and allowed types      | DECISION REQUIRED |
+| Upload URL lifetime                       | DECISION REQUIRED |
+| Download URL lifetime                     | DECISION REQUIRED |
+| EXIF-removal point and verification       | DECISION REQUIRED |
+| Original-image operational retention      | DECISION REQUIRED |
+| Derived-image retention                   | DECISION REQUIRED |
 | Backup retention and deletion propagation | DECISION REQUIRED |
-| Internal access roles | DECISION REQUIRED |
-| AI provider retention | DECISION REQUIRED |
+| Internal access roles                     | DECISION REQUIRED |
+| AI provider retention                     | DECISION REQUIRED |
 
 ## Approval and evidence
 

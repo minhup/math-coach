@@ -2,14 +2,14 @@
 
 ## Metadata
 
-- Status: blocked
+- Status: implementation complete; final rebase and verification in progress
 - Owner: project owner and Codex
 - Branch: `feat/m6-multimodal-transcription`
 - Base commit: `dbfd8162a27f2f63fecfcdbe63759d64eab56c24`
 - Related milestone: Milestone 6 — Multimodal transcription
 - Related issue/ticket: None supplied
 - Started: 2026-08-27
-- Last updated: 2026-08-27
+- Last updated: 2026-08-28
 
 ## Context
 
@@ -26,11 +26,13 @@ or model-run records. The mock transcription boundary does not read image bytes.
 provide the authenticated, auditable, provider-backed transcription and exact confirmation required
 by Milestone 6.
 
-Repository provider documentation deliberately leaves the real provider, exact model, candidate
-count, fixture count, and budget as `DECISION REQUIRED`. The project owner must select the provider
-and exact model before provider-specific implementation, and must separately approve fixture count
-and maximum spend before a real network call. This ChangePlan records the inspected options and the
-provider-independent design but remains blocked at that gate.
+Repository provider documentation originally left the real provider, exact model, candidate count,
+fixture count, and budget as `DECISION REQUIRED`. The owner selected Gemini
+`gemini-3.5-flash` first and requested exact OpenAI `gpt-5.4-2026-03-05` and Anthropic
+`claude-sonnet-5` server-only alternatives. The owner approved implementation and the existing HTTP
+client dependency, but explicitly deferred the real benchmark. Therefore all three adapters are
+implemented and contract-tested without network access; no key was loaded and no provider call was
+made.
 
 ## Goal
 
@@ -239,8 +241,8 @@ what was written; empty or over-limit math values fail the boundary.
   retryable and return a safe 503 response.
 - `transcription_provider_rejected` is permanent and returns a safe 502 response.
 - `transcription_invalid_media` is permanent and returns 422.
-- `transcription_empty_output` and `transcription_invalid_schema` are terminal invalid-schema states
-  and return 502 after at most one schema repair.
+- Empty output and other malformed structured output map to the terminal
+  `transcription_invalid_schema` state and return 502 after at most one schema repair.
 - A valid provider uncertainty result returns an explicit `uncertain` application outcome with no
   transcript.
 - `transcription_in_progress` returns 409 without starting a duplicate call.
@@ -265,7 +267,7 @@ return-to-correction transition.
 
 ### Synthetic fixtures and benchmark
 
-Ten deterministic repository-owned image fixtures are proposed, each with an expected flat
+Eleven deterministic repository-owned image fixtures are implemented, each with an expected flat
 transcript and provenance manifest:
 
 1. clean handwritten mathematics;
@@ -277,9 +279,10 @@ transcript and provenance manifest:
 7. a subtle mathematical sign error that must remain unchanged;
 8. an incomplete solution;
 9. a geometry solution;
-10. alternating text and mathematics on one visual line.
+10. alternating text and mathematics on one visual line;
+11. warnings and source regions.
 
-Warnings and source regions are represented within this set. Separate recorded JSON shapes cover
+Separate hand-authored recorded-shape JSON envelopes cover
 valid output, unknown fields/variants, empty output, invalid regions, one-retry recovery, retry
 exhaustion, timeout, rate limit, permanent rejection, uncertainty, and fake/real metadata mismatch.
 Upload tests cover invalid MIME, size, status, and ownership. Every fixture is labeled original
@@ -287,10 +290,11 @@ synthetic, generated deterministically for this repository, and carries no real 
 learner, handwriting, provider response, or personal metadata.
 
 The real benchmark command is opt-in and refuses to run unless real mode, the exact approved model,
-an explicit synthetic-only acknowledgement, a call ceiling, and a USD ceiling are configured. The
-proposal is 10 fixtures, at most 20 paid calls (one initial and the worst-case one schema repair per
-fixture), at most 10,000 billed input tokens and 3,000 output tokens per call, and no transport
-retry. Estimated maximum model charges, before tax or regional adjustments, are:
+an explicit synthetic-only acknowledgement, the exact 11-fixture count, and an estimated USD ceiling
+are configured. The implemented corpus permits at most 22 paid calls (one initial and the worst-case
+one schema repair per fixture), assumes at most 10,000 billed input tokens and caps output at 3,000
+tokens per call, and performs no transport retry. The original 10-fixture/20-call planning estimates
+were:
 
 | Candidate                                                                                   | Published input/output price per 1M tokens | Estimated maximum |
 | ------------------------------------------------------------------------------------------- | ------------------------------------------ | ----------------: |
@@ -298,8 +302,9 @@ retry. Estimated maximum model charges, before tax or regional adjustments, are:
 | [Anthropic `claude-sonnet-5`](https://platform.claude.com/docs/en/models/sonnet-5/overview) | $2.00 / $10.00                             |             $1.00 |
 | [Google `gemini-3.5-flash`](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash)  | $1.50 / $9.00                              |             $0.84 |
 
-Actual usage and cost will be recorded from validated usage metadata and application pricing; these
-figures are conservative planning ceilings, not release gates or provider approval.
+The 11-fixture Gemini estimate is `$0.924000`. Actual usage and cost will be recorded from validated
+usage metadata and application pricing when separately approved; these are conservative planning
+estimates, not guaranteed invoices, release gates, or provider approval.
 
 ## Multi-exam impact
 
@@ -325,27 +330,32 @@ expansion or contract change must be recorded here before editing.
 - `services/api/app/transcription/__init__.py` — package boundary.
 - `services/api/app/transcription/schemas.py` — strict provider and application schemas.
 - `services/api/app/transcription/models.py` — attempt asset, prompt, run, version, confirmation ORM.
-- `services/api/app/transcription/provider.py` — narrow protocol, error taxonomy, configured factory.
+- `services/api/app/transcription/provider.py`, `provider_schema.py`, `http_provider.py`, and
+  `prompt.py` — narrow protocol, strict JSON schema, safe HTTP mapping, cost calculation, and fixed
+  prompt identities.
 - `services/api/app/transcription/fake_provider.py` — deterministic production-shaped fake.
-- `services/api/app/transcription/<approved>_provider.py` — one owner-approved real HTTP adapter.
+- `services/api/app/transcription/gemini_provider.py` — primary owner-approved real HTTP adapter.
+- `services/api/app/transcription/openai_provider.py` and
+  `services/api/app/transcription/anthropic_provider.py` — owner-requested server-only alternatives
+  using their exact approved model IDs and the same application boundary.
 - `services/api/app/transcription/service.py` — ownership, idempotency, persistence, correction,
   confirmation, and error mapping.
 - `services/api/app/transcription/prompts/m6-faithful-transcription-v1.txt` — exact reviewed prompt.
 - `services/api/app/scripts/benchmark_transcription.py` — guarded approved synthetic benchmark.
-- `services/api/tests/fixtures/transcription.py` — application and provider-shape builders.
-- `services/api/tests/fixtures/transcription/recorded-<approved>-shapes.json` — synthetic recorded
-  response shapes, never live learner/provider data.
+- `services/api/tests/fixtures/transcription/manifest.json`, 11 PNGs, and their 11 SVG sources —
+  original synthetic provenance, expected flat documents, and exact hashes.
+- `services/api/tests/fixtures/transcription/recorded-provider-shapes.json` — hand-authored synthetic
+  Gemini/OpenAI/Anthropic response shapes, never live learner/provider data.
 - `services/api/tests/unit/test_transcription_schemas.py` — strict schema regressions.
-- `services/api/tests/unit/test_transcription_provider.py` — retry/error/metadata/fake and recorded
-  real-shape contract regressions.
+- `services/api/tests/unit/test_transcription_provider.py`, `test_transcription_adapters.py`,
+  `test_transcription_fixture_manifest.py`, and `test_transcription_benchmark.py` — retry/error/
+  metadata/fake, direct-HTTP shape, corpus, and benchmark guard regressions.
 - `services/api/tests/integration/test_m6_transcription.py` — auth, object storage, persistence,
   isolation, idempotency, correction, and confirmation.
-- `apps/student-web/components/transcription/transcription-status.tsx` and test — complete state UI.
-- `tests/fixtures/transcription/manifest.yaml` — provenance, expected document, fixture hashes.
-- `tests/fixtures/transcription/images/*.png` — ten deterministic synthetic/non-personal images.
-- `tests/e2e/multimodal-transcription.spec.ts` — fake-provider journey in all five projects.
+- `apps/student-web/lib/transcription-api.ts` and test — generated-contract types plus strict nested
+  runtime guards and M6 requests.
 - `docs/architecture/multimodal-transcription.md` — permanent boundary and persistence architecture.
-- `docs/evaluation/m6-transcription-benchmark.md` — exact provider benchmark evidence.
+- `docs/evaluation/m6-transcription-benchmark-report.md` — exact deferred benchmark evidence.
 - `docs/evaluation/m6-transcription-device-report.md` — five-project device/regression evidence.
 
 ### Modify
@@ -354,8 +364,8 @@ expansion or contract change must be recorded here before editing.
 - `Makefile` — focused fake checks and a separate explicit real benchmark command.
 - `README.md` — M6 architecture, configuration, commands, and synthetic-data boundary.
 - `package.json` — format-check coverage for M6 documents, without a frontend dependency.
-- `services/api/pyproject.toml` and `services/api/uv.lock` — promote the already locked
-  `httpx==0.28.1` HTTP client to server runtime if approved.
+- `services/api/pyproject.toml` and `services/api/uv.lock` — promote the owner-approved, already
+  locked `httpx==0.28.1` HTTP client to server runtime.
 - `services/api/app/config.py` — strict server-only adapter/model/prompt/pricing configuration and
   production validation.
 - `services/api/app/storage.py` — bounded internal object read and short-lived signed download URL.
@@ -367,7 +377,8 @@ expansion or contract change must be recorded here before editing.
 - `services/api/tests/integration/test_m5_static_journey.py` and M5 unit tests — unchanged plan and
   clearly mocked downstream regression through the new confirmation identity.
 - `packages/api-client/openapi.json` and `packages/api-client/src/schema.d.ts` — generated contract.
-- `apps/student-web/lib/static-journey-api.ts` and test — strict nested M6 runtime guards and calls.
+- `apps/student-web/lib/static-journey-api.ts` and test — confirmed-version-only mock-evaluation
+  request while the new transcription API module owns M6 validation and calls.
 - `apps/student-web/features/transcription/transcript-state.ts` and test — preserve M3 editor
   operations while carrying immutable transcript-version identity outside the flat document.
 - `apps/student-web/features/journey/static-journey-state.ts` and test — explicit transcription
@@ -420,17 +431,19 @@ Migration `20260827_0003` is required because durable run metadata and exact con
 conditions. It will add only transcription-scope tables:
 
 - `attempt_assets`: UUID primary key, `attempt_id` and `solution_upload_id` restrictive foreign keys,
-  created time, unique `(attempt_id, solution_upload_id)`, an upload lookup index, and an immutable
-  update/delete trigger. It stores no image bytes.
+  created time, unique `(attempt_id, solution_upload_id)`, and an immutable update/delete trigger. The
+  exact link lookup is served by that unique index; no separate speculative upload index was added.
+  It stores no image bytes.
 - `prompt_versions`: UUID primary key, operation, version, exact application prompt text,
   `prompt_sha256`, schema version, created time, unique operation/version and hash constraints, and an
   immutable trigger.
 - `ai_model_runs`: UUID primary key, attempt-asset/prompt foreign keys, configured provider and exact
   model snapshot, schema and pricing versions, globally unique idempotency key, request fingerprint,
   status, schema-attempt count constrained to one or two, nullable terminal latency/token/cost/error
-  metadata, and start/finish times. An `(attempt_asset_id, created_at)` index supports owned state
-  reload; a partial unique index prevents two `processing` runs for one asset. Only controlled status
-  updates occur; no raw response or error body is stored.
+  metadata, and start/finish times. An
+  `(attempt_asset_id, request_fingerprint, started_at)` index supports completed replay; a partial
+  unique index prevents two `processing` runs for one asset. Only controlled status updates occur;
+  no raw response or error body is stored.
 - `transcript_versions`: UUID primary key, attempt/source-run/optional-parent foreign keys, positive
   per-attempt version, strict validated JSON document, schema version, SHA-256, origin, optional
   learner creator, and created time. Unique attempt/version, attempt/hash, and source-run constraints
@@ -561,8 +574,9 @@ policy; the benchmark uses repository-owned synthetic data only.
 
 ### Benchmark
 
-- Run only after owner approval and credentials with the guarded command, exact 10-file manifest,
-  SHA-256 fixture/prompt/schema hashes, exact model snapshot, and maximum 20-call/$approved cap.
+- Run only after renewed owner approval and credentials with the guarded command, exact 11-file
+  manifest, SHA-256 fixture/prompt/schema hashes, exact model snapshot, and worst-case 22-call/
+  `$0.924000` Gemini estimate approval.
 - Record expected and validated flat transcripts, text edits, visual math edits, ordering errors,
   preserved mathematical errors, warnings/regions, schema retries/failures, latency, usage, per-run
   and total cost, documented data-handling facts, limitations, and observed failure modes.
@@ -595,9 +609,10 @@ policy; the benchmark uses repository-owned synthetic data only.
 ## Rollout and rollback
 
 - Default local/test mode uses the deterministic fake. Real mode requires explicit server-only
-  provider, exact model, API key, timeout, pricing version, and synthetic-data acknowledgement.
+  provider, exact model, API key, and timeout. Pricing identity is application-owned. The separate
+  benchmark additionally requires exact fixture/cost approval and both paid/synthetic acknowledgements.
 - Production startup rejects fake mode, missing secrets, model aliases that are not the approved
-  snapshot, development credentials, and benchmark enablement. This does not imply provider privacy
+  snapshot, development credentials, and insecure sessions. This does not imply provider privacy
   approval; deployment remains blocked by the privacy action list.
 - Apply migration before deploying M6 code. Existing M5 records are untouched and old M5 code ignores
   additive tables, permitting application rollback before database downgrade.
@@ -637,8 +652,9 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 
 ## Risks
 
-- Provider/model remains unapproved. Mitigation: no provider implementation or call before explicit
-  owner selection.
+- Provider/model integration is approved, but live quality, privacy, retention, and production use
+  remain unapproved. Mitigation: implement exact server-only adapters and recorded-shape tests while
+  making zero network calls and prohibiting real learner data.
 - Real handwriting transcription can silently correct mathematical mistakes. Mitigation: prompt,
   error-preservation fixtures, expected-transcript comparison, correction burden report, and no
   release gate claim.
@@ -662,19 +678,20 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 - Frontend changes can regress M3 editing or M5 multi-target behavior. Mitigation: preserve existing
   public editor operations and run focused plus full five-project regressions.
 - Benchmark costs can exceed estimates if image or output tokens are larger. Mitigation: fixed
-  fixture manifest, per-call output cap, preflight budget, 20-call ceiling, and hard application USD
-  ceiling.
+  fixture manifest, per-call output cap, exact 11-fixture preflight, at-most-22 schema-call policy,
+  conservative estimate approval, and stop after the first measured over-budget result. Input image
+  tokenization remains provider-controlled, so the approved estimate is not a guaranteed invoice cap.
 
 ## Progress
 
 - [x] Repository inspected
-- [ ] Plan reviewed
+- [x] Plan reviewed
 - [x] Branch created from current main
-- [ ] Tests written or updated
-- [ ] Implementation complete
-- [ ] Documentation updated
-- [ ] Relevant checks pass
-- [ ] Diff reviewed
+- [x] Tests written or updated
+- [x] Implementation complete
+- [x] Documentation updated
+- [x] Relevant checks pass
+- [x] Diff reviewed
 - [ ] Branch rebased on current main
 - [ ] Conflict resolution re-tested
 - [ ] Handoff summary written
@@ -693,9 +710,16 @@ remote shared-contract change first, then M6 migration/API generation, then fron
   remain clearly synthetic.
 - 2026-08-27: No frontend dependency is proposed. Direct provider HTTP through the already locked
   `httpx` client is preferred over a provider SDK, contingent on dependency approval.
-- 2026-08-27: Provider and exact model remain an owner decision. Viable inspected options are OpenAI
-  `gpt-5.4-2026-03-05`, Anthropic `claude-sonnet-5`, and Google `gemini-3.5-flash`. No option is
-  selected by this plan.
+- 2026-08-27: Initial provider inspection presented OpenAI `gpt-5.4-2026-03-05`, Anthropic
+  `claude-sonnet-5`, and Google `gemini-3.5-flash` for the owner decision without selecting one.
+- 2026-08-27: The owner selected Google `gemini-3.5-flash` as the default real provider/model and
+  requested OpenAI `gpt-5.4-2026-03-05` and Anthropic `claude-sonnet-5` as server-configured
+  alternatives. The browser will not choose providers or models.
+- 2026-08-27: The owner approved moving the existing pinned `httpx==0.28.1` dependency into the
+  production dependency group. No provider SDK will be added.
+- 2026-08-27: The owner explicitly deferred the 10-fixture/20-call Gemini benchmark. No real provider
+  network call is authorized in this implementation run. The benchmark report must remain visibly
+  `NOT RUN — OWNER DEFERRED`, and the final handoff must explain later server-only API-key setup.
 
 ## Discoveries
 
@@ -712,6 +736,21 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 - `httpx` is already version-locked for tests, so direct provider HTTP can avoid a provider SDK and a
   new transitive graph, although moving it into production requirements is still an approval-gated
   dependency change.
+- Provider SDKs are unnecessary: all three official request shapes fit one small direct-HTTP module,
+  while provider-specific envelope parsing remains inside the adapter package and is exercised with
+  `httpx.MockTransport`.
+- A completed-run replay initially rolled back its read transaction before serialization, expiring
+  the ORM row and causing an async `MissingGreenlet` failure. Keeping the read transaction intact
+  returns the exact persisted result without a duplicate run or provider call.
+- The original M5 1×1 valid PNG was too weak for M6 visual evidence. The final browser run uploads
+  the committed `warnings-source-regions.png` fixture so the source text, uncertainty cue, and
+  normalized overlay can be inspected on every device.
+- Existing M3 processes own ports 3000/8000 and the shared MinIO CORS origin. Final browser evidence
+  therefore used ports 3100/8100, a task-specific PostgreSQL database, and a task-specific ephemeral
+  MinIO on 9100/9101; no unrelated process or data was changed.
+- Complete-diff review found that sequential duplicate correction saves returned `stale` even though
+  the plan specified deduplication. A red integration assertion now proves the exact repeat returns
+  the same version; attempt-row locks also serialize concurrent correction and confirmation clicks.
 
 ## Verification evidence
 
@@ -724,14 +763,52 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 /home/minh/dev/math-coach-m6-transcription origin/main` — succeeded at the M5 commit.
 - Read-only repository, documentation, migration, configuration, generated-contract, backend,
   frontend, package, test, and Playwright inspection completed as listed in Current-state findings.
-- No test command, dependency change, fixture generation, provider implementation, or provider
-  network call has been run yet. Existing M5 verification evidence is documented in its completed
-  ChangePlan and device report; it is not restated as a new M6 test result.
+- Red-green evidence included focused schema/adapter failures before their implementations, a browser
+  label regression that failed 1 of 10 component assertions before the source-label seam, and a
+  duplicate correction-save integration assertion that failed with HTTP 409 before deduplication and
+  then passed with the same immutable version response.
+- `make api-generate` — regenerated OpenAPI and TypeScript declarations. Final SHA-256 values are
+  `6233de1150f96f4bca6d642c2f5b7310833895a62a99079b2345ca060f693587` for
+  `packages/api-client/openapi.json` and
+  `f8af1082e874c48bc9963cde68d30c11db98e78dcd8911c423e61b446d14e449` for
+  `packages/api-client/src/schema.d.ts`; `scripts/check_api_contract.sh` passed byte comparison.
+- `make check` with isolated web/API ports 3100/8100, task-specific PostgreSQL database
+  `math_coach_m6_e2e`, and ephemeral MinIO ports 9100/9101 — passed: Prettier, Ruff format, ESLint,
+  Ruff lint, TypeScript, mypy on 48 files, generated API contract, two content packages, production
+  Next.js build, 146 frontend unit tests, 100 backend unit tests, two full downgrade/upgrade cycles,
+  39 integration tests, and 15 Playwright cases in 18.7 seconds.
+- The 39 integration cases include 11 M6 tests covering authentication and cross-user isolation,
+  owned/verified upload enforcement and byte loading, immutable content pinning, run replay and
+  in-flight exclusion, timeout/rate-limit/permanent/uncertain/schema failures without transcripts,
+  exactly two schema attempts, immutable correction/confirmation, duplicate save/confirmation,
+  trigger/index contracts, and populated M6 downgrade/re-upgrade while preserving M5 rows.
+- A separate final `VISUAL_QA=1 make test-e2e` production-build run passed all 15 cases in 22.7
+  seconds using the hash-verified `warnings-source-regions.png` source. Twenty review/MathLive/mock/
+  summary screenshots were inspected at high detail; exact project timings and SHA-256 values are in
+  `docs/evaluation/m6-transcription-device-report.md`. Automation found no document horizontal
+  overflow or escaped audited elements.
+- Frontend coverage: 21 files, 146 tests, 88.13% statements, 82.72% branches, 93.07% functions, and
+  87.96% lines. Backend unit result: 100 passed, 39 integration deselected. Integration result: 39
+  passed, 100 unit deselected.
+- `npm audit --audit-level=high` — 0 vulnerabilities. `uv lock --project services/api --check` — 51
+  packages resolved and lock current. The dependency graph adds no package: `httpx==0.28.1` moved
+  from the development group to runtime.
+- `git diff --check` — passed with no whitespace errors after complete manual diff review.
+- Prompt SHA-256 is
+  `d487b2f47b769380002a80fa31316bf8e238b3db15f34a7cff0c560473e0ad89`; fixture manifest SHA-256 is
+  `21c08074e746206f4491cd665ff4897a1164b0aedaf4c7acd8b88423b91aa979`.
+- Real benchmark: **not run by owner direction**. Exact result is 0 provider calls, 0 input/output
+  tokens measured, and `$0.000000` spent. The guarded 11-fixture Gemini estimate is `$0.924000` with
+  at most 22 schema calls. No Gemini/OpenAI/Anthropic key was loaded or network request made.
+- The task-specific E2E MinIO container and PostgreSQL database were removed after the passing runs;
+  unrelated M3 services, the shared development database/object store, and the original checkout's
+  untracked corpus/data work were not changed.
 
 ## Result
 
-Planning and repository verification are complete. Implementation is blocked exactly as required by
-the provider decision gate: the project owner must select one provider and exact model, approve the
-10-fixture/20-call benchmark ceiling and maximum model cost, and approve promoting
-`httpx==0.28.1` to the server runtime. No implementation test/code, dependency, real fixture, or paid
-provider call has been created.
+Implementation, tests, architecture documentation, deferred benchmark report, and five-project
+device evidence are complete. Gemini 3.5 Flash is the first real server adapter; exact OpenAI and
+Anthropic alternatives and the deterministic fake use the same boundary. The M5 multi-target plan
+and clearly mocked downstream path remain intact, and no Milestone 7–9 behavior was introduced. The
+real-provider benchmark remains intentionally deferred: no paid/provider call or production-quality
+claim is part of this result. Final remote rebase verification remains before handoff.

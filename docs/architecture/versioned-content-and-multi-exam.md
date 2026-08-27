@@ -172,7 +172,10 @@ GET            /api/v1/internal/content-preview
 GET            /api/v1/internal/content-preview/{problem_id}
 GET            /api/v1/exam-cycles
 GET            /api/v1/plans/today
-POST           /api/v1/attempts/{attempt_id}/mock-transcription
+POST           /api/v1/attempts/{attempt_id}/transcribe
+GET            /api/v1/attempts/{attempt_id}/transcription
+POST           /api/v1/attempts/{attempt_id}/transcripts
+POST           /api/v1/attempts/{attempt_id}/confirm-transcript
 POST           /api/v1/attempts/{attempt_id}/mock-evaluation
 POST           /api/v1/attempts/{attempt_id}/hints/next
 GET            /api/v1/concept-versions/{concept_version_id}
@@ -196,6 +199,11 @@ ordered targets, and ordered immutable problem versions, so identical inputs rem
 This narrow fixture-backed composition does not duplicate skills, infer learner state, implement the
 Milestone 9 planner, or predict an examination outcome. The complete boundary is documented in the
 [static student journey architecture](static-student-journey.md).
+
+Milestone 6 attempt assets, model runs, transcript versions, and confirmations always join through
+the attempt and therefore its exact immutable problem version and owning study profile. They contain
+no exam-target foreign key or singular exam projection. Transcription does not change the deterministic
+plan or target relevance. See the [multimodal transcription architecture](multimodal-transcription.md).
 
 ## Migration and rollback
 

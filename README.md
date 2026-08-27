@@ -1,6 +1,6 @@
 # Math Coach
 
-Math Coach is an interaction-first MVP for helping students move from a photographed paper solution to a confirmed transcript and useful mathematical feedback. Milestones 1 through 5 supply the internal engineering foundation, invite login, responsive phone/tablet shell, verified synthetic-image upload, multi-exam study-profile contracts, strictly validated versioned synthetic content, controlled mathematical rendering, the visual-correction editor, the curated interactive geometry engine, and a complete deterministic synthetic student journey. Real AI transcription, production grading, learner state, and adaptive coaching arrive in later milestones.
+Math Coach is an interaction-first MVP for helping students move from a photographed paper solution to a confirmed transcript and useful mathematical feedback. Milestones 1 through 6 supply the internal engineering foundation, invite login, responsive phone/tablet shell, verified synthetic-image upload, multi-exam study-profile contracts, strictly validated versioned synthetic content, controlled mathematical rendering, the visual-correction editor, the curated interactive geometry engine, a complete deterministic student journey, and server-owned multimodal transcription. Production grading, learner state, and adaptive coaching arrive in later milestones.
 
 Use synthetic or non-personal images only. The local credentials are development defaults, not production configuration.
 
@@ -38,6 +38,15 @@ synthetic transcript/evaluation payloads. See the
 [static student journey architecture](docs/architecture/static-student-journey.md) and
 [five-project journey report](docs/evaluation/m5-static-journey-device-report.md).
 
+Milestone 6 loads only an owned verified image, validates one complete provider response through
+strict Pydantic schemas, persists immutable run/transcript/confirmation records, and presents one
+continuous text/math correction document with warnings and source regions. Gemini
+`gemini-3.5-flash` is the first real adapter; exact OpenAI and Anthropic alternatives plus a
+deterministic fake use the same server boundary. The existing evaluation remains clearly mocked.
+See the [multimodal transcription architecture](docs/architecture/multimodal-transcription.md),
+[deferred benchmark report](docs/evaluation/m6-transcription-benchmark-report.md), and
+[five-project device report](docs/evaluation/m6-transcription-device-report.md).
+
 ## Local setup
 
 Prerequisites are Node 20.19 or newer, npm, Python 3.12, uv, Docker with Compose, and Make.
@@ -62,6 +71,22 @@ path. MinIO's local console is at
 `http://localhost:9001`. Stop infrastructure without deleting its volumes with
 `make services-down`.
 
+Local development and every automated test default to the deterministic M6 fake. To use Gemini later,
+create an untracked root `.env` (or use a deployment secret manager) with:
+
+```dotenv
+MATH_COACH_TRANSCRIPTION_PROVIDER=gemini
+MATH_COACH_TRANSCRIPTION_MODEL_SNAPSHOT=gemini-3.5-flash
+MATH_COACH_GEMINI_API_KEY=replace-with-your-server-secret
+```
+
+Never put the key in a `NEXT_PUBLIC_` variable, browser request, commit, screenshot, log, or chat
+message. Restart the API after changing server settings. The two optional exact alternatives use
+`openai` / `gpt-5.4-2026-03-05` / `MATH_COACH_OPENAI_API_KEY`, or `anthropic` /
+`claude-sonnet-5` / `MATH_COACH_ANTHROPIC_API_KEY`. Configuration availability does not approve real
+learner data; use only clearly synthetic/non-personal images until privacy and provider suitability
+are separately approved.
+
 ## Root command contract
 
 ```text
@@ -74,6 +99,7 @@ make test-unit             run backend unit and frontend component tests
 make test-integration      test migrations, PostgreSQL, auth, and real MinIO uploads
 make test-e2e              run the browser journey in containerized phone/tablet emulations
 make content-validate      validate packages and generated content schema without importing
+make transcription-benchmark  run the separately approved, paid synthetic benchmark with explicit arguments
 make test                  run unit, integration, and browser tests
 make check                 run every non-destructive review check
 ```

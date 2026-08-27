@@ -157,3 +157,17 @@ authorization and ownership, immutable retry pinning, frontend boundary rejectio
 state, and the complete production-build journey on all five configured Chromium/WebKit
 phone/tablet projects. Exact browser evidence is in the
 [Milestone 5 device report](../evaluation/m5-static-journey-device-report.md).
+
+## Milestone 6 transcription replacement
+
+Milestone 6 removes `POST /mock-transcription` and routes the same M5 journey through the production-
+shaped authenticated transcription endpoint. The deterministic fake remains the browser/test source,
+but it reads the verified owned upload and persists the same model-run and transcript records as a
+configured real adapter. Correction and confirmation are now durable, and mock evaluation accepts
+only the exact confirmed transcript version ID instead of a browser-supplied document.
+
+The plan, `study_profile -> student_exam_targets[]`, supported-target arrays, immutable problem
+version, curated hints, retry, concept review, and summary remain unchanged. The downstream evaluator
+is still labeled deterministic/synthetic/mock in its button, heading, metadata, and explanatory copy.
+See the [multimodal transcription architecture](multimodal-transcription.md) and
+[Milestone 6 device report](../evaluation/m6-transcription-device-report.md).
