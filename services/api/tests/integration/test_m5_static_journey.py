@@ -3,7 +3,6 @@ from pathlib import Path
 
 import httpx
 import pytest
-
 from app.database import session_factory
 from app.main import app
 from app.models import PilotInvite

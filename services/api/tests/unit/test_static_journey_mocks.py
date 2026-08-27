@@ -1,7 +1,6 @@
 import uuid
 
 import pytest
-
 from app.static_journey.mocks import (
     DeterministicMockBoundary,
     MockPayloadInvalidError,
