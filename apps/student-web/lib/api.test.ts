@@ -32,7 +32,24 @@ const provenance = {
   translationDescription: null,
 };
 
+type MutableRecord = Record<string, unknown>;
+
+function mutableRecord(value: unknown): MutableRecord {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error("Expected mutable fixture record");
+  }
+  return value as MutableRecord;
+}
+
+function mutableArray(value: unknown): unknown[] {
+  if (!Array.isArray(value)) {
+    throw new Error("Expected mutable fixture array");
+  }
+  return value;
+}
+
 function validPreviewPayload(): object {
+  const sceneVersionId = "10000000-0000-4000-8000-000000000501";
   return {
     difficultyBand: "core",
     estimatedMinutes: 12,
@@ -41,11 +58,11 @@ function validPreviewPayload(): object {
       accessibilityDescription: "A synthetic coordinate scene.",
       animationIds: ["move-M"],
       fallbackImageAssetId: "fallback-1",
-      id: "scene-version-1",
+      id: sceneVersionId,
       initialVisibleObjectIds: ["A", "B", "M"],
       objects: [
-        { id: "A", label: "A", parents: [], type: "point", x: 0, y: 0 },
-        { id: "B", label: null, parents: [], type: "point", x: 6, y: 0 },
+        { id: "A", label: "A", parents: [], selectable: true, type: "point", x: 0, y: 0 },
+        { id: "B", label: null, parents: [], selectable: true, type: "point", x: 6, y: 0 },
         { id: "M", parents: ["A", "B"], type: "midpoint" },
       ],
       provenance,
@@ -120,7 +137,7 @@ function validPreviewPayload(): object {
         ],
         type: "rich_line",
       },
-      { id: "geometry", sceneVersionId: "scene-version-1", type: "geometry" },
+      { id: "geometry", sceneVersionId, type: "geometry" },
       { alt: "Synthetic fallback", assetId: "asset-1", id: "image", type: "image" },
       {
         content: [{ id: "nested", text: "Synthetic note.", type: "text" }],
@@ -255,6 +272,50 @@ describe("API boundary", () => {
         }),
       ),
     );
+
+    await expect(getContentPreview("problem-1")).rejects.toMatchObject({
+      code: "invalid_response",
+      status: 502,
+    });
+  });
+
+  it.each([
+    [
+      "scene executable fields",
+      (payload: MutableRecord) => (mutableRecord(payload.geometryScene).script = "unsafe()"),
+    ],
+    [
+      "object markup fields",
+      (payload: MutableRecord) => {
+        const scene = mutableRecord(payload.geometryScene);
+        mutableRecord(mutableArray(scene.objects)[0]).html = "<b>A</b>";
+      },
+    ],
+    [
+      "unknown action targets",
+      (payload: MutableRecord) => {
+        const hint = mutableRecord(mutableArray(payload.hints)[0]);
+        mutableRecord(mutableArray(hint.geometryActions)[0]).objectIds = ["UNKNOWN"];
+      },
+    ],
+    [
+      "selection of locked objects",
+      (payload: MutableRecord) => {
+        const hint = mutableRecord(mutableArray(payload.hints)[0]);
+        mutableRecord(mutableArray(hint.geometryActions)[6]).allowedObjectIds = ["M"];
+      },
+    ],
+    [
+      "action executable fields",
+      (payload: MutableRecord) => {
+        const hint = mutableRecord(mutableArray(payload.hints)[0]);
+        mutableRecord(mutableArray(hint.geometryActions)[0]).javascript = "unsafe()";
+      },
+    ],
+  ])("rejects %s at the API boundary", async (_label, mutate) => {
+    const payload = structuredClone(validPreviewPayload()) as MutableRecord;
+    mutate(payload);
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(payload)));
 
     await expect(getContentPreview("problem-1")).rejects.toMatchObject({
       code: "invalid_response",

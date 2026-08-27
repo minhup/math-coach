@@ -1,5 +1,8 @@
 import type { components } from "@math-coach/api-client";
 
+import { validateAndOrderGeometryScene } from "../features/geometry/geometry-scene";
+import { validateGeometryAction } from "../features/geometry/interaction-state";
+
 export type User = components["schemas"]["UserResponse"];
 export type Session = components["schemas"]["SessionResponse"];
 export type PresignUploadRequest = components["schemas"]["PresignUploadRequest"];
@@ -9,6 +12,7 @@ export type ContentPreviewList = components["schemas"]["ContentPreviewListRespon
 export type ContentPreview = components["schemas"]["ContentPreviewResponse"];
 export type ContentBlock = ContentPreview["statement"][number];
 export type GeometryAction = ContentPreview["hints"][number]["geometryActions"][number];
+export type GeometryScene = NonNullable<ContentPreview["geometryScene"]>;
 
 export class ApiError extends Error {
   constructor(
@@ -198,47 +202,12 @@ function isGeometryAction(value: unknown): value is GeometryAction {
 }
 
 function isGeometryScene(value: unknown): value is components["schemas"]["GeometrySceneVersion"] {
-  if (!isObject(value) || !isObject(value.viewport)) {
+  try {
+    validateAndOrderGeometryScene(value);
+    return true;
+  } catch {
     return false;
   }
-  const viewport = value.viewport;
-  const geometryObjectTypes = [
-    "point",
-    "segment",
-    "line",
-    "ray",
-    "circle",
-    "arc",
-    "polygon",
-    "angle",
-    "midpoint",
-    "intersection",
-    "perpendicular",
-    "parallel",
-    "circumcircle",
-    "label",
-  ];
-  return (
-    hasStringProperties(value, ["accessibilityDescription", "fallbackImageAssetId", "id"]) &&
-    typeof value.version === "number" &&
-    isStringArray(value.animationIds) &&
-    isStringArray(value.initialVisibleObjectIds) &&
-    ["xMax", "xMin", "yMax", "yMin"].every(
-      (coordinate) => typeof viewport[coordinate] === "number",
-    ) &&
-    Array.isArray(value.objects) &&
-    value.objects.every(
-      (object) =>
-        isObject(object) &&
-        typeof object.id === "string" &&
-        geometryObjectTypes.includes(String(object.type)) &&
-        (object.label === undefined || object.label === null || typeof object.label === "string") &&
-        (object.parents === undefined || isStringArray(object.parents)) &&
-        (object.x === undefined || object.x === null || typeof object.x === "number") &&
-        (object.y === undefined || object.y === null || typeof object.y === "number"),
-    ) &&
-    isProvenance(value.provenance)
-  );
 }
 
 function isContentPreviewSummary(
@@ -348,6 +317,20 @@ function isContentPreview(value: unknown): value is ContentPreview {
 
 function parseContentPreview(value: unknown): ContentPreview {
   if (!isContentPreview(value)) {
+    return invalidResponse();
+  }
+  if (value.geometryScene === null) {
+    if (value.hints.some((hint) => hint.geometryActions.length > 0)) {
+      return invalidResponse();
+    }
+    return value;
+  }
+  const scene = validateAndOrderGeometryScene(value.geometryScene);
+  if (
+    value.hints.some((hint) =>
+      hint.geometryActions.some((action) => validateGeometryAction(scene, action) === null),
+    )
+  ) {
     return invalidResponse();
   }
   return value;
