@@ -4,12 +4,15 @@ set -euo pipefail
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 log_directory="$(mktemp -d)"
 playwright_image="mcr.microsoft.com/playwright:v1.62.1-noble"
+web_port="${PLAYWRIGHT_WEB_PORT:-3000}"
+api_port="${PLAYWRIGHT_API_PORT:-8000}"
 
 cd "${repository_root}/services/api"
-uv run uvicorn app.main:app --host 127.0.0.1 --port 8000 >"${log_directory}/api.log" 2>&1 &
+uv run uvicorn app.main:app --host 127.0.0.1 --port "${api_port}" >"${log_directory}/api.log" 2>&1 &
 api_pid=$!
 cd "${repository_root}"
-API_PROXY_TARGET=http://127.0.0.1:8000 npm run start --workspace @math-coach/student-web \
+API_PROXY_TARGET="http://127.0.0.1:${api_port}" PORT="${web_port}" \
+  npm run start --workspace @math-coach/student-web \
   >"${log_directory}/web.log" 2>&1 &
 web_pid=$!
 
@@ -40,8 +43,8 @@ wait_for_server() {
   return 1
 }
 
-wait_for_server "http://127.0.0.1:8000/api/v1/health" "${api_pid}" "${log_directory}/api.log"
-wait_for_server "http://127.0.0.1:3000" "${web_pid}" "${log_directory}/web.log"
+wait_for_server "http://127.0.0.1:${api_port}/api/v1/health" "${api_pid}" "${log_directory}/api.log"
+wait_for_server "http://127.0.0.1:${web_port}" "${web_pid}" "${log_directory}/web.log"
 
 docker run --rm \
   --network host \
@@ -49,6 +52,8 @@ docker run --rm \
   --env "CI=${CI:-}" \
   --env HOME=/tmp \
   --env PLAYWRIGHT_EXTERNAL_SERVERS=1 \
+  --env "PLAYWRIGHT_API_PORT=${api_port}" \
+  --env "PLAYWRIGHT_WEB_PORT=${web_port}" \
   --env "VISUAL_QA=${VISUAL_QA:-}" \
   --volume "${repository_root}:/work" \
   --workdir /work \

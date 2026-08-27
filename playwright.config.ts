@@ -1,7 +1,9 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const webUrl = "http://localhost:3000";
-const apiUrl = "http://127.0.0.1:8000/api/v1/health";
+const webPort = process.env.PLAYWRIGHT_WEB_PORT ?? "3000";
+const apiPort = process.env.PLAYWRIGHT_API_PORT ?? "8000";
+const webUrl = `http://localhost:${webPort}`;
+const apiOrigin = `http://127.0.0.1:${apiPort}`;
 
 export default defineConfig({
   expect: { timeout: 10_000 },
@@ -18,14 +20,14 @@ export default defineConfig({
     ? undefined
     : [
         {
-          command: "cd services/api && uv run uvicorn app.main:app --host 127.0.0.1 --port 8000",
+          command: `cd services/api && uv run uvicorn app.main:app --host 127.0.0.1 --port ${apiPort}`,
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,
-          url: apiUrl,
+          url: `${apiOrigin}/api/v1/health`,
         },
         {
           command: "npm run dev:web",
-          env: { API_PROXY_TARGET: "http://127.0.0.1:8000" },
+          env: { API_PROXY_TARGET: apiOrigin, PORT: webPort },
           reuseExistingServer: !process.env.CI,
           timeout: 120_000,
           url: webUrl,
