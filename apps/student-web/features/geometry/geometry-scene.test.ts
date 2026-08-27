@@ -76,6 +76,14 @@ describe("validateAndOrderGeometryScene", () => {
       "non-finite viewport",
       (scene: MutableRecord) => ((scene.viewport as MutableRecord).xMin = NaN),
     ],
+    [
+      "coerced viewport numbers",
+      (scene: MutableRecord) => ((scene.viewport as MutableRecord).xMin = "-5"),
+    ],
+    [
+      "boolean viewport numbers",
+      (scene: MutableRecord) => ((scene.viewport as MutableRecord).xMin = true),
+    ],
     ["reversed viewport", (scene: MutableRecord) => ((scene.viewport as MutableRecord).xMin = 8)],
     ["non-finite coordinates", (scene: MutableRecord) => (object(scene, "A").x = Infinity)],
     ["missing point coordinates", (scene: MutableRecord) => delete object(scene, "A").x],

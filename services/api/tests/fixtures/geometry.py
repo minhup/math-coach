@@ -167,7 +167,10 @@ def synthetic_m4_content_package() -> dict[str, Any]:
         {
             "id": "m4-problem-question",
             "type": "text",
-            "text": "Move A if useful, then find CM² for the initial configuration and justify the result.",
+            "text": (
+                "Move A if useful, then find CM² for the initial configuration "
+                "and justify the result."
+            ),
         },
         {
             "id": "m4-problem-geometry",

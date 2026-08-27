@@ -12,7 +12,7 @@ from pydantic.alias_generators import to_camel
 
 NonEmptyText = Annotated[str, Field(min_length=1)]
 Identifier = Annotated[str, Field(min_length=1, pattern=r"^[A-Za-z][A-Za-z0-9_-]*$")]
-FiniteNumber = Annotated[float, Field(allow_inf_nan=False)]
+FiniteNumber = Annotated[float, Field(allow_inf_nan=False, strict=True)]
 PositiveVersion = Annotated[int, Field(strict=True, ge=1)]
 PositiveMinutes = Annotated[int, Field(strict=True, ge=1, le=180)]
 Score = Annotated[Decimal, Field(ge=Decimal("0"), max_digits=8, decimal_places=2)]

@@ -2,10 +2,9 @@ from copy import deepcopy
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
-
 from app.content.loader import canonical_content_hash, load_content_package
 from app.content.schemas import ContentPackage, GeometrySceneVersion
+from pydantic import ValidationError
 from tests.fixtures.geometry import (
     synthetic_geometry_content_package,
     synthetic_geometry_scene_version,
@@ -130,6 +129,8 @@ def test_malformed_scene_graphs_are_rejected(mutate, message: str) -> None:
     [
         (lambda payload: payload["viewport"].update({"xMin": float("nan")}), "finite number"),
         (lambda payload: payload["viewport"].update({"xMax": float("inf")}), "finite number"),
+        (lambda payload: payload["viewport"].update({"xMin": "-5"}), "valid number"),
+        (lambda payload: payload["viewport"].update({"xMin": True}), "valid number"),
         (lambda payload: _object(payload, "A").update({"x": float("nan")}), "finite number"),
         (lambda payload: _object(payload, "A").update({"y": float("inf")}), "finite number"),
         (lambda payload: _object(payload, "A").pop("x"), "free points require x and y"),
