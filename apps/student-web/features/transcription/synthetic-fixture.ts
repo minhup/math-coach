@@ -5,7 +5,7 @@ export const SYNTHETIC_CORRECTION_TRANSCRIPT: TranscriptState = {
   blocks: [
     {
       id: "synthetic-text-1",
-      text: "Factor the quadratic expression:",
+      text: "Factor the quadratic expression: ",
       type: "text",
     },
     {
@@ -15,7 +15,7 @@ export const SYNTHETIC_CORRECTION_TRANSCRIPT: TranscriptState = {
     },
     {
       id: "synthetic-text-2",
-      text: "Set each factor equal to zero.",
+      text: ".\nSet each factor equal to zero: ",
       type: "text",
     },
     {
@@ -25,13 +25,18 @@ export const SYNTHETIC_CORRECTION_TRANSCRIPT: TranscriptState = {
     },
     {
       id: "synthetic-text-3",
-      text: "The two solutions are shown below.",
+      text: ".\nThe two solutions are ",
       type: "text",
     },
     {
       id: "synthetic-math-3",
       latex: String.raw`x\in\{2,3\}`,
       type: "math",
+    },
+    {
+      id: "synthetic-text-4",
+      text: ".",
+      type: "text",
     },
   ],
   schemaVersion: "2.0.0",

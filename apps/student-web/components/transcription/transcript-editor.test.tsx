@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -15,125 +15,200 @@ const invalidSource = String.raw`\frac{PRIVATE_INVALID_SOURCE}{`;
 const initialState: TranscriptState = {
   attemptId: "synthetic-attempt-correction",
   blocks: [
-    { id: "text-a", text: "Start with the equation.", type: "text" },
+    { id: "text-a", text: "Start with the equation. ", type: "text" },
     { id: "math-a", latex: invalidSource, type: "math" },
-    { id: "text-b", text: "Therefore the positive root is", type: "text" },
+    { id: "text-b", text: " Therefore the positive root is ", type: "text" },
     { id: "math-b", latex: "x=2", type: "math" },
+    { id: "text-c", text: ".", type: "text" },
   ],
   schemaVersion: "2.0.0",
 };
 
+function textNodeContaining(root: HTMLElement, text: string) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node !== null && !node.textContent?.includes(text)) {
+    node = walker.nextNode();
+  }
+  if (node === null) {
+    throw new Error(`Text node not found: ${text}`);
+  }
+  return node;
+}
+
+function placeCaret(root: HTMLElement, text: string, offset: number) {
+  root.focus();
+  const node = textNodeContaining(root, text);
+  const range = document.createRange();
+  range.setStart(node, offset);
+  range.collapse(true);
+  const selection = window.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+  fireEvent.pointerUp(root);
+}
+
 describe("TranscriptEditor", () => {
-  it("presents one continuous editable document without reasoning-step UI", async () => {
+  it("presents one inline plaintext editor with a native caret and no text-block controls", async () => {
     const { container } = render(<TranscriptEditor initialState={initialState} />);
 
-    const document = screen.getByRole("document", { name: "Editable transcript document" });
-    expect(document).toBeInTheDocument();
-    expect(screen.getByLabelText("Edit text block 1")).toHaveValue("Start with the equation.");
-    expect(screen.getAllByRole("group", { name: /Transcript block \d/ })).toHaveLength(4);
-    expect(screen.queryByRole("heading", { name: /Step \d/i })).toBeNull();
-    expect(screen.queryByRole("button", { name: /split|merge|move step/i })).toBeNull();
-    expect(container.innerHTML).not.toContain("stepId");
-    expect(container.innerHTML).not.toContain("PRIVATE_INVALID_SOURCE");
-  });
-
-  it("shows one rendered formula until the learner activates visual editing", async () => {
-    const user = userEvent.setup();
-    render(<TranscriptEditor initialState={initialState} />);
-    const validMathBlock = screen.getByRole("group", { name: "Transcript block 4" });
-
-    await waitFor(() => expect(within(validMathBlock).getByLabelText("Mathematics block 4")));
-    expect(validMathBlock.querySelector(".katex")).not.toBeNull();
-    expect(within(validMathBlock).queryByLabelText("Edit mathematics block 4")).toBeNull();
-
-    await user.click(within(validMathBlock).getByLabelText("Edit formula 4"));
-    const field = await within(validMathBlock).findByLabelText("Edit mathematics block 4");
-    expect(field.tagName).toBe("MATH-FIELD");
-    expect(validMathBlock.querySelector(".katex")).toBeNull();
-
-    await user.click(within(validMathBlock).getByLabelText("Done editing formula 4"));
-    await waitFor(() => expect(validMathBlock.querySelector(".katex")).not.toBeNull());
-    expect(within(validMathBlock).queryByLabelText("Edit mathematics block 4")).toBeNull();
-  });
-
-  it("corrects an invalid formula through MathLive without exposing its source", async () => {
-    const user = userEvent.setup();
-    const { container } = render(<TranscriptEditor initialState={initialState} />);
-    const invalidMathBlock = screen.getByRole("group", { name: "Transcript block 2" });
-
+    const editor = screen.getByRole("textbox", { name: "Editable transcript document" });
+    expect(editor).toHaveAttribute("contenteditable", "plaintext-only");
+    expect(editor).toHaveAttribute("aria-multiline", "true");
+    expect(editor).toHaveTextContent("Start with the equation.");
     expect(
-      await within(invalidMathBlock).findByRole("img", { name: "Math needs correction" }),
-    ).toBeInTheDocument();
-    expect(container.innerHTML).not.toContain("PRIVATE_INVALID_SOURCE");
-    await user.click(within(invalidMathBlock).getByLabelText("Edit formula 2"));
-
-    const field = await within(invalidMathBlock).findByLabelText("Edit mathematics block 2");
-    await waitFor(() => expect(Reflect.get(field, "value")).toBe(invalidSource));
-    expect(
-      within(invalidMathBlock).queryByRole("img", { name: "Math needs correction" }),
+      container.querySelector("textarea, .transcript-block, .transcript-block-menu"),
     ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Add text block" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Insert formula at caret" })).toBeInTheDocument();
+    expect(container.innerHTML).not.toMatch(/stepId|PRIVATE_INVALID_SOURCE/);
+  });
+
+  it("types directly at the browser caret and confirms the visible text", async () => {
+    const onConfirm = vi.fn<(snapshot: ConfirmedTranscriptSnapshot) => void>();
+    const user = userEvent.setup();
+    render(<TranscriptEditor initialState={initialState} onConfirm={onConfirm} />);
+    const editor = screen.getByRole("textbox", { name: "Editable transcript document" });
+
+    placeCaret(editor, "Start with the equation.", 5);
+    const textNode = textNodeContaining(editor, "Start with the equation.") as Text;
+    textNode.insertData(5, " directly");
+    fireEvent.input(editor, { data: " directly", inputType: "insertText" });
+    await user.click(screen.getByRole("button", { name: "Confirm transcript" }));
+
+    expect(onConfirm.mock.calls[0]?.[0].blocks[0]).toEqual({
+      id: "text-a",
+      text: "Start directly with the equation. ",
+      type: "text",
+    });
+  });
+
+  it("accepts only plain text from paste into canonical transcript state", async () => {
+    const onConfirm = vi.fn<(snapshot: ConfirmedTranscriptSnapshot) => void>();
+    const user = userEvent.setup();
+    const { container } = render(
+      <TranscriptEditor initialState={initialState} onConfirm={onConfirm} />,
+    );
+    const editor = screen.getByRole("textbox", { name: "Editable transcript document" });
+
+    placeCaret(editor, "Start with the equation.", 5);
+    fireEvent.paste(editor, {
+      clipboardData: {
+        getData: (type: string) =>
+          type === "text/plain" ? " pasted" : '<img src="https://example.invalid/tracker">',
+      },
+    });
+    await user.click(screen.getByRole("button", { name: "Confirm transcript" }));
+
+    expect(onConfirm.mock.calls[0]?.[0].blocks[0]).toMatchObject({
+      text: "Start pasted with the equation. ",
+    });
+    expect(container.querySelector("img, script, iframe")).toBeNull();
+  });
+
+  it("inserts and focuses visual mathematics at the saved caret", async () => {
+    const onConfirm = vi.fn<(snapshot: ConfirmedTranscriptSnapshot) => void>();
+    const user = userEvent.setup();
+    render(<TranscriptEditor initialState={initialState} onConfirm={onConfirm} />);
+    const editor = screen.getByRole("textbox", { name: "Editable transcript document" });
+
+    placeCaret(editor, "Start with the equation.", 5);
+    await user.click(screen.getByRole("button", { name: "Insert formula at caret" }));
+    const field = await screen.findByLabelText("Edit formula 1");
+    await waitFor(() => expect(field).toHaveFocus());
+    Reflect.set(field, "value", "y=1");
+    field.dispatchEvent(new Event("input", { bubbles: true }));
+    await user.click(screen.getByRole("button", { name: "Done editing formula 1" }));
+    await user.click(screen.getByRole("button", { name: "Confirm transcript" }));
+
+    expect(onConfirm.mock.calls[0]?.[0].blocks.slice(0, 3)).toEqual([
+      { id: "text-a", text: "Start", type: "text" },
+      { id: "m3-math-1", latex: "y=1", type: "math" },
+      { id: "m3-text-1", text: " with the equation. ", type: "text" },
+    ]);
+  });
+
+  it("edits valid and invalid inline formulas without exposing source or a simultaneous preview", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<TranscriptEditor initialState={initialState} />);
+
+    expect(await screen.findByRole("img", { name: "Math needs correction" })).toBeInTheDocument();
+    expect(container.innerHTML).not.toContain("PRIVATE_INVALID_SOURCE");
+    const validToken = screen.getByRole("button", { name: "Edit formula 2" }).parentElement;
+    expect(validToken?.querySelector(".katex")).not.toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Edit formula 1" }));
+    const field = await screen.findByLabelText("Edit formula 1");
+    await waitFor(() => expect(Reflect.get(field, "value")).toBe(invalidSource));
+    expect(screen.queryByRole("img", { name: "Math needs correction" })).toBeNull();
     expect(container.innerHTML).not.toContain("PRIVATE_INVALID_SOURCE");
 
     Reflect.set(field, "value", "x^2=4");
     field.dispatchEvent(new Event("input", { bubbles: true }));
-    await user.click(within(invalidMathBlock).getByLabelText("Done editing formula 2"));
-
-    await waitFor(() => expect(invalidMathBlock.querySelector(".katex")).not.toBeNull());
-    expect(screen.queryByRole("img", { name: "Math needs correction" })).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Done editing formula 1" }));
+    await waitFor(() => expect(container.querySelectorAll(".katex")).toHaveLength(2));
   });
 
-  it("adds, deletes, and reorders flat blocks through contextual controls", async () => {
+  it("keeps a formula until explicit deletion confirmation and joins surrounding text", async () => {
     const user = userEvent.setup();
-    render(<TranscriptEditor initialState={initialState} />);
+    const { container } = render(<TranscriptEditor initialState={initialState} />);
 
-    const firstMenu = screen.getByLabelText("Block 1 options").closest("details");
-    expect(firstMenu).not.toHaveAttribute("open");
-    await user.click(screen.getByLabelText("Block 1 options"));
-    expect(firstMenu).toHaveAttribute("open");
-    expect(screen.getByRole("button", { name: "Move block 1 up" })).toBeDisabled();
-    await user.click(screen.getByRole("button", { name: "Move block 1 down" }));
-    const reordered = screen.getAllByRole("group", { name: /Transcript block \d/ });
-    expect(within(reordered[1]).getByLabelText("Edit text block 2")).toHaveValue(
-      "Start with the equation.",
+    await user.click(screen.getByRole("button", { name: "Edit formula 1" }));
+    await user.click(screen.getByRole("button", { name: "Delete formula 1" }));
+    let dialog = screen.getByRole("alertdialog", { name: "Delete this formula?" });
+    expect(container.querySelectorAll("[data-transcript-math-id]")).toHaveLength(2);
+    expect(within(dialog).getByRole("button", { name: "Keep formula" })).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+    expect(container.querySelectorAll("[data-transcript-math-id]")).toHaveLength(2);
+
+    await user.click(screen.getByRole("button", { name: "Delete formula 1" }));
+    dialog = screen.getByRole("alertdialog", { name: "Delete this formula?" });
+    await user.click(within(dialog).getByRole("button", { name: "Delete formula" }));
+    expect(container.querySelectorAll("[data-transcript-math-id]")).toHaveLength(1);
+    expect(container.querySelector("[data-transcript-text-id='text-a']")?.textContent).toBe(
+      "Start with the equation.  Therefore the positive root is ",
     );
-
-    await user.click(screen.getByRole("button", { name: "Add text block" }));
-    await user.type(screen.getByLabelText("Edit text block 5"), "New conclusion.");
-    await user.click(screen.getByLabelText("Block 5 options"));
-    await user.click(screen.getByRole("button", { name: "Delete block 5" }));
-    expect(screen.queryByDisplayValue("New conclusion.")).toBeNull();
-
-    await user.click(screen.getByRole("button", { name: "Add math block" }));
-    expect(screen.getByLabelText("Edit formula 5")).toBeInTheDocument();
   });
 
-  it("confirms the exact flat snapshot while showing only reviewed content", async () => {
+  it("intercepts adjacent Backspace and empty-formula deletion before removing a token", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<TranscriptEditor initialState={initialState} />);
+    const editor = screen.getByRole("textbox", { name: "Editable transcript document" });
+
+    placeCaret(editor, " Therefore the positive root is ", 0);
+    fireEvent.keyDown(editor, { key: "Backspace" });
+    let dialog = screen.getByRole("alertdialog", { name: "Delete this formula?" });
+    expect(container.querySelectorAll("[data-transcript-math-id]")).toHaveLength(2);
+    await user.click(within(dialog).getByRole("button", { name: "Keep formula" }));
+
+    placeCaret(editor, "Start with the equation.", 5);
+    await user.click(screen.getByRole("button", { name: "Insert formula at caret" }));
+    const emptyField = await screen.findByLabelText("Edit formula 1");
+    fireEvent.keyDown(emptyField, { key: "Backspace" });
+    dialog = screen.getByRole("alertdialog", { name: "Delete this formula?" });
+    expect(dialog).toBeInTheDocument();
+  });
+
+  it("reorders an active formula contextually and confirms content without technical structure", async () => {
     const onConfirm = vi.fn<(snapshot: ConfirmedTranscriptSnapshot) => void>();
     const user = userEvent.setup();
     render(<TranscriptEditor initialState={initialState} onConfirm={onConfirm} />);
 
-    const firstText = screen.getByLabelText("Edit text block 1");
-    await user.clear(firstText);
-    await user.type(firstText, "Begin with the equation.");
-    await user.click(screen.getByLabelText("Block 1 options"));
-    await user.click(screen.getByRole("button", { name: "Move block 1 down" }));
-    await user.click(screen.getByLabelText("Confirm transcript"));
+    await user.click(screen.getByRole("button", { name: "Edit formula 2" }));
+    await user.click(screen.getByRole("button", { name: "Move formula 2 earlier" }));
+    await user.click(screen.getByRole("button", { name: "Done editing formula 2" }));
+    await user.click(screen.getByRole("button", { name: "Confirm transcript" }));
 
-    expect(onConfirm).toHaveBeenCalledWith({
-      attemptId: "synthetic-attempt-correction",
-      blocks: [
-        { id: "math-a", latex: invalidSource, type: "math" },
-        { id: "text-a", text: "Begin with the equation.", type: "text" },
-        { id: "text-b", text: "Therefore the positive root is", type: "text" },
-        { id: "math-b", latex: "x=2", type: "math" },
-      ],
-      schemaVersion: "2.0.0",
-    });
-
+    expect(onConfirm.mock.calls[0]?.[0].blocks.map(({ id }) => id)).toEqual([
+      "text-a",
+      "math-a",
+      "math-b",
+      "text-b",
+      "text-c",
+    ]);
     const confirmation = screen.getByRole("status", { name: "Confirmed transcript" });
     expect(confirmation).toHaveTextContent("Future authoritative grading input");
-    expect(confirmation).toHaveTextContent("Begin with the equation.");
-    expect(confirmation).toHaveTextContent("Therefore the positive root is");
     expect(confirmation.textContent).not.toMatch(/text-a|math-a|step-|schemaVersion|2\.0\.0|→/);
   });
 });
