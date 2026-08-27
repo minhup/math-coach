@@ -50,6 +50,7 @@ test("curated geometry preserves constraints and interactions on phone and table
   await expect(board).toHaveAttribute("role", "region");
   await expect(board).toHaveAttribute("aria-label", syntheticGeometryDescription);
   await expect(constraintOutput).toContainText("circumcircle:circumABC");
+  await expect(board.locator("script, iframe, [onclick], [onload], [onerror]")).toHaveCount(0);
 
   const initial = await snapshot(constraintOutput);
   await page.reload();
@@ -90,6 +91,8 @@ test("curated geometry preserves constraints and interactions on phone and table
 
   await pointB.tap();
   await expect(page.getByRole("status", { name: "Selection result" })).toHaveText("Selected B.");
+  await pointA.click();
+  await expect(page.getByRole("status", { name: "Selection result" })).toHaveText("Selected A.");
 
   await page.getByRole("button", { name: "Ask selection question" }).click();
   await expect(page.getByText("Select point A.")).toBeVisible();
@@ -117,6 +120,11 @@ test("curated geometry preserves constraints and interactions on phone and table
     "Animation applied.",
   );
 
+  await page.getByText("Static fallback", { exact: true }).click();
+  await expect(
+    page.getByRole("img", { name: `${syntheticGeometryDescription} Static fallback.` }),
+  ).toHaveAttribute("src", "/fixtures/synthetic-m4-geometry-fallback.svg");
+
   const layoutReport = await page.evaluate(() => {
     const selectors = [
       ".geometry-spike-shell",
@@ -126,6 +134,7 @@ test("curated geometry preserves constraints and interactions on phone and table
       ".geometry-action-list",
       ".geometry-selection-list",
       ".geometry-constraint-snapshot",
+      ".geometry-static-fallback",
     ];
     const viewportWidth = document.documentElement.clientWidth;
     const escaped = Array.from(document.querySelectorAll(selectors.join(",")))

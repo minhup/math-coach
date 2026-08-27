@@ -25,6 +25,7 @@ interface GeometryBoardProps {
 }
 
 type RenderedElement = JXG.GeometryElement;
+type FreeBoard = (board: JXG.Board) => void;
 
 interface CoordinateElement {
   X(): number;
@@ -138,6 +139,14 @@ function distanceToLine(point: readonly [number, number], element: unknown): num
 
 function metric(value: number): number {
   return Number(value.toPrecision(12));
+}
+
+function releaseBoard(freeBoard: FreeBoard | null, board: JXG.Board): void {
+  try {
+    freeBoard?.(board);
+  } catch {
+    // Third-party teardown must never break navigation or the accessible fallback.
+  }
 }
 
 export function createGeometryConstraintSnapshot(
@@ -371,7 +380,7 @@ export function GeometryBoard({
   const boardId = `geometry-board-${reactId.replaceAll(":", "")}`;
   const boardRef = useRef<JXG.Board | null>(null);
   const elementsRef = useRef<Map<string, RenderedElement>>(new Map());
-  const freeBoardRef = useRef<((board: JXG.Board) => void) | null>(null);
+  const freeBoardRef = useRef<FreeBoard | null>(null);
   const pulseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const interactionRef = useRef(interaction);
 
@@ -390,7 +399,8 @@ export function GeometryBoard({
         if (disposed) {
           return;
         }
-        board = JXGModule.default.JSXGraph.initBoard(boardId, {
+        const JSXGraph = JXGModule.default.JSXGraph;
+        board = JSXGraph.initBoard(boardId, {
           axis: true,
           boundingbox: [
             scene.scene.viewport.xMin,
@@ -406,7 +416,7 @@ export function GeometryBoard({
           zoom: { wheel: false },
         });
         boardRef.current = board;
-        freeBoardRef.current = JXGModule.default.JSXGraph.freeBoard;
+        freeBoardRef.current = JSXGraph.freeBoard.bind(JSXGraph);
         const visible = new Set(interactionRef.current.visibleObjectIds);
         for (const objectId of scene.constructionOrder) {
           const item = scene.scene.objects.find((candidate) => candidate.id === objectId);
@@ -432,7 +442,7 @@ export function GeometryBoard({
         onReady();
       } catch {
         if (board) {
-          freeBoardRef.current?.(board);
+          releaseBoard(freeBoardRef.current, board);
         }
         boardRef.current = null;
         elements.clear();
@@ -446,7 +456,7 @@ export function GeometryBoard({
         clearTimeout(pulseTimerRef.current);
       }
       if (boardRef.current) {
-        freeBoardRef.current?.(boardRef.current);
+        releaseBoard(freeBoardRef.current, boardRef.current);
       }
       boardRef.current = null;
       elements.clear();

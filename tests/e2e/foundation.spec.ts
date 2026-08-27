@@ -35,7 +35,12 @@ test("internal learner signs in and completes a synthetic image upload", async (
   await expect(page.getByText("SYN-AURORA-2027")).toBeVisible();
   await expect(page.getByText("SYN-HARBOR-2027")).toBeVisible();
   await expect(page.getByText("Reference solutions are non-exhaustive.")).toBeVisible();
-  await expect(page.getByText(/A coordinate triangle with A at zero/)).toBeVisible();
+  await expect(
+    page.getByLabel("Statement").getByText(/A coordinate triangle with A at zero/),
+  ).toBeVisible();
+  await expect(
+    page.getByLabel("Curated geometry scene").getByText(/A coordinate triangle with A at zero/),
+  ).toBeVisible();
 
   const horizontalOverflow = await page.evaluate(
     () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,

@@ -40,7 +40,12 @@ const graph = vi.hoisted(() => {
   });
   const board = { create, update: vi.fn() };
   const initBoard = vi.fn(() => board);
-  const freeBoard = vi.fn();
+  const freeBoard = vi.fn(function (this: unknown) {
+    if (this !== jsxGraph) {
+      throw new TypeError("freeBoard requires its JSXGraph receiver");
+    }
+  });
+  const jsxGraph = { initBoard, freeBoard };
   return {
     board,
     create,
@@ -50,6 +55,7 @@ const graph = vi.hoisted(() => {
     failCreateAt(index: number | null) {
       createFailureAt = index;
     },
+    jsxGraph,
     reset() {
       create.mockClear();
       board.update.mockClear();
@@ -62,7 +68,7 @@ const graph = vi.hoisted(() => {
 });
 
 vi.mock("jsxgraph", () => ({
-  default: { JSXGraph: { initBoard: graph.initBoard, freeBoard: graph.freeBoard } },
+  default: { JSXGraph: graph.jsxGraph },
 }));
 
 const scene = validateAndOrderGeometryScene(syntheticGeometryScene);
