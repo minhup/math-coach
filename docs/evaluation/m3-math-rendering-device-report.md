@@ -32,20 +32,22 @@ normal `playwright.config.ts` and `make test-e2e` commands.
 
 ## Exact automated result
 
-Final production-build visual run: **5 passed in 6.6 seconds**.
+Final production-build visual run: **5 passed in 8.4 seconds**.
 
 | Project                        | Engine   | Viewport   | Required layout           | Result | Test time |
 | ------------------------------ | -------- | ---------- | ------------------------- | ------ | --------- |
-| `compact-chromium`             | Chromium | 360 × 640  | PHOTO/TRANSCRIPT document | PASS   | 1.2 s     |
-| `pixel-7-chromium`             | Chromium | 412 × 839  | PHOTO/TRANSCRIPT document | PASS   | 1.7 s     |
-| `iphone-13-webkit`             | WebKit   | 390 × 664  | PHOTO/TRANSCRIPT document | PASS   | 5.1 s     |
-| `ipad-pro-11-portrait-webkit`  | WebKit   | 834 × 1194 | photo/document split      | PASS   | 5.3 s     |
-| `ipad-pro-11-landscape-webkit` | WebKit   | 1194 × 834 | photo/document split      | PASS   | 5.9 s     |
+| `compact-chromium`             | Chromium | 360 × 640  | PHOTO/TRANSCRIPT document | PASS   | 1.8 s     |
+| `pixel-7-chromium`             | Chromium | 412 × 839  | PHOTO/TRANSCRIPT document | PASS   | 3.0 s     |
+| `iphone-13-webkit`             | WebKit   | 390 × 664  | PHOTO/TRANSCRIPT document | PASS   | 7.1 s     |
+| `ipad-pro-11-portrait-webkit`  | WebKit   | 834 × 1194 | photo/document split      | PASS   | 6.9 s     |
+| `ipad-pro-11-landscape-webkit` | WebKit   | 1194 × 834 | photo/document split      | PASS   | 7.7 s     |
 
-Two earlier red runs are not passing evidence. The first reached the new page in all projects and
-exposed an ambiguous text locator; the second exercised the correction and block operations in all
-projects before exposing a Testing-Library-only locator accidentally used in Playwright. Both test
-issues were corrected without weakening product assertions before the passing run.
+The first real-browser refinement run exposed reversed physical-keyboard input because React
+reconciliation moved the native caret after every character. Typed text now updates the canonical
+ref without rerendering the editable host; structural actions and confirmation commit that state.
+A second run reached the final known-literal assertion and showed that its expected insertion point
+was stale: the native caret correctly remained after the newly typed phrase. The expected public
+order was corrected without changing product behavior. The passing visual run followed.
 
 ## Regression assertions exercised in every project
 
@@ -54,17 +56,22 @@ issues were corrected without weakening product assertions before the passing ru
 - On phones, expose PHOTO/TRANSCRIPT tabs, move selection/focus with arrow keys, and activate the
   transcript with a touch event.
 - On tablets, omit the phone tabs and show photo plus continuous document simultaneously.
-- Assert one accessible editable document with no reasoning-step heading, boundary, split/merge
-  control, move-step control, `stepId`, or synthetic step identifier.
-- Render valid inline/display mathematics through controlled KaTeX while no MathLive field is
-  permanently mounted.
+- Assert one `contenteditable="plaintext-only"` document with no reasoning-step heading, boundary,
+  split/merge/move-step control, add-text action, textarea, block row, `stepId`, or synthetic step
+  identifier.
+- Render valid inline mathematics through controlled KaTeX while no MathLive field is permanently
+  mounted.
 - Show `Math needs correction` for malformed input; assert raw source and forbidden executable or
   external elements are absent.
 - Activate the invalid formula, correct it through the real MathLive keyboard path, finish editing,
   and return to one KaTeX display.
-- Edit text naturally in place.
-- Open contextual block options, move a block globally, add a temporary text block, delete it, and
-  confirm the visible transcript.
+- Place the native caret within text and type through the physical keyboard path without activating
+  a text row.
+- Insert a formula at the saved caret, assert immediate MathLive focus and the `auto` touch virtual
+  keyboard policy, enter visual mathematics, and return to inline KaTeX.
+- Request whole-formula deletion with Backspace at an adjacent text boundary; cancel once without
+  mutation, then confirm deletion and verify the token count changes only after confirmation.
+- Activate a formula and use its contextual deterministic reorder action.
 - Verify the confirmed snapshot has the exact content order, identifies the future authoritative
   grading input, and exposes no block IDs, schema details, arrows, or step structure.
 - Assert `documentElement.scrollWidth <= documentElement.clientWidth + 1`.
@@ -82,22 +89,25 @@ projects.
 | Photo/transcript navigation  | Tabs remain clear and do not cover document controls                 | Both panels visible; no phone tablist                |
 | Synthetic uploaded solution  | Available in PHOTO before the automated switch                       | Visible and legible beside the document              |
 | Continuous document          | One paper surface; no step cards or headings                         | One paper surface in the transcript column           |
-| Text editing presentation    | Borderless paragraph-like text remains readable                      | Document-like text remains readable                  |
-| Formula presentation         | One KaTeX result per idle formula; local math scrolling is contained | Formulas fit or remain locally contained             |
-| Contextual controls          | Subtle ellipsis affordances and 44 px add/confirm controls fit       | Menus/add controls remain aligned                    |
-| Confirmation                 | Reviewed content appears without IDs or type/schema summaries        | Content-only confirmation fits the transcript column |
+| Text editing presentation    | One visible native-caret surface; inline text remains readable       | Word-like paper surface remains readable             |
+| Formula presentation         | Idle inline KaTeX switches in place to focused MathLive              | Same inline activation; active field remains bounded |
+| Contextual controls          | One `+ Formula` action; active-token actions wrap within the paper   | Active-token controls remain beside the formula      |
+| Delete confirmation          | Safe action is prominent; no formula mutates before confirmation     | Centered modal remains within the viewport           |
+| Confirmation                 | Reviewed inline content appears without IDs or type/schema summaries | Content-only confirmation fits the transcript column |
 | Horizontal document overflow | None observed or reported by automation                              | None observed or reported by automation              |
 
-The automated flow finishes with the first text block moved below the first formula, deliberately
-proving that the confirmation document follows visible flat array order rather than hidden grouping.
-Compact phone screenshots show long formulas clipped only inside their explicitly scrollable math
-container; no page or document surface expands horizontally.
+Three screenshots per project were inspected: active MathLive, formula-deletion confirmation, and
+the final confirmed state. The automated flow inserts `y = 1` after the exact typed caret, removes a
+different formula only after confirmation, and moves another formula earlier. This proves that the
+confirmed document follows the visible flat array order rather than hidden grouping. Compact phone
+screenshots show the active visual field and actions wrapping within the paper; no page or document
+surface expands horizontally.
 
 ## Outcome
 
 The clarified Milestone 3 correction spike meets its configured phone/tablet exit condition. The
-correction-stage model and UI are flat, the transcript reads as one editable document, invalid math
-is source-free and directly correctable, MathLive appears only for the activated formula, and the
-confirmed content matches the exact visible order without technical structure. Reasoning-step
-detection remains deferred. No real OCR, grading, persistence, AI integration, or student-data flow
-was exercised.
+correction-stage model and UI are flat, the transcript behaves as one native-caret inline document,
+invalid math is source-free and directly correctable, and MathLive appears only for the activated or
+newly inserted formula. Whole-formula deletion is confirmed, and the confirmed content matches the
+exact visible order without technical structure. Reasoning-step detection remains deferred. No real
+OCR, grading, persistence, AI integration, or student-data flow was exercised.

@@ -479,7 +479,8 @@ interface TranscriptionResult {
 
 Block array order is the canonical transcription order. Correction-stage transcription does not
 contain reasoning-step IDs or grouping. Reasoning analysis may run only after the learner confirms
-this flat document.
+this flat document. Text and math variants may alternate within the same visual line; the learner
+edits them through one continuous document rather than exposed block rows.
 
 ### 7.5 Evaluation result
 
@@ -980,9 +981,11 @@ The model must not silently correct mathematical mistakes.
 The student may:
 
 ```text
-edit text
-edit math visually
-add/delete/reorder blocks
+place a native caret and edit text in place
+insert math at the caret
+activate and edit existing math visually
+reorder formulas through contextual controls
+delete a whole formula only after explicit confirmation
 confirm
 ```
 
@@ -1289,14 +1292,16 @@ Deliver:
 KaTeX renderer
 MathLive editor
 flat mixed text/math blocks
-continuous document correction
-block add/delete/reorder
+inline native-caret document correction
+formula insert/confirmed-delete/contextual-reorder operations
 regression suite
 device report
 ```
 
 Exit when no raw LaTeX appears in the regression suite and confirmation preserves the exact flat
-ordered document without reasoning-step grouping.
+ordered document without reasoning-step grouping. Text and mathematics must flow inline, MathLive
+must activate at an existing or newly inserted formula, and no whole formula may be deleted without
+learner confirmation.
 
 ### Milestone 4 — Interactive geometry engine
 

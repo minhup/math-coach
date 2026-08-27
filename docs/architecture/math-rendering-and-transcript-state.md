@@ -49,11 +49,12 @@ with a visual formula field through physical keyboard and touch virtual-keyboard
 are never required to read or edit raw LaTeX.
 
 An idle mathematics transcript block shows only the controlled KaTeX result. Activating that result
-replaces it with the visual editor; completing the edit returns to the controlled renderer. The
-preview and editor are not permanently displayed as separate areas. A failed render shows the safe
-placeholder inside the same activation control, so invalid mathematics remains directly correctable.
-Correcting the field updates typed transcript state. A local-package load failure has an explicit
-source-free failure message and does not fabricate a corrected expression.
+replaces it in place with the focused visual editor; completing the edit returns to the controlled
+renderer. A newly inserted formula follows the same focused path. The preview and editor are not
+permanently displayed as separate areas. A failed render shows the safe placeholder inside the same
+activation control, so invalid mathematics remains directly correctable. Correcting the field
+updates typed transcript state. A local-package load failure has an explicit source-free failure
+message and does not fabricate a corrected expression.
 
 The integration uses MathLive's official
 [React integration](https://mathlive.io/mathfield/guides/integration/),
@@ -87,10 +88,20 @@ The validator enforces:
 
 Pure operations accept caller-supplied IDs, never use time or randomness, do not mutate their input,
 and validate every result. The `blocks` array is the sole canonical order, so no ownership/reference
-array can orphan or multiply reference a block. Add inserts at an explicit global index, delete
-removes a non-final block, and up/down movement swaps adjacent blocks across the continuous document.
-There are no correction-stage step types or split/merge/move-step operations. Controls live in
-labelled contextual menus with disabled boundary states, so drag-and-drop is unnecessary.
+array can orphan or multiply reference a block. Formula insertion splits a text variant at an exact
+character offset without losing characters. Confirmed formula deletion removes the math variant and
+joins adjacent text variants in reading order; deleting the only token creates one empty text
+variant so the document stays editable. Up/down movement swaps adjacent blocks across the continuous
+document. There are no correction-stage step types or split/merge/move-step operations.
+
+The editor renders those variants as inline runs inside one `contenteditable="plaintext-only"`
+surface. Browser Selection/Range offsets locate the native caret, while only `textContent` from
+application-owned text runs is synchronized to canonical state; pasted HTML and browser DOM markup
+are never accepted as content. The sole insertion toolbar action adds a formula at the saved caret.
+Formula finish, reorder, and delete actions appear only beside an active token, so drag-and-drop and
+an add-text button are unnecessary. Backspace/Delete at a formula boundary, Delete on a selected
+formula, and the contextual delete action all open an accessible confirmation dialog before the
+whole token can be removed. Escape or the safe action cancels without mutation.
 
 Confirmation validates once more and produces a deeply independent snapshot whose flat block array
 matches the exact visible order. It contains no timestamp, score, grade, provider record, AI
@@ -108,9 +119,10 @@ deterministic transcript explicitly presented as simulated OCR output. No OCR se
 Below 768 px, PHOTO and TRANSCRIPT are keyboard-operable tabs and only the selected tab panel is
 exposed. At 768 px and above, the phone tablist is absent and the photo plus transcript are visible in
 a two-column split. The transcript is one paper-like document surface: text edits in place, formulas
-switch between idle KaTeX and active MathLive, and block actions are contextual. Controls have
-labelled minimum 44 px targets, wrap at narrow widths, and remain inside the viewport. Long display
-formulas may scroll only within their own bounded renderer.
+flow inline with text, and each formula switches between idle KaTeX and active MathLive. The browser
+caret and selection work directly in text; insertion and formula actions remain contextual. Controls
+have labelled minimum 44 px targets, wrap at narrow widths, and remain inside the viewport. Long
+mathematics may scroll only within its own bounded renderer.
 
 ## Contracts unchanged
 
@@ -125,11 +137,11 @@ contracts remain unchanged.
 
 Unit tests cover flat transcript invariants and immutable operations. Component tests cover the
 complete render corpus, source-free adversarial failures, MathLive property/event behavior,
-click-to-edit correction, mixed blocks, contextual operations, authentication states, and
-content-only confirmation. The browser regression runs in all five configured phone/tablet projects
-and checks real MathLive keyboard correction, touch/keyboard tab controls, absence of reasoning-step
-UI/state, exact flat confirmation order, source absence, forbidden elements, and horizontal
-containment.
+native-caret text entry, exact-caret formula insertion, click-to-edit correction, confirmed deletion,
+mixed inline blocks, contextual operations, authentication states, and content-only confirmation.
+The browser regression runs in all five configured phone/tablet projects and checks real MathLive
+keyboard correction, touch/keyboard tab controls, absence of reasoning-step UI/state, exact flat
+confirmation order, source absence, forbidden elements, and horizontal containment.
 Exact results are in
 [the Milestone 3 device report](../evaluation/m3-math-rendering-device-report.md).
 

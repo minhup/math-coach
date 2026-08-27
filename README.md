@@ -13,9 +13,10 @@ Milestone 2 implements `study_profile -> student_exam_targets[]`, shared exam/sk
 Milestone 3 routes read-only typed mathematics through a bounded, source-free KaTeX failure
 boundary and uses MathLive for visual correction. Its authenticated `/internal/math-correction`
 route presents deterministic simulated OCR as one continuous document: typed text/math blocks are
-flat and ordered, formulas switch from KaTeX to MathLive only when activated, and confirmation
-produces the future authoritative grading input. Reasoning grouping happens only after confirmation
-in a later milestone. The spike does not run OCR, grade, or persist work. See
+flat and ordered, a native caret edits text in place, and formulas can be inserted at that caret or
+switch from KaTeX to MathLive when activated. Whole-formula deletion requires confirmation, and
+transcript confirmation produces the future authoritative grading input. Reasoning grouping happens
+only after confirmation in a later milestone. The spike does not run OCR, grade, or persist work. See
 [the mathematical rendering and transcript-state architecture](docs/architecture/math-rendering-and-transcript-state.md)
 and [the five-project device report](docs/evaluation/m3-math-rendering-device-report.md).
 
