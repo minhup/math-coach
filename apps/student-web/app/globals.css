@@ -842,14 +842,6 @@ label[for]:focus-visible {
   margin-bottom: 0;
 }
 
-.preview-inline-math,
-.preview-display-math {
-  border-radius: 6px;
-  color: var(--brand-dark);
-  background: var(--brand-soft);
-  font-family: Georgia, "Times New Roman", serif;
-}
-
 .math-renderer {
   max-width: 100%;
   min-width: 0;
@@ -891,18 +883,6 @@ label[for]:focus-visible {
   font-family: inherit;
   font-size: 13px;
   font-weight: 750;
-}
-
-.preview-inline-math {
-  padding: 1px 5px;
-}
-
-.preview-display-math {
-  overflow-x: auto;
-  margin: 12px 0;
-  padding: 13px;
-  font-size: 18px;
-  text-align: center;
 }
 
 .preview-geometry-reference,
