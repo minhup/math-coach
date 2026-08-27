@@ -847,6 +847,49 @@ label[for]:focus-visible {
   font-family: Georgia, "Times New Roman", serif;
 }
 
+.math-renderer {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.math-renderer-inline {
+  display: inline-flex;
+  padding: 0 3px;
+  vertical-align: -0.12em;
+}
+
+.math-renderer-display {
+  display: block;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 12px 0;
+  padding: 13px;
+  border-radius: 10px;
+  background: var(--brand-soft);
+  text-align: center;
+  overscroll-behavior-inline: contain;
+}
+
+.math-renderer-display > [data-math-render-state] {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+
+.math-render-failure {
+  display: inline-flex;
+  min-height: 32px;
+  padding: 5px 9px;
+  align-items: center;
+  border: 1px dashed #d18b78;
+  border-radius: 8px;
+  color: var(--danger);
+  background: var(--danger-soft);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 750;
+}
+
 .preview-inline-math {
   padding: 1px 5px;
 }

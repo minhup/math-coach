@@ -2,14 +2,14 @@
 
 ## Metadata
 
-- Status: proposed
+- Status: in-progress
 - Owner: Codex implementation; project owner approval
 - Branch: `feat/m3-math-rendering-correction-spike`
 - Base commit: `984da70f7fb0e51446054f7dea3c852fca08dac0`
 - Related milestone: Milestone 3 — Mathematical rendering and correction spike
 - Related issue/ticket: None
 - Started: 2026-08-26
-- Last updated: 2026-08-26
+- Last updated: 2026-08-27
 
 ## Context
 
@@ -122,11 +122,13 @@ Deliver an authenticated internal correction spike in which:
 
 `MathRenderer` is the only read-only mathematics entry point. It accepts a source string and an
 explicit inline/display mode, calls the KaTeX DOM renderer without React
-`dangerouslySetInnerHTML`, and never puts the source or thrown error message in the DOM. It uses:
+`dangerouslySetInnerHTML`, and never puts the source or thrown error message in failure-state DOM. It
+renders into a detached staging node and commits that output only after all safety checks pass. It
+uses:
 
 ```text
 throwOnError: true
-trust: false
+trust: callback that records an attempt and always returns false
 strict: "error"
 maxExpand: 100
 maxSize: 10
@@ -139,10 +141,11 @@ Empty/whitespace-only or over-length input fails before KaTeX. KaTeX parse error
 commands, trust failures, and expansion-limit failures converge on one safe placeholder. KaTeX's
 official guidance warns that both built-in `throwOnError: false` rendering and thrown error messages
 may expose source; this boundary deliberately catches with `throwOnError: true` and discards details
-from user-facing output. `trust: false` prohibits link/image/HTML commands. A fresh macro map and
-`globalGroup: false` prevent one block from changing another block's rendering. CSS contains every
-renderer to the available width; large display output may scroll inside its labelled math container,
-but may never expand the document.
+from user-facing output. The always-false trust callback prohibits link/image/HTML commands and lets
+the boundary reject KaTeX's otherwise source-revealing unsupported-command rendering. A fresh macro
+map and `globalGroup: false` prevent one block from changing another block's rendering. CSS contains
+every renderer to the available width; large display output may scroll inside its labelled math
+container, but may never expand the document.
 
 The existing typed-content preview delegates inline math, display math, rich-line math spans, and
 nested callout math to this renderer. Text stays ordinary React text nodes; arbitrary HTML and
@@ -556,7 +559,7 @@ contract will be documented and resolved deliberately, followed by affected focu
 ## Progress
 
 - [x] Repository inspected
-- [ ] Plan reviewed
+- [x] Plan reviewed
 - [x] Branch created from current main
 - [ ] Tests written or updated
 - [ ] Implementation complete
@@ -569,6 +572,8 @@ contract will be documented and resolved deliberately, followed by affected focu
 
 ## Decisions
 
+- 2026-08-27: The project owner confirmed the proposed public test seams and file set. Test-first
+  implementation may proceed within this ChangePlan's owned scope.
 - 2026-08-26: Keep the spike frontend-local and reuse the existing authentication endpoint. A new
   transcript API or database contract would exceed Milestone 3 and falsely imply persistence.
 - 2026-08-26: Use KaTeX's DOM renderer with `throwOnError: true`, not string injection or built-in
@@ -597,6 +602,10 @@ contract will be documented and resolved deliberately, followed by affected focu
   hidden. No separate compute-engine API will be called.
 - Current official MathLive guidance supports React through its `<math-field>` public element,
   property, and input event, and its default virtual-keyboard policy already targets touch devices.
+- KaTeX `trust: false` alone does not throw for a trusted-command attempt: it renders the command name
+  and includes the complete source in its MathML annotation. The controlled boundary therefore uses
+  an always-false trust callback to record any attempt, renders into a detached node, and rejects the
+  complete staged result before it can enter mounted failure-state DOM.
 
 ## Verification evidence
 
@@ -628,11 +637,26 @@ contract will be documented and resolved deliberately, followed by affected focu
   confirmed this branch served the Milestone 2 content-preview link, but 5/5 uploads failed from the
   alternate origin before completion. This is recorded as environment evidence, not a passing
   substitute for `make test-e2e`.
-- Implementation verification: not run; no implementation exists yet.
+- Renderer red/green evidence: the first focused run failed because `MathRenderer` did not exist;
+  subsequent red runs exposed uncaught malformed input, trusted-command source output, empty
+  rendering, over-length rendering, and the existing content preview's plain-source fallback before
+  each behavior was implemented.
+- `npx vitest run components/math/math-renderer.test.tsx
+components/content-preview.test.tsx --coverage=false` passed 20 focused renderer/typed-content
+  tests after the slice. The corpus includes inline/display math, fractions, nested fractions,
+  powers, subscripts, roots, systems/cases, inequalities, congruences, sets, logic, matrices,
+  geometry symbols, multi-line derivations, Vietnamese mixed content, malformed/unsupported/trusted
+  commands, expansion/input/element bounds, empty math, and invalid-to-valid recovery.
+- `npm run typecheck --workspace @math-coach/student-web` passed after the renderer slice.
+- `npm run build --workspace @math-coach/student-web` passed and prerendered the existing `/` and
+  `/internal/content-preview` routes with KaTeX CSS bundled.
+- Actual `du -sb` package content sizes exactly matched registry metadata for direct/transitive
+  production packages: KaTeX tree 4,185,500 bytes and MathLive tree 27,079,799 bytes.
 
 ## Result
 
-Proposed only. Repository and official documentation inspection is complete, the isolated branch and
-ChangePlan exist, and the owned files/public test seams are ready for project-owner review. All
-non-browser baseline gates pass; standard-port E2E is currently obstructed by owner-run services from
-the shared checkout and is recorded above. No test or implementation file has been changed.
+In progress. Repository and official documentation inspection is complete, the isolated branch and
+ChangePlan exist, and the project owner confirmed the owned files/public test seams on 2026-08-27.
+All non-browser baseline gates pass; standard-port E2E is currently obstructed by owner-run services
+from the shared checkout and is recorded above. The controlled renderer and existing typed-content
+preview migration are implemented and focused-green; transcript-state work is next.

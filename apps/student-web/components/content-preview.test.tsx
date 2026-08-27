@@ -163,4 +163,48 @@ describe("ContentPreview", () => {
     expect(screen.queryByText(/validated geometry action/)).toBeNull();
     expect(screen.getByText("Synthetic diagram fallback")).toBeInTheDocument();
   });
+
+  it("keeps invalid typed mathematics source-free and correctable", async () => {
+    const untrustedSource = String.raw`\frac{PRIVATE_PREVIEW_SOURCE}{`;
+    const { container } = render(
+      <ContentPreview
+        preview={{
+          ...preview,
+          statement: [{ id: "invalid-math", latex: untrustedSource, type: "display_math" }],
+        }}
+      />,
+    );
+
+    expect(await screen.findByRole("img", { name: "Math needs correction" })).toBeInTheDocument();
+    expect(container.innerHTML).not.toContain("PRIVATE_PREVIEW_SOURCE");
+    expect(container.innerHTML).not.toContain("\\frac");
+  });
+
+  it("renders a Vietnamese mixed text and mathematics line as typed spans", async () => {
+    render(
+      <ContentPreview
+        preview={{
+          ...preview,
+          statement: [
+            {
+              id: "mixed-vietnamese",
+              spans: [
+                { text: "Với ", type: "text" },
+                { latex: "x^2=4", type: "math" },
+                { text: ", ta có hai nghiệm.", type: "text" },
+              ],
+              type: "rich_line",
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/Với/)).toBeInTheDocument();
+    expect(screen.getByText(/ta có hai nghiệm/)).toBeInTheDocument();
+    expect(await screen.findByLabelText("Inline mathematics")).toHaveAttribute(
+      "data-math-render-state",
+      "rendered",
+    );
+  });
 });

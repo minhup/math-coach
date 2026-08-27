@@ -1,70 +1,5 @@
-import type { ContentBlock, ContentPreview as ContentPreviewData } from "../lib/api";
-
-function TypedBlock({ block }: { block: ContentBlock }) {
-  switch (block.type) {
-    case "text":
-      return <p>{block.text}</p>;
-    case "inline_math":
-      return (
-        <span className="preview-inline-math" aria-label="Inline mathematics">
-          {block.latex}
-        </span>
-      );
-    case "display_math":
-      return (
-        <div className="preview-display-math" aria-label="Displayed mathematics">
-          {block.latex}
-        </div>
-      );
-    case "rich_line":
-      return (
-        <p>
-          {block.spans.map((span, index) =>
-            span.type === "text" ? (
-              <span key={`${block.id}-${index}`}>{span.text}</span>
-            ) : (
-              <span
-                aria-label="Inline mathematics"
-                className="preview-inline-math"
-                key={`${block.id}-${index}`}
-              >
-                {span.latex}
-              </span>
-            ),
-          )}
-        </p>
-      );
-    case "geometry":
-      return (
-        <p className="preview-geometry-reference">
-          Curated geometry scene version: <code>{block.sceneVersionId}</code>
-        </p>
-      );
-    case "image":
-      return (
-        <figure className="preview-asset-reference">
-          <div aria-hidden="true">Image asset</div>
-          <figcaption>{block.alt}</figcaption>
-        </figure>
-      );
-    case "callout":
-      return (
-        <aside className={`preview-callout preview-callout-${block.kind}`}>
-          <TypedBlocks blocks={block.content} />
-        </aside>
-      );
-  }
-}
-
-function TypedBlocks({ blocks }: { blocks: ContentBlock[] }) {
-  return (
-    <div className="preview-blocks">
-      {blocks.map((block) => (
-        <TypedBlock block={block} key={block.id} />
-      ))}
-    </div>
-  );
-}
+import type { ContentPreview as ContentPreviewData } from "../lib/api";
+import { TypedContentBlocks } from "./math/content-blocks";
 
 export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
   return (
@@ -107,7 +42,7 @@ export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
 
       <section className="preview-section" aria-labelledby="statement-heading">
         <h2 id="statement-heading">Statement</h2>
-        <TypedBlocks blocks={preview.statement} />
+        <TypedContentBlocks blocks={preview.statement} />
       </section>
 
       <section className="preview-section" aria-labelledby="skills-heading">
@@ -149,7 +84,7 @@ export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
         {preview.referenceSolutions.map((solution) => (
           <div className="preview-subsection" key={solution.id}>
             <h3>{solution.methodLabel}</h3>
-            <TypedBlocks blocks={solution.content} />
+            <TypedContentBlocks blocks={solution.content} />
           </div>
         ))}
       </section>
@@ -160,7 +95,7 @@ export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
           {preview.rubric.map((item) => (
             <li key={item.id}>
               <div>
-                <TypedBlocks blocks={item.description} />
+                <TypedContentBlocks blocks={item.description} />
               </div>
               <strong>{item.maximumScore} points</strong>
             </li>
@@ -176,7 +111,7 @@ export function ContentPreview({ preview }: { preview: ContentPreviewData }) {
               Level {hint.hintLevel}
               {hint.revealsCompleteSolution ? " · complete solution reveal" : ""}
             </summary>
-            <TypedBlocks blocks={hint.content} />
+            <TypedContentBlocks blocks={hint.content} />
             {hint.geometryActions.length > 0 ? (
               <p className="muted">{hint.geometryActions.length} validated geometry action(s)</p>
             ) : null}
