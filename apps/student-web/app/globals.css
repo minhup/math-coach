@@ -1066,9 +1066,10 @@ label[for]:focus-visible {
 .correction-split > section,
 .correction-panel,
 .transcript-editor,
-.transcript-step,
+.transcript-document,
 .transcript-block,
-.transcript-block-main {
+.transcript-math-editor,
+.transcript-confirmed-document {
   min-width: 0;
   max-width: 100%;
 }
@@ -1129,32 +1130,36 @@ label[for]:focus-visible {
   line-height: 1.5;
 }
 
-.transcript-steps {
+.transcript-document {
   display: grid;
-  padding: 12px;
-  gap: 12px;
+  min-height: 520px;
+  margin: 12px;
+  padding: clamp(22px, 6vw, 48px) clamp(16px, 7vw, 56px);
+  border: 1px solid #dedbd0;
+  border-radius: 5px;
+  background: #fffef9;
+  box-shadow:
+    0 8px 24px rgba(31, 48, 47, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.72);
+  align-content: start;
+  gap: 2px;
 }
 
-.transcript-step {
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: #fbfcf8;
-}
-
-.transcript-step-heading {
+.transcript-block {
+  position: relative;
   display: grid;
-  margin-bottom: 12px;
-  gap: 10px;
+  min-height: 48px;
+  padding: 5px 46px 5px 4px;
+  border-radius: 8px;
+  align-items: center;
 }
 
-.transcript-step-heading h3 {
-  margin: 0;
-  font-size: 17px;
+.transcript-block:hover,
+.transcript-block:focus-within {
+  background: rgba(223, 241, 235, 0.38);
 }
 
-.transcript-control-row,
-.transcript-add-row {
+.transcript-control-row {
   display: flex;
   min-width: 0;
   flex-wrap: wrap;
@@ -1181,44 +1186,72 @@ label[for]:focus-visible {
   opacity: 0.48;
 }
 
-.transcript-blocks {
-  display: grid;
-  gap: 10px;
-}
-
-.transcript-block {
-  display: grid;
+.transcript-text-field {
+  field-sizing: content;
+  display: block;
+  width: 100%;
+  min-height: 38px;
   overflow: hidden;
-  padding: 12px;
-  border: 1px solid #dfe5df;
-  border-radius: 13px;
-  background: white;
-  gap: 10px;
+  resize: none;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.65;
 }
 
-.transcript-field-label {
-  display: grid;
+.transcript-text-field:focus {
+  outline: 2px solid rgba(23, 107, 104, 0.34);
+  outline-offset: 1px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.transcript-math-activation {
+  display: block;
+  width: 100%;
   min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  cursor: text;
+  text-align: inherit;
+}
+
+.transcript-math-activation:hover,
+.transcript-math-activation:focus-visible {
+  outline: 2px solid rgba(23, 107, 104, 0.28);
+  outline-offset: 1px;
+  background: rgba(223, 241, 235, 0.45);
+}
+
+.transcript-math-activation .math-renderer-display {
+  margin: 0;
+  background: transparent;
+}
+
+.transcript-math-editor {
+  display: grid;
+  padding: 4px;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 7px;
-  color: var(--muted);
+}
+
+.transcript-done-button,
+.transcript-add-button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #a8bbb5;
+  border-radius: 9px;
+  color: var(--brand-dark);
+  background: white;
   font-size: 12px;
   font-weight: 800;
-}
-
-.transcript-field-label textarea {
-  width: 100%;
-  min-height: 70px;
-  resize: vertical;
-  padding: 11px 12px;
-  border: 1px solid #b9c5c1;
-  border-radius: 10px;
-  color: var(--ink);
-  background: var(--paper);
-  line-height: 1.5;
-}
-
-.transcript-math-field {
-  min-width: 0;
 }
 
 .mathlive-editor {
@@ -1255,13 +1288,68 @@ label[for]:focus-visible {
   font-size: 13px;
 }
 
-.transcript-add-row {
-  margin-top: 12px;
+.transcript-block-menu {
+  position: absolute;
+  z-index: 3;
+  top: 6px;
+  right: 1px;
 }
 
-.transcript-add-row .secondary-button {
-  min-height: 44px;
-  flex: 1 1 120px;
+.transcript-block-menu summary {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  list-style: none;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--muted);
+  place-items: center;
+}
+
+.transcript-block-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.transcript-block-menu summary:hover,
+.transcript-block-menu summary:focus-visible,
+.transcript-block-menu[open] summary {
+  border-color: #bdcbc6;
+  outline: 0;
+  color: var(--brand-dark);
+  background: white;
+}
+
+.transcript-block-menu .transcript-control-row {
+  position: absolute;
+  z-index: 4;
+  top: 47px;
+  right: 0;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 64px));
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 10px 28px rgba(27, 61, 64, 0.16);
+}
+
+.transcript-add-row {
+  display: flex;
+  min-width: 0;
+  margin-top: 22px;
+  padding: 18px 4px 0;
+  flex-wrap: wrap;
+  align-items: center;
+  border-top: 1px dashed #ccd6d1;
+  gap: 8px;
+}
+
+.transcript-add-row > span {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .transcript-confirmation {
@@ -1297,12 +1385,25 @@ label[for]:focus-visible {
   font-size: 16px;
 }
 
-.transcript-snapshot ol {
+.transcript-confirmed-document {
   display: grid;
-  margin: 12px 0 0;
-  padding-left: 20px;
-  gap: 6px;
-  font-size: 13px;
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid rgba(23, 107, 104, 0.2);
+  border-radius: 6px;
+  background: #fffef9;
+  gap: 3px;
+}
+
+.transcript-confirmed-document p {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.65;
+}
+
+.transcript-confirmed-document .math-renderer-display {
+  margin: 4px 0;
+  background: transparent;
 }
 
 @media (min-width: 768px) {
@@ -1327,13 +1428,8 @@ label[for]:focus-visible {
     top: 18px;
   }
 
-  .transcript-step-heading {
-    align-items: center;
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .transcript-step-heading .transcript-control-row {
-    justify-content: flex-end;
+  .transcript-document {
+    margin: 16px;
   }
 }
 

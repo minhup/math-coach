@@ -42,7 +42,12 @@ describe("CorrectionSpikeApp", () => {
     expect(
       await screen.findByRole("heading", { name: "Mathematical correction spike" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Synthetic fixture — not student work")).toBeInTheDocument();
+    expect(
+      screen.getByText("Synthetic upload and simulated OCR — not student work"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Synthetic uploaded solution" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "PHOTO" })).toHaveAttribute("aria-selected", "true");
     expect(screen.queryByRole("tabpanel", { name: "TRANSCRIPT" })).toBeNull();
 
@@ -79,7 +84,7 @@ describe("CorrectionSpikeApp", () => {
     expect(
       await screen.findByRole("heading", { name: "Authentication required" }),
     ).toBeInTheDocument();
-    expect(screen.queryByText("Synthetic fixture — not student work")).toBeNull();
+    expect(screen.queryByText("Synthetic upload and simulated OCR — not student work")).toBeNull();
   });
 
   it("retries a temporary session failure", async () => {

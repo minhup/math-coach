@@ -124,8 +124,8 @@ export function CorrectionSpikeApp() {
   const photoPanel = (
     <div className="correction-panel correction-photo-panel">
       <div className="correction-panel-heading">
-        <p className="eyebrow">Photo</p>
-        <h2>Synthetic paper fixture</h2>
+        <p className="eyebrow">Uploaded solution</p>
+        <h2>Synthetic uploaded solution</h2>
       </div>
       <figure className="synthetic-paper">
         <Image
@@ -135,9 +135,7 @@ export function CorrectionSpikeApp() {
           src="/fixtures/synthetic-correction-sheet.svg"
           width={720}
         />
-        <figcaption>
-          Original repository fixture. No student image or AI output is shown.
-        </figcaption>
+        <figcaption>Repository-owned upload fixture. It contains no student data.</figcaption>
       </figure>
     </div>
   );
@@ -161,12 +159,14 @@ export function CorrectionSpikeApp() {
           <div>
             <p className="eyebrow">Milestone 3 · internal only</p>
             <h1>Mathematical correction spike</h1>
-            <p className="correction-synthetic-label">Synthetic fixture — not student work</p>
+            <p className="correction-synthetic-label">
+              Synthetic upload and simulated OCR — not student work
+            </p>
           </div>
           <p className="correction-header-copy">
-            Compare the fixture with its typed transcript. A valid inline factor such as{" "}
-            <MathRenderer label="Inline synthetic factor" latex="x-2" mode="inline" /> renders
-            through the same controlled boundary used by every preview.
+            Compare the uploaded-solution fixture with its simulated OCR transcript. A factor such
+            as <MathRenderer label="Inline synthetic factor" latex="x-2" mode="inline" /> renders
+            through the same controlled boundary used by every formula.
           </p>
         </header>
 
