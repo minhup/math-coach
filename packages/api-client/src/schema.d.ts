@@ -55,6 +55,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/attempts/{attempt_id}/evaluation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Evaluation State */
+        get: operations["get_evaluation_state_api_v1_attempts__attempt_id__evaluation_get"];
+        put?: never;
+        /** Post Evaluation */
+        post: operations["post_evaluation_api_v1_attempts__attempt_id__evaluation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/attempts/{attempt_id}/hints/next": {
         parameters: {
             query?: never;
@@ -66,23 +84,6 @@ export interface paths {
         put?: never;
         /** Post Next Hint */
         post: operations["post_next_hint_api_v1_attempts__attempt_id__hints_next_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/attempts/{attempt_id}/mock-evaluation": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Post Mock Evaluation */
-        post: operations["post_mock_evaluation_api_v1_attempts__attempt_id__mock_evaluation_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -651,6 +652,109 @@ export interface components {
         ErrorEnvelope: {
             error: components["schemas"]["ErrorDetail"];
         };
+        /** EvaluationFailureState */
+        EvaluationFailureState: {
+            run: components["schemas"]["EvaluationRunResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            state: "invalid_schema" | "permanent_failure" | "retryable_failure";
+        };
+        /** EvaluationNotStartedState */
+        EvaluationNotStartedState: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            state: "not_started";
+        };
+        /** EvaluationProcessingState */
+        EvaluationProcessingState: {
+            run: components["schemas"]["EvaluationRunResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            state: "processing";
+        };
+        /** EvaluationReadyState */
+        EvaluationReadyState: {
+            result: components["schemas"]["ReadyEvaluationResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            state: "ready";
+        };
+        /** EvaluationRequest */
+        EvaluationRequest: {
+            /**
+             * Confirmedtranscriptversionid
+             * Format: uuid
+             */
+            confirmedTranscriptVersionId: string;
+            /**
+             * Idempotencykey
+             * Format: uuid
+             */
+            idempotencyKey: string;
+        };
+        /** EvaluationRunResponse */
+        EvaluationRunResponse: {
+            /** Completedat */
+            completedAt: string | null;
+            /** Costusd */
+            costUsd: string | null;
+            /** Errorcode */
+            errorCode: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Inputtokens */
+            inputTokens: number | null;
+            /** Latencyms */
+            latencyMs: number | null;
+            /** Modelsnapshot */
+            modelSnapshot: string;
+            /** Outputtokens */
+            outputTokens: number | null;
+            /** Pricingversion */
+            pricingVersion: string;
+            /** Prompthash */
+            promptHash: string;
+            /** Promptversion */
+            promptVersion: string;
+            /** Provider */
+            provider: string;
+            /** Retrycount */
+            retryCount: number;
+            /** Schemaattempts */
+            schemaAttempts: number;
+            /** Schemaversion */
+            schemaVersion: string;
+            /**
+             * Startedat
+             * Format: date-time
+             */
+            startedAt: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "processing" | "succeeded" | "uncertain" | "retryable_failure" | "permanent_failure" | "invalid_schema";
+        };
+        /** EvaluationUncertainState */
+        EvaluationUncertainState: {
+            result: components["schemas"]["UncertainEvaluationResponse"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            state: "uncertain";
+        };
         /** ExamTargetCreateRequest */
         ExamTargetCreateRequest: {
             /**
@@ -853,75 +957,13 @@ export interface components {
              */
             type: "math";
         };
-        /** MockEvaluationRequest */
-        MockEvaluationRequest: {
-            /**
-             * Confirmedtranscriptversionid
-             * Format: uuid
-             */
-            confirmedTranscriptVersionId: string;
-        };
-        /** MockEvaluationResponse */
-        MockEvaluationResponse: {
-            /** Feedback */
-            feedback: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
-            metadata: components["schemas"]["MockRunMetadata"];
-            /** Nextsteps */
-            nextSteps: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
-            /**
-             * Outcome
-             * @enum {string}
-             */
-            outcome: "ready" | "uncertain";
-            /**
-             * Referencesolutionsnonexhaustive
-             * @constant
-             */
-            referenceSolutionsNonExhaustive: true;
-            /** Transcriptfingerprint */
-            transcriptFingerprint: string;
-        };
-        /** MockRunMetadata */
-        MockRunMetadata: {
-            /** Costusd */
-            costUsd: string;
-            /**
-             * Inputtokens
-             * @constant
-             */
-            inputTokens: 0;
-            /** Latencyms */
-            latencyMs: number;
-            /**
-             * Modelsnapshot
-             * @constant
-             */
-            modelSnapshot: "m5-static-fixture-v1";
-            /**
-             * Outputtokens
-             * @constant
-             */
-            outputTokens: 0;
-            /**
-             * Promptversion
-             * @constant
-             */
-            promptVersion: "m5-no-provider-prompt-v1";
-            /**
-             * Provider
-             * @constant
-             */
-            provider: "application-owned-synthetic-mock";
-            /**
-             * Schemaversion
-             * @constant
-             */
-            schemaVersion: "1.0.0";
-        };
         /** NextHintRequest */
         NextHintRequest: {
-            /** Previoushintlevel */
-            previousHintLevel: number;
+            /**
+             * Idempotencykey
+             * Format: uuid
+             */
+            idempotencyKey: string;
         };
         /** NextHintResponse */
         NextHintResponse: {
@@ -929,8 +971,18 @@ export interface components {
             conceptVersionId: string | null;
             /** Content */
             content: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /**
+             * Evaluationid
+             * Format: uuid
+             */
+            evaluationId: string;
             /** Geometryactions */
             geometryActions: (components["schemas"]["ShowAction"] | components["schemas"]["HideAction"] | components["schemas"]["HighlightAction"] | components["schemas"]["ClearHighlightAction"] | components["schemas"]["FocusAction"] | components["schemas"]["AnimateAction"] | components["schemas"]["AskSelectAction"])[];
+            /**
+             * Hinteventid
+             * Format: uuid
+             */
+            hintEventId: string;
             /**
              * Hintid
              * Format: uuid
@@ -938,6 +990,11 @@ export interface components {
             hintId: string;
             /** Hintlevel */
             hintLevel: number;
+            /**
+             * Releasedat
+             * Format: date-time
+             */
+            releasedAt: string;
             /** Revealscompletesolution */
             revealsCompleteSolution: boolean;
         };
@@ -1150,6 +1207,42 @@ export interface components {
             /** Translationdescription */
             translationDescription: string | null;
         };
+        /** ReadyEvaluationResponse */
+        ReadyEvaluationResponse: {
+            /**
+             * Confirmedtranscriptversionid
+             * Format: uuid
+             */
+            confirmedTranscriptVersionId: string;
+            /**
+             * Evaluationid
+             * Format: uuid
+             */
+            evaluationId: string;
+            /** Feedback */
+            feedback: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /** Maximumscore */
+            maximumScore: string;
+            /** Nextsteps */
+            nextSteps: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            outcome: "ready";
+            /** Reasoningsteps */
+            reasoningSteps: components["schemas"]["ReasoningStepResponse"][];
+            /**
+             * Referencesolutionsnonexhaustive
+             * @constant
+             */
+            referenceSolutionsNonExhaustive: true;
+            /** Rubricbreakdown */
+            rubricBreakdown: components["schemas"]["RubricScoreResponse"][];
+            run: components["schemas"]["EvaluationRunResponse"];
+            /** Score */
+            score: string;
+        };
         /** ReadyTranscriptionResponse */
         ReadyTranscriptionResponse: {
             /**
@@ -1159,6 +1252,34 @@ export interface components {
             outcome: "ready";
             run: components["schemas"]["TranscriptionRunResponse"];
             transcriptVersion: components["schemas"]["TranscriptVersionResponse"];
+        };
+        /** ReasoningStepResponse */
+        ReasoningStepResponse: {
+            /** Dependsonstepids */
+            dependsOnStepIds: string[];
+            /**
+             * Errorkind
+             * @enum {string}
+             */
+            errorKind: "none" | "root" | "dependent";
+            /** Feedback */
+            feedback: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Judgment
+             * @enum {string}
+             */
+            judgment: "correct" | "incorrect" | "uncertain" | "not_assessable";
+            /** Position */
+            position: number;
+            /** Summary */
+            summary: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /** Transcriptblockids */
+            transcriptBlockIds: string[];
         };
         /** RichLineBlock */
         RichLineBlock: {
@@ -1171,6 +1292,22 @@ export interface components {
              * @enum {string}
              */
             type: "rich_line";
+        };
+        /** RubricScoreResponse */
+        RubricScoreResponse: {
+            /** Awardedscore */
+            awardedScore: string;
+            /** Explanation */
+            explanation: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /** Maximumscore */
+            maximumScore: string;
+            /** Rubriccode */
+            rubricCode: string;
+            /**
+             * Rubricitemid
+             * Format: uuid
+             */
+            rubricItemId: string;
         };
         /** SessionResponse */
         SessionResponse: {
@@ -1605,6 +1742,32 @@ export interface components {
             /** Warnings */
             warnings: components["schemas"]["TranscriptWarning"][];
         };
+        /** UncertainEvaluationResponse */
+        UncertainEvaluationResponse: {
+            /**
+             * Confirmedtranscriptversionid
+             * Format: uuid
+             */
+            confirmedTranscriptVersionId: string;
+            /**
+             * Evaluationid
+             * Format: uuid
+             */
+            evaluationId: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            outcome: "uncertain";
+            /** Reason */
+            reason: (components["schemas"]["TextBlock"] | components["schemas"]["InlineMathBlock"] | components["schemas"]["DisplayMathBlock"] | components["schemas"]["RichLineBlock"] | components["schemas"]["GeometryBlock"] | components["schemas"]["ImageBlock"] | components["schemas"]["CalloutBlock"])[];
+            /**
+             * Recommendedaction
+             * @constant
+             */
+            recommendedAction: "manual_review";
+            run: components["schemas"]["EvaluationRunResponse"];
+        };
         /** UncertainTranscriptionResponse */
         UncertainTranscriptionResponse: {
             /**
@@ -1949,7 +2112,7 @@ export interface operations {
             };
         };
     };
-    post_next_hint_api_v1_attempts__attempt_id__hints_next_post: {
+    get_evaluation_state_api_v1_attempts__attempt_id__evaluation_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1958,11 +2121,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["NextHintRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -1970,7 +2129,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["NextHintResponse"];
+                    "application/json": components["schemas"]["EvaluationNotStartedState"] | components["schemas"]["EvaluationProcessingState"] | components["schemas"]["EvaluationReadyState"] | components["schemas"]["EvaluationUncertainState"] | components["schemas"]["EvaluationFailureState"];
                 };
             };
             /** @description Authentication failed or is required */
@@ -2038,7 +2197,7 @@ export interface operations {
             };
         };
     };
-    post_mock_evaluation_api_v1_attempts__attempt_id__mock_evaluation_post: {
+    post_evaluation_api_v1_attempts__attempt_id__evaluation_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -2049,7 +2208,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MockEvaluationRequest"];
+                "application/json": components["schemas"]["EvaluationRequest"];
             };
         };
         responses: {
@@ -2059,7 +2218,96 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["MockEvaluationResponse"];
+                    "application/json": components["schemas"]["ReadyEvaluationResponse"] | components["schemas"]["UncertainEvaluationResponse"];
+                };
+            };
+            /** @description Authentication failed or is required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Owned resource was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request conflicts with current state */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Request or upload validation failed */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An unexpected server error occurred */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description An upstream structured response was invalid */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description A required service is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    post_next_hint_api_v1_attempts__attempt_id__hints_next_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                attempt_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NextHintRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NextHintResponse"];
                 };
             };
             /** @description Authentication failed or is required */

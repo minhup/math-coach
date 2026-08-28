@@ -8,7 +8,6 @@ import {
   getConceptVersion,
   getStaticPlan,
   getStudyProfile,
-  requestMockEvaluation,
   requestNextHint,
 } from "./static-journey-api";
 
@@ -90,39 +89,6 @@ describe("static journey API boundary", () => {
     );
   });
 
-  it("sends only the explicitly confirmed transcript to mock evaluation", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(
-        JSON.stringify({
-          feedback: [{ id: "feedback", text: "Synthetic feedback.", type: "text" }],
-          metadata: {
-            costUsd: "0.000000",
-            inputTokens: 0,
-            latencyMs: 0,
-            modelSnapshot: "m5-static-fixture-v1",
-            outputTokens: 0,
-            promptVersion: "m5-no-provider-prompt-v1",
-            provider: "application-owned-synthetic-mock",
-            schemaVersion: "1.0.0",
-          },
-          nextSteps: [{ id: "next", text: "Request a hint.", type: "text" }],
-          outcome: "ready",
-          referenceSolutionsNonExhaustive: true,
-          transcriptFingerprint: "a".repeat(64),
-        }),
-      ),
-    );
-    await requestMockEvaluation("attempt-1", "transcript-version-1");
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/v1/attempts/attempt-1/mock-evaluation",
-      expect.objectContaining({
-        body: JSON.stringify({ confirmedTranscriptVersionId: "transcript-version-1" }),
-        method: "POST",
-      }),
-    );
-  });
-
   it("validates onboarding, attempt, transcript, hint, and concept payloads", async () => {
     const target = {
       createdAt: "2026-08-27T00:00:00Z",
@@ -173,9 +139,12 @@ describe("static journey API boundary", () => {
       {
         conceptVersionId: null,
         content: [{ id: "hint-1", text: "Inspect the midpoint.", type: "text" }],
+        evaluationId: "evaluation-1",
         geometryActions: [],
+        hintEventId: "hint-event-1",
         hintId: "hint-1",
         hintLevel: 1,
+        releasedAt: "2026-08-27T00:00:04Z",
         revealsCompleteSolution: false,
       },
       {
@@ -202,7 +171,9 @@ describe("static journey API boundary", () => {
       items: [{ cycleCode: "SYN-AURORA-2027" }],
     });
     await expect(createAttempt("problem-version-1")).resolves.toMatchObject({ id: "attempt-1" });
-    await expect(requestNextHint("attempt-1", 0)).resolves.toMatchObject({ hintLevel: 1 });
+    await expect(requestNextHint("attempt-1", "hint-key-1")).resolves.toMatchObject({
+      hintLevel: 1,
+    });
     await expect(getConceptVersion("concept-version-1")).resolves.toMatchObject({
       code: "SYN-MIDPOINT-COORDINATES",
     });

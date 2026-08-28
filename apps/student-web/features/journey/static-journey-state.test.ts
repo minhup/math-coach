@@ -80,7 +80,11 @@ describe("static student journey state", () => {
     });
     state = accepted(state, { type: "evaluation_requested" });
     state = accepted(state, {
-      evaluation: { outcome: "ready", transcriptFingerprint: "a".repeat(64) },
+      evaluation: {
+        confirmedTranscriptVersionId: transcriptVersion.id,
+        evaluationId: "evaluation-1",
+        outcome: "ready",
+      },
       type: "evaluation_received",
     });
     state = accepted(state, { type: "hint_requested" });
@@ -141,7 +145,11 @@ describe("static student journey state", () => {
     });
     state = accepted(state, { type: "evaluation_requested" });
     state = accepted(state, {
-      evaluation: { outcome: "ready", transcriptFingerprint: "a".repeat(64) },
+      evaluation: {
+        confirmedTranscriptVersionId: transcriptVersion.id,
+        evaluationId: "evaluation-1",
+        outcome: "ready",
+      },
       type: "evaluation_received",
     });
     state = accepted(state, { type: "hint_requested" });

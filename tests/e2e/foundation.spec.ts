@@ -37,7 +37,7 @@ async function placeCaret(page: Page, text: string, offset: number) {
   );
 }
 
-test("invited learner completes the deterministic multi-exam student journey", async ({
+test("invited learner completes transcription, evaluation, and progressive hints", async ({
   page,
 }, testInfo) => {
   await page.goto("/");
@@ -126,12 +126,12 @@ test("invited learner completes the deterministic multi-exam student journey", a
     });
   }
   await placeCaret(page, "The synthetic draft", 19);
-  await page.keyboard.type(" reviewed");
+  await page.keyboard.type(" reviewed SYNTHETIC-EVAL:subtle-error");
   await page.getByRole("button", { name: "Edit formula 1" }).click();
   const mathField = page.getByLabel("Edit formula 1");
   await expect(mathField).toBeFocused();
   await mathField.press("ControlOrMeta+A");
-  await mathField.pressSequentially("M=(2,0)");
+  await mathField.pressSequentially("M=(3,0)");
   if (process.env.VISUAL_QA) {
     await page.screenshot({
       fullPage: true,
@@ -150,14 +150,18 @@ test("invited learner completes the deterministic multi-exam student journey", a
   await expect(page.getByLabel("Confirmed authoritative transcript")).toContainText(
     "draft reviewed",
   );
-  await page.getByRole("button", { name: "Run clearly mocked evaluation" }).click();
-  await expect(page.getByRole("heading", { name: "Deterministic feedback" })).toBeVisible();
+  await page.getByRole("button", { name: "Evaluate confirmed work" }).click();
+  await expect(page.getByRole("heading", { name: "Score 0.00 / 4.00" })).toBeVisible();
+  await expect(page.getByText("Root error")).toBeVisible();
+  await expect(page.getByText("Dependent error")).toBeVisible();
+  await expect(page.getByText(/Depends on step 1/)).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Rubric score breakdown" })).toBeVisible();
   await expect(page.getByText(/Reference solutions are non-exhaustive/)).toBeVisible();
   await expect(page.locator(".math-render-failure")).toHaveCount(0);
   if (process.env.VISUAL_QA) {
     await page.screenshot({
       fullPage: true,
-      path: `test-results/m6-mock-evaluation-${testInfo.project.name}.png`,
+      path: `test-results/m7-evaluation-${testInfo.project.name}.png`,
     });
   }
 
@@ -176,6 +180,12 @@ test("invited learner completes the deterministic multi-exam student journey", a
   await expect(page.getByRole("status", { name: "Selection result" })).toContainText(
     "A is the expected selection",
   );
+  if (process.env.VISUAL_QA) {
+    await page.screenshot({
+      fullPage: true,
+      path: `test-results/m7-evaluation-hints-${testInfo.project.name}.png`,
+    });
+  }
 
   await page.getByRole("button", { name: "Retry this problem" }).click();
   await expect(page.getByRole("heading", { name: "New attempt ready" })).toBeVisible();
@@ -212,13 +222,6 @@ test("invited learner completes the deterministic multi-exam student journey", a
     layoutReport.documentClientWidth + 1,
   );
   expect(layoutReport.escaped).toBe(0);
-
-  if (process.env.VISUAL_QA) {
-    await page.screenshot({
-      fullPage: true,
-      path: `test-results/m6-multimodal-transcription-${testInfo.project.name}.png`,
-    });
-  }
 
   await page.reload();
   await expect(page.getByRole("heading", { name: "Your study profile" })).toBeVisible();

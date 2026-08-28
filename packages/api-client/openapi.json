@@ -715,6 +715,290 @@
         "title": "ErrorEnvelope",
         "type": "object"
       },
+      "EvaluationFailureState": {
+        "additionalProperties": false,
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/EvaluationRunResponse"
+          },
+          "state": {
+            "enum": [
+              "retryable_failure",
+              "permanent_failure",
+              "invalid_schema"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "run"
+        ],
+        "title": "EvaluationFailureState",
+        "type": "object"
+      },
+      "EvaluationNotStartedState": {
+        "additionalProperties": false,
+        "properties": {
+          "state": {
+            "const": "not_started",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "title": "EvaluationNotStartedState",
+        "type": "object"
+      },
+      "EvaluationProcessingState": {
+        "additionalProperties": false,
+        "properties": {
+          "run": {
+            "$ref": "#/components/schemas/EvaluationRunResponse"
+          },
+          "state": {
+            "const": "processing",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "run"
+        ],
+        "title": "EvaluationProcessingState",
+        "type": "object"
+      },
+      "EvaluationReadyState": {
+        "additionalProperties": false,
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/ReadyEvaluationResponse"
+          },
+          "state": {
+            "const": "ready",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "result"
+        ],
+        "title": "EvaluationReadyState",
+        "type": "object"
+      },
+      "EvaluationRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmedTranscriptVersionId": {
+            "format": "uuid",
+            "title": "Confirmedtranscriptversionid",
+            "type": "string"
+          },
+          "idempotencyKey": {
+            "format": "uuid",
+            "title": "Idempotencykey",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirmedTranscriptVersionId",
+          "idempotencyKey"
+        ],
+        "title": "EvaluationRequest",
+        "type": "object"
+      },
+      "EvaluationRunResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "completedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completedat"
+          },
+          "costUsd": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Costusd"
+          },
+          "errorCode": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Errorcode"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "inputTokens": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inputtokens"
+          },
+          "latencyMs": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latencyms"
+          },
+          "modelSnapshot": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Modelsnapshot",
+            "type": "string"
+          },
+          "outputTokens": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outputtokens"
+          },
+          "pricingVersion": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Pricingversion",
+            "type": "string"
+          },
+          "promptHash": {
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Prompthash",
+            "type": "string"
+          },
+          "promptVersion": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Promptversion",
+            "type": "string"
+          },
+          "provider": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Provider",
+            "type": "string"
+          },
+          "retryCount": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Retrycount",
+            "type": "integer"
+          },
+          "schemaAttempts": {
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Schemaattempts",
+            "type": "integer"
+          },
+          "schemaVersion": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Schemaversion",
+            "type": "string"
+          },
+          "startedAt": {
+            "format": "date-time",
+            "title": "Startedat",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "processing",
+              "succeeded",
+              "uncertain",
+              "retryable_failure",
+              "permanent_failure",
+              "invalid_schema"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "provider",
+          "modelSnapshot",
+          "promptVersion",
+          "promptHash",
+          "schemaVersion",
+          "pricingVersion",
+          "schemaAttempts",
+          "retryCount",
+          "latencyMs",
+          "inputTokens",
+          "outputTokens",
+          "costUsd",
+          "errorCode",
+          "startedAt",
+          "completedAt"
+        ],
+        "title": "EvaluationRunResponse",
+        "type": "object"
+      },
+      "EvaluationUncertainState": {
+        "additionalProperties": false,
+        "properties": {
+          "result": {
+            "$ref": "#/components/schemas/UncertainEvaluationResponse"
+          },
+          "state": {
+            "const": "uncertain",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "result"
+        ],
+        "title": "EvaluationUncertainState",
+        "type": "object"
+      },
       "ExamTargetCreateRequest": {
         "properties": {
           "examCycleId": {
@@ -1277,210 +1561,17 @@
         "title": "MathSpan",
         "type": "object"
       },
-      "MockEvaluationRequest": {
-        "additionalProperties": false,
-        "properties": {
-          "confirmedTranscriptVersionId": {
-            "format": "uuid",
-            "title": "Confirmedtranscriptversionid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "confirmedTranscriptVersionId"
-        ],
-        "title": "MockEvaluationRequest",
-        "type": "object"
-      },
-      "MockEvaluationResponse": {
-        "additionalProperties": false,
-        "properties": {
-          "feedback": {
-            "items": {
-              "discriminator": {
-                "mapping": {
-                  "callout": "#/components/schemas/CalloutBlock",
-                  "display_math": "#/components/schemas/DisplayMathBlock",
-                  "geometry": "#/components/schemas/GeometryBlock",
-                  "image": "#/components/schemas/ImageBlock",
-                  "inline_math": "#/components/schemas/InlineMathBlock",
-                  "rich_line": "#/components/schemas/RichLineBlock",
-                  "text": "#/components/schemas/TextBlock"
-                },
-                "propertyName": "type"
-              },
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/TextBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/InlineMathBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/DisplayMathBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/RichLineBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/GeometryBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/ImageBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/CalloutBlock"
-                }
-              ]
-            },
-            "minItems": 1,
-            "title": "Feedback",
-            "type": "array"
-          },
-          "metadata": {
-            "$ref": "#/components/schemas/MockRunMetadata"
-          },
-          "nextSteps": {
-            "items": {
-              "discriminator": {
-                "mapping": {
-                  "callout": "#/components/schemas/CalloutBlock",
-                  "display_math": "#/components/schemas/DisplayMathBlock",
-                  "geometry": "#/components/schemas/GeometryBlock",
-                  "image": "#/components/schemas/ImageBlock",
-                  "inline_math": "#/components/schemas/InlineMathBlock",
-                  "rich_line": "#/components/schemas/RichLineBlock",
-                  "text": "#/components/schemas/TextBlock"
-                },
-                "propertyName": "type"
-              },
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/TextBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/InlineMathBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/DisplayMathBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/RichLineBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/GeometryBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/ImageBlock"
-                },
-                {
-                  "$ref": "#/components/schemas/CalloutBlock"
-                }
-              ]
-            },
-            "minItems": 1,
-            "title": "Nextsteps",
-            "type": "array"
-          },
-          "outcome": {
-            "enum": [
-              "ready",
-              "uncertain"
-            ],
-            "title": "Outcome",
-            "type": "string"
-          },
-          "referenceSolutionsNonExhaustive": {
-            "const": true,
-            "title": "Referencesolutionsnonexhaustive",
-            "type": "boolean"
-          },
-          "transcriptFingerprint": {
-            "pattern": "^[0-9a-f]{64}$",
-            "title": "Transcriptfingerprint",
-            "type": "string"
-          }
-        },
-        "required": [
-          "outcome",
-          "feedback",
-          "nextSteps",
-          "referenceSolutionsNonExhaustive",
-          "transcriptFingerprint",
-          "metadata"
-        ],
-        "title": "MockEvaluationResponse",
-        "type": "object"
-      },
-      "MockRunMetadata": {
-        "additionalProperties": false,
-        "properties": {
-          "costUsd": {
-            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-            "title": "Costusd",
-            "type": "string"
-          },
-          "inputTokens": {
-            "const": 0,
-            "title": "Inputtokens",
-            "type": "integer"
-          },
-          "latencyMs": {
-            "minimum": 0.0,
-            "title": "Latencyms",
-            "type": "integer"
-          },
-          "modelSnapshot": {
-            "const": "m5-static-fixture-v1",
-            "title": "Modelsnapshot",
-            "type": "string"
-          },
-          "outputTokens": {
-            "const": 0,
-            "title": "Outputtokens",
-            "type": "integer"
-          },
-          "promptVersion": {
-            "const": "m5-no-provider-prompt-v1",
-            "title": "Promptversion",
-            "type": "string"
-          },
-          "provider": {
-            "const": "application-owned-synthetic-mock",
-            "title": "Provider",
-            "type": "string"
-          },
-          "schemaVersion": {
-            "const": "1.0.0",
-            "title": "Schemaversion",
-            "type": "string"
-          }
-        },
-        "required": [
-          "provider",
-          "modelSnapshot",
-          "promptVersion",
-          "schemaVersion",
-          "latencyMs",
-          "inputTokens",
-          "outputTokens",
-          "costUsd"
-        ],
-        "title": "MockRunMetadata",
-        "type": "object"
-      },
       "NextHintRequest": {
         "additionalProperties": false,
         "properties": {
-          "previousHintLevel": {
-            "maximum": 5.0,
-            "minimum": 0.0,
-            "title": "Previoushintlevel",
-            "type": "integer"
+          "idempotencyKey": {
+            "format": "uuid",
+            "title": "Idempotencykey",
+            "type": "string"
           }
         },
         "required": [
-          "previousHintLevel"
+          "idempotencyKey"
         ],
         "title": "NextHintRequest",
         "type": "object"
@@ -1542,6 +1633,11 @@
             "title": "Content",
             "type": "array"
           },
+          "evaluationId": {
+            "format": "uuid",
+            "title": "Evaluationid",
+            "type": "string"
+          },
           "geometryActions": {
             "items": {
               "discriminator": {
@@ -1583,6 +1679,11 @@
             "title": "Geometryactions",
             "type": "array"
           },
+          "hintEventId": {
+            "format": "uuid",
+            "title": "Hinteventid",
+            "type": "string"
+          },
           "hintId": {
             "format": "uuid",
             "title": "Hintid",
@@ -1594,18 +1695,26 @@
             "title": "Hintlevel",
             "type": "integer"
           },
+          "releasedAt": {
+            "format": "date-time",
+            "title": "Releasedat",
+            "type": "string"
+          },
           "revealsCompleteSolution": {
             "title": "Revealscompletesolution",
             "type": "boolean"
           }
         },
         "required": [
+          "hintEventId",
+          "evaluationId",
           "hintId",
           "hintLevel",
           "content",
           "geometryActions",
           "revealsCompleteSolution",
-          "conceptVersionId"
+          "conceptVersionId",
+          "releasedAt"
         ],
         "title": "NextHintResponse",
         "type": "object"
@@ -2211,6 +2320,159 @@
         "title": "Provenance",
         "type": "object"
       },
+      "ReadyEvaluationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmedTranscriptVersionId": {
+            "format": "uuid",
+            "title": "Confirmedtranscriptversionid",
+            "type": "string"
+          },
+          "evaluationId": {
+            "format": "uuid",
+            "title": "Evaluationid",
+            "type": "string"
+          },
+          "feedback": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Feedback",
+            "type": "array"
+          },
+          "maximumScore": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,9}0*$)\\d{0,6}\\.\\d{0,2}0*$)",
+            "title": "Maximumscore",
+            "type": "string"
+          },
+          "nextSteps": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Nextsteps",
+            "type": "array"
+          },
+          "outcome": {
+            "const": "ready",
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reasoningSteps": {
+            "items": {
+              "$ref": "#/components/schemas/ReasoningStepResponse"
+            },
+            "minItems": 1,
+            "title": "Reasoningsteps",
+            "type": "array"
+          },
+          "referenceSolutionsNonExhaustive": {
+            "const": true,
+            "title": "Referencesolutionsnonexhaustive",
+            "type": "boolean"
+          },
+          "rubricBreakdown": {
+            "items": {
+              "$ref": "#/components/schemas/RubricScoreResponse"
+            },
+            "minItems": 1,
+            "title": "Rubricbreakdown",
+            "type": "array"
+          },
+          "run": {
+            "$ref": "#/components/schemas/EvaluationRunResponse"
+          },
+          "score": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,9}0*$)\\d{0,6}\\.\\d{0,2}0*$)",
+            "title": "Score",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "evaluationId",
+          "confirmedTranscriptVersionId",
+          "score",
+          "maximumScore",
+          "reasoningSteps",
+          "rubricBreakdown",
+          "feedback",
+          "nextSteps",
+          "referenceSolutionsNonExhaustive",
+          "run"
+        ],
+        "title": "ReadyEvaluationResponse",
+        "type": "object"
+      },
       "ReadyTranscriptionResponse": {
         "additionalProperties": false,
         "properties": {
@@ -2232,6 +2494,152 @@
           "transcriptVersion"
         ],
         "title": "ReadyTranscriptionResponse",
+        "type": "object"
+      },
+      "ReasoningStepResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "dependsOnStepIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Dependsonstepids",
+            "type": "array"
+          },
+          "errorKind": {
+            "enum": [
+              "none",
+              "root",
+              "dependent"
+            ],
+            "title": "Errorkind",
+            "type": "string"
+          },
+          "feedback": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Feedback",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "judgment": {
+            "enum": [
+              "correct",
+              "incorrect",
+              "uncertain",
+              "not_assessable"
+            ],
+            "title": "Judgment",
+            "type": "string"
+          },
+          "position": {
+            "minimum": 1.0,
+            "title": "Position",
+            "type": "integer"
+          },
+          "summary": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Summary",
+            "type": "array"
+          },
+          "transcriptBlockIds": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Transcriptblockids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "position",
+          "transcriptBlockIds",
+          "summary",
+          "judgment",
+          "errorKind",
+          "dependsOnStepIds",
+          "feedback"
+        ],
+        "title": "ReasoningStepResponse",
         "type": "object"
       },
       "RichLineBlock": {
@@ -2277,6 +2685,83 @@
           "spans"
         ],
         "title": "RichLineBlock",
+        "type": "object"
+      },
+      "RubricScoreResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "awardedScore": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,9}0*$)\\d{0,6}\\.\\d{0,2}0*$)",
+            "title": "Awardedscore",
+            "type": "string"
+          },
+          "explanation": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Explanation",
+            "type": "array"
+          },
+          "maximumScore": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*(?:\\d{0,6}|(?=[\\d.]{1,9}0*$)\\d{0,6}\\.\\d{0,2}0*$)",
+            "title": "Maximumscore",
+            "type": "string"
+          },
+          "rubricCode": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Rubriccode",
+            "type": "string"
+          },
+          "rubricItemId": {
+            "format": "uuid",
+            "title": "Rubricitemid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rubricItemId",
+          "rubricCode",
+          "awardedScore",
+          "maximumScore",
+          "explanation"
+        ],
+        "title": "RubricScoreResponse",
         "type": "object"
       },
       "SessionResponse": {
@@ -3401,6 +3886,86 @@
         "title": "TranscriptionUncertainState",
         "type": "object"
       },
+      "UncertainEvaluationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "confirmedTranscriptVersionId": {
+            "format": "uuid",
+            "title": "Confirmedtranscriptversionid",
+            "type": "string"
+          },
+          "evaluationId": {
+            "format": "uuid",
+            "title": "Evaluationid",
+            "type": "string"
+          },
+          "outcome": {
+            "const": "uncertain",
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "callout": "#/components/schemas/CalloutBlock",
+                  "display_math": "#/components/schemas/DisplayMathBlock",
+                  "geometry": "#/components/schemas/GeometryBlock",
+                  "image": "#/components/schemas/ImageBlock",
+                  "inline_math": "#/components/schemas/InlineMathBlock",
+                  "rich_line": "#/components/schemas/RichLineBlock",
+                  "text": "#/components/schemas/TextBlock"
+                },
+                "propertyName": "type"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/TextBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/InlineMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/DisplayMathBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/RichLineBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/GeometryBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/ImageBlock"
+                },
+                {
+                  "$ref": "#/components/schemas/CalloutBlock"
+                }
+              ]
+            },
+            "minItems": 1,
+            "title": "Reason",
+            "type": "array"
+          },
+          "recommendedAction": {
+            "const": "manual_review",
+            "title": "Recommendedaction",
+            "type": "string"
+          },
+          "run": {
+            "$ref": "#/components/schemas/EvaluationRunResponse"
+          }
+        },
+        "required": [
+          "outcome",
+          "evaluationId",
+          "confirmedTranscriptVersionId",
+          "reason",
+          "recommendedAction",
+          "run"
+        ],
+        "title": "UncertainEvaluationResponse",
+        "type": "object"
+      },
       "UncertainTranscriptionResponse": {
         "additionalProperties": false,
         "properties": {
@@ -3878,6 +4443,264 @@
         ]
       }
     },
+    "/api/v1/attempts/{attempt_id}/evaluation": {
+      "get": {
+        "operationId": "get_evaluation_state_api_v1_attempts__attempt_id__evaluation_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "discriminator": {
+                    "mapping": {
+                      "invalid_schema": "#/components/schemas/EvaluationFailureState",
+                      "not_started": "#/components/schemas/EvaluationNotStartedState",
+                      "permanent_failure": "#/components/schemas/EvaluationFailureState",
+                      "processing": "#/components/schemas/EvaluationProcessingState",
+                      "ready": "#/components/schemas/EvaluationReadyState",
+                      "retryable_failure": "#/components/schemas/EvaluationFailureState",
+                      "uncertain": "#/components/schemas/EvaluationUncertainState"
+                    },
+                    "propertyName": "state"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/EvaluationNotStartedState"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EvaluationProcessingState"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EvaluationReadyState"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EvaluationUncertainState"
+                    },
+                    {
+                      "$ref": "#/components/schemas/EvaluationFailureState"
+                    }
+                  ],
+                  "title": "Response Get Evaluation State Api V1 Attempts  Attempt Id  Evaluation Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An upstream structured response was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Get Evaluation State",
+        "tags": [
+          "evaluation"
+        ]
+      },
+      "post": {
+        "operationId": "post_evaluation_api_v1_attempts__attempt_id__evaluation_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attempt_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Attempt Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "discriminator": {
+                    "mapping": {
+                      "ready": "#/components/schemas/ReadyEvaluationResponse",
+                      "uncertain": "#/components/schemas/UncertainEvaluationResponse"
+                    },
+                    "propertyName": "outcome"
+                  },
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ReadyEvaluationResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UncertainEvaluationResponse"
+                    }
+                  ],
+                  "title": "Response Post Evaluation Api V1 Attempts  Attempt Id  Evaluation Post"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Authentication failed or is required"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Owned resource was not found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request conflicts with current state"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "Request or upload validation failed"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred"
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "An upstream structured response was invalid"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorEnvelope"
+                }
+              }
+            },
+            "description": "A required service is unavailable"
+          }
+        },
+        "summary": "Post Evaluation",
+        "tags": [
+          "evaluation"
+        ]
+      }
+    },
     "/api/v1/attempts/{attempt_id}/hints/next": {
       "post": {
         "operationId": "post_next_hint_api_v1_attempts__attempt_id__hints_next_post",
@@ -3987,120 +4810,7 @@
         },
         "summary": "Post Next Hint",
         "tags": [
-          "static-journey"
-        ]
-      }
-    },
-    "/api/v1/attempts/{attempt_id}/mock-evaluation": {
-      "post": {
-        "operationId": "post_mock_evaluation_api_v1_attempts__attempt_id__mock_evaluation_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "attempt_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Attempt Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MockEvaluationRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MockEvaluationResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            },
-            "description": "Authentication failed or is required"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            },
-            "description": "Owned resource was not found"
-          },
-          "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            },
-            "description": "Request conflicts with current state"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            },
-            "description": "Request or upload validation failed"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            },
-            "description": "An unexpected server error occurred"
-          },
-          "502": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            },
-            "description": "An upstream structured response was invalid"
-          },
-          "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorEnvelope"
-                }
-              }
-            },
-            "description": "A required service is unavailable"
-          }
-        },
-        "summary": "Post Mock Evaluation",
-        "tags": [
-          "static-journey"
+          "evaluation"
         ]
       }
     },

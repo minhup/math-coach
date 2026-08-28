@@ -5,7 +5,6 @@ import { apiRequest } from "./api-transport";
 
 export type AvailableExamCycles = components["schemas"]["AvailableExamCycleListResponse"];
 export type StaticDailyPlan = components["schemas"]["StaticDailyPlanResponse"];
-export type MockEvaluation = components["schemas"]["MockEvaluationResponse"];
 export type NextHint = components["schemas"]["NextHintResponse"];
 export type ConceptVersion = components["schemas"]["ConceptVersionResponse"];
 export type StudyProfile = components["schemas"]["StudyProfileResponse"];
@@ -187,7 +186,7 @@ function isStrictContentBlock(value: unknown): value is JourneyContentBlock {
   }
 }
 
-function isStrictContentBlocks(value: unknown): value is JourneyContentBlock[] {
+export function isStrictContentBlocks(value: unknown): value is JourneyContentBlock[] {
   return Array.isArray(value) && value.every(isStrictContentBlock);
 }
 
@@ -302,72 +301,18 @@ function parseStaticPlan(value: unknown): StaticDailyPlan {
   return value;
 }
 
-function isMetadata(value: unknown): value is components["schemas"]["MockRunMetadata"] {
-  return (
-    isObject(value) &&
-    hasOnlyKeys(value, [
-      "costUsd",
-      "inputTokens",
-      "latencyMs",
-      "modelSnapshot",
-      "outputTokens",
-      "promptVersion",
-      "provider",
-      "schemaVersion",
-    ]) &&
-    value.provider === "application-owned-synthetic-mock" &&
-    value.modelSnapshot === "m5-static-fixture-v1" &&
-    value.promptVersion === "m5-no-provider-prompt-v1" &&
-    value.schemaVersion === "1.0.0" &&
-    value.inputTokens === 0 &&
-    value.outputTokens === 0 &&
-    value.latencyMs === 0 &&
-    value.costUsd === "0.000000"
-  );
-}
-
-function isMockEvaluation(value: unknown): value is MockEvaluation {
-  if (
-    !isObject(value) ||
-    !hasOnlyKeys(value, [
-      "feedback",
-      "metadata",
-      "nextSteps",
-      "outcome",
-      "referenceSolutionsNonExhaustive",
-      "transcriptFingerprint",
-    ]) ||
-    (value.outcome !== "ready" && value.outcome !== "uncertain") ||
-    value.referenceSolutionsNonExhaustive !== true ||
-    typeof value.transcriptFingerprint !== "string" ||
-    !/^[0-9a-f]{64}$/.test(value.transcriptFingerprint) ||
-    !isStrictContentBlocks(value.feedback) ||
-    value.feedback.length === 0 ||
-    !isStrictContentBlocks(value.nextSteps) ||
-    value.nextSteps.length === 0 ||
-    !isMetadata(value.metadata)
-  ) {
-    return false;
-  }
-  return true;
-}
-
-function parseMockEvaluation(value: unknown): MockEvaluation {
-  if (!isMockEvaluation(value)) {
-    return invalidResponse();
-  }
-  return value;
-}
-
 function parseNextHint(value: unknown): NextHint {
   if (
     !isObject(value) ||
     !hasOnlyKeys(value, [
       "conceptVersionId",
       "content",
+      "evaluationId",
       "geometryActions",
+      "hintEventId",
       "hintId",
       "hintLevel",
+      "releasedAt",
       "revealsCompleteSolution",
     ]) ||
     !isNullableString(value.conceptVersionId) ||
@@ -375,7 +320,7 @@ function parseNextHint(value: unknown): NextHint {
     value.content.length === 0 ||
     !Array.isArray(value.geometryActions) ||
     !value.geometryActions.every(isStrictGeometryAction) ||
-    typeof value.hintId !== "string" ||
+    !hasStrings(value, ["evaluationId", "hintEventId", "hintId", "releasedAt"]) ||
     !Number.isInteger(value.hintLevel) ||
     Number(value.hintLevel) < 1 ||
     typeof value.revealsCompleteSolution !== "boolean"
@@ -385,9 +330,12 @@ function parseNextHint(value: unknown): NextHint {
   return {
     conceptVersionId: value.conceptVersionId,
     content: value.content,
+    evaluationId: value.evaluationId,
     geometryActions: value.geometryActions,
+    hintEventId: value.hintEventId,
     hintId: value.hintId,
     hintLevel: Number(value.hintLevel),
+    releasedAt: value.releasedAt,
     revealsCompleteSolution: value.revealsCompleteSolution,
   };
 }
@@ -454,16 +402,6 @@ export function getStaticPlan(): Promise<StaticDailyPlan> {
   return apiRequest("/api/v1/plans/today", parseStaticPlan);
 }
 
-export function requestMockEvaluation(
-  attemptId: string,
-  confirmedTranscriptVersionId: string,
-): Promise<MockEvaluation> {
-  return apiRequest(`/api/v1/attempts/${attemptId}/mock-evaluation`, parseMockEvaluation, {
-    body: JSON.stringify({ confirmedTranscriptVersionId }),
-    method: "POST",
-  });
-}
-
 export function createAttempt(problemVersionId: string): Promise<Attempt> {
   return apiRequest("/api/v1/attempts", parseAttempt, {
     body: JSON.stringify({ problemVersionId }),
@@ -471,9 +409,12 @@ export function createAttempt(problemVersionId: string): Promise<Attempt> {
   });
 }
 
-export function requestNextHint(attemptId: string, previousHintLevel: number): Promise<NextHint> {
+export function requestNextHint(
+  attemptId: string,
+  idempotencyKey: string = crypto.randomUUID(),
+): Promise<NextHint> {
   return apiRequest(`/api/v1/attempts/${attemptId}/hints/next`, parseNextHint, {
-    body: JSON.stringify({ previousHintLevel }),
+    body: JSON.stringify({ idempotencyKey }),
     method: "POST",
   });
 }

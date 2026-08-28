@@ -18,7 +18,11 @@ const completed: StaticJourneyState = {
       },
     ],
     concept: { conceptVersionId: "concept-version-1" },
-    evaluation: { outcome: "ready", transcriptFingerprint: "a".repeat(64) },
+    evaluation: {
+      confirmedTranscriptVersionId: "transcript-version-1",
+      evaluationId: "evaluation-1",
+      outcome: "ready",
+    },
     hints: [{ hintLevel: 1 }, { hintLevel: 2 }],
     plan: {
       id: "plan-1",

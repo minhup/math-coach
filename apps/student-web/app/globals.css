@@ -558,6 +558,98 @@ label[for]:focus-visible {
   color: var(--danger);
 }
 
+.evaluation-result {
+  display: grid;
+  margin-top: 20px;
+  gap: 16px;
+}
+
+.evaluation-result h3 {
+  margin: 8px 0 0;
+}
+
+.evaluation-step-list,
+.evaluation-rubric-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 10px;
+}
+
+.evaluation-step {
+  display: grid;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-medium);
+  background: rgba(255, 255, 255, 0.68);
+  gap: 9px;
+}
+
+.evaluation-step-root {
+  border-left: 5px solid var(--danger);
+}
+
+.evaluation-step-dependent {
+  border-left: 5px solid var(--accent);
+}
+
+.evaluation-step-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+
+.evaluation-step-heading span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.evaluation-step .preview-blocks,
+.evaluation-rubric-list .preview-blocks {
+  margin: 0;
+}
+
+.evaluation-step p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.evaluation-rubric-list > div {
+  display: grid;
+  padding: 13px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  border-radius: 14px;
+  background: var(--paper-deep);
+  gap: 6px 12px;
+}
+
+.evaluation-rubric-list dt {
+  overflow-wrap: anywhere;
+  font-weight: 800;
+}
+
+.evaluation-rubric-list dd {
+  margin: 0;
+}
+
+.evaluation-rubric-list dd:last-child {
+  grid-column: 1 / -1;
+}
+
+.evaluation-run-note {
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .journey-summary {
   display: grid;
   margin: 24px 0;

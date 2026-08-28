@@ -95,15 +95,24 @@ const plan = {
   })),
 };
 
-const metadata = {
+const evaluationRun = {
+  completedAt: "2026-08-27T00:00:03Z",
   costUsd: "0.000000",
+  errorCode: null,
+  id: "evaluation-run-1",
   inputTokens: 0 as const,
   latencyMs: 0,
-  modelSnapshot: "m5-static-fixture-v1" as const,
+  modelSnapshot: "m7-evaluation-fixture-v1",
   outputTokens: 0 as const,
-  promptVersion: "m5-no-provider-prompt-v1" as const,
-  provider: "application-owned-synthetic-mock" as const,
-  schemaVersion: "1.0.0" as const,
+  pricingVersion: "fake-zero-v1",
+  promptHash: "c".repeat(64),
+  promptVersion: "m7-evaluation-v1",
+  provider: "application-owned-deterministic-fake",
+  retryCount: 0,
+  schemaAttempts: 1,
+  schemaVersion: "m7-provider-evaluation-v1",
+  startedAt: "2026-08-27T00:00:02Z",
+  status: "succeeded" as const,
 };
 
 const transcriptDocument = {
@@ -202,13 +211,58 @@ function createApi(): StaticJourneyApi {
       expiresAt: "2026-08-27T00:05:00Z",
       uploadId: "upload-1",
     }),
-    requestMockEvaluation: vi.fn().mockResolvedValue({
+    requestEvaluation: vi.fn().mockResolvedValue({
+      confirmedTranscriptVersionId: transcriptVersion.id,
+      evaluationId: "evaluation-1",
       feedback: [{ id: "feedback", text: "Deterministic synthetic feedback.", type: "text" }],
-      metadata,
+      maximumScore: "4.00",
       nextSteps: [{ id: "next", text: "Request a curated hint.", type: "text" }],
-      outcome: "uncertain",
+      outcome: "ready",
+      reasoningSteps: [
+        {
+          dependsOnStepIds: [],
+          errorKind: "root",
+          feedback: [{ id: "step-feedback-1", text: "Average the endpoints.", type: "text" }],
+          id: "step-1",
+          judgment: "incorrect",
+          position: 1,
+          summary: [{ id: "step-summary-1", text: "The midpoint is incorrect.", type: "text" }],
+          transcriptBlockIds: ["text-1"],
+        },
+        {
+          dependsOnStepIds: ["step-1"],
+          errorKind: "dependent",
+          feedback: [
+            { id: "step-feedback-2", text: "Recompute after the midpoint.", type: "text" },
+          ],
+          id: "step-2",
+          judgment: "incorrect",
+          position: 2,
+          summary: [
+            { id: "step-summary-2", text: "The conclusion depends on that value.", type: "text" },
+          ],
+          transcriptBlockIds: ["math-1"],
+        },
+      ],
       referenceSolutionsNonExhaustive: true,
-      transcriptFingerprint: "a".repeat(64),
+      rubricBreakdown: [
+        {
+          awardedScore: "0.00",
+          explanation: [{ id: "rubric-1", text: "Not supported yet.", type: "text" }],
+          maximumScore: "2.00",
+          rubricCode: "midpoint",
+          rubricItemId: "rubric-1",
+        },
+        {
+          awardedScore: "0.00",
+          explanation: [{ id: "rubric-2", text: "Not supported yet.", type: "text" }],
+          maximumScore: "2.00",
+          rubricCode: "distance",
+          rubricItemId: "rubric-2",
+        },
+      ],
+      run: evaluationRun,
+      score: "0.00",
     }),
     requestTranscription: vi.fn().mockResolvedValue({
       outcome: "ready",
@@ -228,17 +282,23 @@ function createApi(): StaticJourneyApi {
       .mockResolvedValueOnce({
         conceptVersionId: "concept-version-1",
         content: [{ id: "hint-1", text: "Inspect point A.", type: "text" }],
+        evaluationId: "evaluation-1",
         geometryActions: [{ objectIds: ["A"], type: "highlight" }],
+        hintEventId: "hint-event-1",
         hintId: "hint-1",
         hintLevel: 1,
+        releasedAt: "2026-08-27T00:00:04Z",
         revealsCompleteSolution: false,
       })
       .mockResolvedValueOnce({
         conceptVersionId: "concept-version-1",
         content: [{ id: "hint-2", latex: "M=\\frac{A+B}{2}", type: "display_math" }],
+        evaluationId: "evaluation-1",
         geometryActions: [{ objectIds: ["M"], type: "focus" }],
+        hintEventId: "hint-event-2",
         hintId: "hint-2",
         hintLevel: 2,
+        releasedAt: "2026-08-27T00:00:05Z",
         revealsCompleteSolution: true,
       }),
   };
@@ -283,6 +343,14 @@ async function reachReadyUpload(user: ReturnType<typeof userEvent.setup>) {
   );
   await user.click(screen.getByRole("button", { name: "Upload solution" }));
   return screen.findByRole("button", { name: "Use this upload" });
+}
+
+async function reachConfirmedTranscript(user: ReturnType<typeof userEvent.setup>) {
+  mockSuccessfulUpload();
+  await user.click(await reachReadyUpload(user));
+  await screen.findByRole("heading", { name: "Review the transcript" });
+  await user.click(screen.getByRole("button", { name: "Confirm exact transcript" }));
+  return screen.findByRole("heading", { name: "Authoritative evaluation input" });
 }
 
 beforeEach(() => {
@@ -343,9 +411,11 @@ describe("StaticStudentJourney", () => {
     expect(
       await screen.findByRole("heading", { name: "Authoritative evaluation input" }),
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Run clearly mocked evaluation" }));
+    await user.click(screen.getByRole("button", { name: "Evaluate confirmed work" }));
     expect(await screen.findByText("Deterministic synthetic feedback.")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Evaluation is uncertain" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Score 0.00 / 4.00" })).toBeInTheDocument();
+    expect(screen.getByText("Root error")).toBeInTheDocument();
+    expect(screen.getByText("Dependent error")).toBeInTheDocument();
     expect(screen.getByText(/Reference solutions are non-exhaustive/)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Request hint 1" }));
@@ -444,7 +514,7 @@ describe("StaticStudentJourney", () => {
     permanentApi.getStaticPlan = vi
       .fn()
       .mockRejectedValue(
-        new ApiError("mock_payload_invalid", "The payload remained invalid.", 502),
+        new ApiError("evaluation_invalid_schema", "The payload remained invalid.", 502),
       );
     render(<StaticStudentJourney api={permanentApi} />);
     await user.click(await screen.findByRole("button", { name: "Build today's combined plan" }));
@@ -497,6 +567,85 @@ describe("StaticStudentJourney", () => {
     await user.click(screen.getByRole("button", { name: "Upload a clearer synthetic image" }));
     expect(screen.getByLabelText("Choose image")).toBeInTheDocument();
   });
+
+  it("shows evaluation loading and a scoreless uncertainty result", async () => {
+    const api = createApi();
+    type ApiEvaluation = Awaited<ReturnType<StaticJourneyApi["requestEvaluation"]>>;
+    let resolveEvaluation: ((value: ApiEvaluation) => void) | undefined;
+    api.requestEvaluation = vi.fn<StaticJourneyApi["requestEvaluation"]>(
+      () =>
+        new Promise((resolve) => {
+          resolveEvaluation = resolve;
+        }),
+    );
+    const user = userEvent.setup();
+    render(<StaticStudentJourney api={api} />);
+    await reachConfirmedTranscript(user);
+
+    await user.click(screen.getByRole("button", { name: "Evaluate confirmed work" }));
+    expect(screen.getByText("Evaluating the confirmed transcript…")).toHaveAttribute(
+      "role",
+      "status",
+    );
+    resolveEvaluation?.({
+      confirmedTranscriptVersionId: transcriptVersion.id,
+      evaluationId: "evaluation-uncertain",
+      outcome: "uncertain",
+      reason: [{ id: "uncertain-reason", text: "The work is contradictory.", type: "text" }],
+      recommendedAction: "manual_review",
+      run: { ...evaluationRun, status: "uncertain" },
+    });
+
+    expect(
+      await screen.findByRole("heading", { name: "Evaluation is uncertain" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("The work is contradictory.")).toBeInTheDocument();
+    expect(screen.getByText(/No correctness claim or score was fabricated/)).toBeInTheDocument();
+    expect(screen.queryByText(/Score /)).not.toBeInTheDocument();
+  });
+
+  it.each([
+    {
+      code: "evaluation_temporarily_unavailable",
+      heading: "This step could not finish.",
+      retryable: true,
+      status: 503,
+    },
+    {
+      code: "evaluation_permanent_failure",
+      heading: "This step could not finish.",
+      retryable: false,
+      status: 502,
+    },
+    {
+      code: "evaluation_invalid_schema",
+      heading: "No evaluation result was accepted.",
+      retryable: false,
+      status: 502,
+    },
+  ])(
+    "shows the terminal $code evaluation state without fabricated scoring",
+    async ({ code, heading, retryable, status }) => {
+      const api = createApi();
+      api.requestEvaluation = vi
+        .fn()
+        .mockRejectedValue(new ApiError(code, "No evaluation result is available.", status));
+      const user = userEvent.setup();
+      render(<StaticStudentJourney api={api} />);
+      await reachConfirmedTranscript(user);
+      await user.click(screen.getByRole("button", { name: "Evaluate confirmed work" }));
+
+      expect(await screen.findByRole("heading", { name: heading })).toBeInTheDocument();
+      expect(screen.queryByText(/Score /)).not.toBeInTheDocument();
+      if (retryable) {
+        expect(screen.getByRole("button", { name: "Retry this step" })).toBeEnabled();
+      } else {
+        expect(
+          screen.getByText("The application did not fabricate a replacement result."),
+        ).toBeInTheDocument();
+      }
+    },
+  );
 
   it.each([
     {

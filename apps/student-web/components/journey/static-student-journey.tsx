@@ -15,6 +15,7 @@ import {
   transcriptDocumentsEqual,
 } from "../../features/transcription/transcript-state";
 import { ApiError } from "../../lib/api";
+import { requestEvaluation, type Evaluation, type ReadyEvaluation } from "../../lib/evaluation-api";
 import {
   addExamTarget,
   createAttempt,
@@ -23,12 +24,10 @@ import {
   getConceptVersion,
   getStaticPlan,
   getStudyProfile,
-  requestMockEvaluation,
   requestNextHint,
   type Attempt,
   type AvailableExamCycles,
   type ConceptVersion,
-  type MockEvaluation,
   type NextHint,
   type StaticDailyPlan,
   type StudyProfile,
@@ -57,7 +56,7 @@ export type StaticJourneyApi = {
   getStaticPlan: typeof getStaticPlan;
   getStudyProfile: typeof getStudyProfile;
   getUploadDownload: typeof getUploadDownload;
-  requestMockEvaluation: typeof requestMockEvaluation;
+  requestEvaluation: typeof requestEvaluation;
   requestNextHint: typeof requestNextHint;
   requestTranscription: typeof requestTranscription;
   createTranscriptVersion: typeof createTranscriptVersion;
@@ -73,7 +72,7 @@ const defaultApi: StaticJourneyApi = {
   getStaticPlan,
   getStudyProfile,
   getUploadDownload,
-  requestMockEvaluation,
+  requestEvaluation,
   requestNextHint,
   requestTranscription,
   createTranscriptVersion,
@@ -112,12 +111,15 @@ function planReference(plan: StaticDailyPlan) {
 
 function operationFailure(error: unknown): "invalid_schema" | "permanent" | "retryable" {
   if (error instanceof ApiError) {
-    if (error.code === "transcription_invalid_schema" || error.code === "invalid_response") {
+    if (
+      error.code === "transcription_invalid_schema" ||
+      error.code === "evaluation_invalid_schema" ||
+      error.code === "invalid_response"
+    ) {
       return "invalid_schema";
     }
     if (
-      error.code === "mock_payload_invalid" ||
-      error.code === "mock_permanent_failure" ||
+      error.code === "evaluation_permanent_failure" ||
       error.code === "transcription_provider_rejected" ||
       error.code === "transcription_invalid_media"
     ) {
@@ -153,6 +155,56 @@ function ConfirmedTranscriptView({ transcript }: { transcript: ConfirmedTranscri
   );
 }
 
+function ReadyEvaluationResult({ evaluation }: { evaluation: ReadyEvaluation }) {
+  const positions = new Map(evaluation.reasoningSteps.map((step) => [step.id, step.position]));
+  return (
+    <div className="evaluation-result">
+      <ol className="evaluation-step-list" aria-label="Post-confirmation reasoning steps">
+        {evaluation.reasoningSteps.map((step) => (
+          <li className={`evaluation-step evaluation-step-${step.errorKind}`} key={step.id}>
+            <div className="evaluation-step-heading">
+              <strong>Step {step.position}</strong>
+              <span>{step.judgment.replace("_", " ")}</span>
+              {step.errorKind === "root" ? <span>Root error</span> : null}
+              {step.errorKind === "dependent" ? <span>Dependent error</span> : null}
+            </div>
+            <TypedContentBlocks blocks={step.summary} />
+            {step.dependsOnStepIds.length > 0 ? (
+              <p>
+                Depends on{" "}
+                {step.dependsOnStepIds.map((id) => `step ${positions.get(id)}`).join(", ")}.
+              </p>
+            ) : null}
+            <TypedContentBlocks blocks={step.feedback} />
+          </li>
+        ))}
+      </ol>
+      <h3>Rubric score breakdown</h3>
+      <dl className="evaluation-rubric-list">
+        {evaluation.rubricBreakdown.map((item) => (
+          <div key={item.rubricItemId}>
+            <dt>{item.rubricCode}</dt>
+            <dd>
+              {item.awardedScore} / {item.maximumScore}
+            </dd>
+            <dd>
+              <TypedContentBlocks blocks={item.explanation} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <h3>Feedback</h3>
+      <TypedContentBlocks blocks={evaluation.feedback} />
+      <h3>Next step</h3>
+      <TypedContentBlocks blocks={evaluation.nextSteps} />
+      <p className="evaluation-run-note">
+        Validated with {evaluation.run.provider} · {evaluation.run.modelSnapshot} · prompt{" "}
+        {evaluation.run.promptVersion}
+      </p>
+    </div>
+  );
+}
+
 export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourneyApi }) {
   const [journey, setJourney] = useState(createInitialStaticJourneyState);
   const [loadStatus, setLoadStatus] = useState<LoadStatus>("loading");
@@ -161,7 +213,7 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
   const [plan, setPlan] = useState<StaticDailyPlan | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [currentAttempt, setCurrentAttempt] = useState<Attempt | null>(null);
-  const [evaluation, setEvaluation] = useState<MockEvaluation | null>(null);
+  const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
   const [hints, setHints] = useState<NextHint[]>([]);
   const [concept, setConcept] = useState<ConceptVersion | null>(null);
   const [transcriptVersion, setTranscriptVersion] = useState<TranscriptVersion | null>(null);
@@ -390,15 +442,16 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
       return;
     }
     try {
-      const response = await api.requestMockEvaluation(
+      const response = await api.requestEvaluation(
         currentAttempt.id,
         confirmed.transcriptVersionId,
       );
       setEvaluation(response);
       dispatch({
         evaluation: {
+          confirmedTranscriptVersionId: response.confirmedTranscriptVersionId,
+          evaluationId: response.evaluationId,
           outcome: response.outcome,
-          transcriptFingerprint: response.transcriptFingerprint,
         },
         type: "evaluation_received",
       });
@@ -418,7 +471,7 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
       return;
     }
     try {
-      const hint = await api.requestNextHint(currentAttempt.id, hints.length);
+      const hint = await api.requestNextHint(currentAttempt.id);
       setHints((current) => [...current, hint]);
       dispatch({ hint: { hintLevel: hint.hintLevel }, type: "hint_received" });
     } catch (error) {
@@ -556,7 +609,11 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
               : "Permanent failure"}
         </p>
         <h2 id="journey-operation-error">
-          {invalidSchema ? "No transcript was accepted." : "This step could not finish."}
+          {invalidSchema
+            ? journey.phase === "transcription"
+              ? "No transcript was accepted."
+              : "No evaluation result was accepted."
+            : "This step could not finish."}
         </h2>
         <p role="alert">{errorMessage}</p>
         {retryable ? (
@@ -779,40 +836,41 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
       <section className="journey-card" aria-labelledby="authoritative-title">
         <p className="eyebrow">Explicitly confirmed</p>
         <h2 id="authoritative-title">Authoritative evaluation input</h2>
-        <p>
-          This locked snapshot—and no earlier draft—is sent to the deterministic mock evaluation.
-        </p>
+        <p>This locked snapshot—and no earlier draft—is the authoritative grading input.</p>
         <p className="identifier">
           Transcript version {transcriptVersion?.version} · {confirmation?.transcriptVersionId}
         </p>
         <p className="identifier">SHA-256 {confirmation?.transcriptHash}</p>
         <ConfirmedTranscriptView transcript={journey.data.confirmedTranscript} />
         <button className="primary-button" onClick={startEvaluation} type="button">
-          Run clearly mocked evaluation
+          Evaluate confirmed work
         </button>
       </section>
     );
-  } else if (journey.phase === "mock_evaluation" && journey.status === "loading") {
+  } else if (journey.phase === "evaluation" && journey.status === "loading") {
     panel = (
       <p className="journey-status" role="status">
         Evaluating the confirmed transcript…
       </p>
     );
-  } else if (journey.phase === "mock_evaluation" && evaluation !== null) {
+  } else if (journey.phase === "evaluation" && evaluation !== null) {
     panel = (
       <section className="journey-card" aria-labelledby="evaluation-title">
-        <p className="eyebrow">Structured mock evaluation</p>
+        <p className="eyebrow">Validated structured evaluation</p>
         <h2 id="evaluation-title">
-          {journey.status === "uncertain" ? "Evaluation is uncertain" : "Deterministic feedback"}
+          {evaluation.outcome === "uncertain"
+            ? "Evaluation is uncertain"
+            : `Score ${evaluation.score} / ${evaluation.maximumScore}`}
         </h2>
-        {journey.status === "uncertain" ? (
-          <p className="uncertain-callout">
-            No correctness claim is made for this uncertain result.
-          </p>
-        ) : null}
-        <TypedContentBlocks blocks={evaluation.feedback} />
-        <h3>Next steps</h3>
-        <TypedContentBlocks blocks={evaluation.nextSteps} />
+        {evaluation.outcome === "uncertain" ? (
+          <div className="uncertain-callout">
+            <p>No correctness claim or score was fabricated for this result.</p>
+            <TypedContentBlocks blocks={evaluation.reason} />
+            <p>Recommended action: manual review.</p>
+          </div>
+        ) : (
+          <ReadyEvaluationResult evaluation={evaluation} />
+        )}
         <p className="reference-note">
           Reference solutions are non-exhaustive; valid alternative methods may also be correct.
         </p>

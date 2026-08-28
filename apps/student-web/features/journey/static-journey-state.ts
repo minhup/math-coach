@@ -8,7 +8,7 @@ export type JourneyPhase =
   | "transcription"
   | "correction"
   | "confirmation"
-  | "mock_evaluation"
+  | "evaluation"
   | "hint"
   | "retry"
   | "concept"
@@ -53,8 +53,9 @@ export type JourneyUploadReference = {
 };
 
 export type JourneyEvaluationReference = {
+  confirmedTranscriptVersionId: string;
+  evaluationId: string;
   outcome: "ready" | "uncertain";
-  transcriptFingerprint: string;
 };
 
 export type JourneyTranscriptVersionReference = {
@@ -266,23 +267,25 @@ export function transitionStaticJourney(
     });
   }
   if (event.type === "evaluation_requested" && state.phase === "confirmation") {
-    return accept({ ...state, phase: "mock_evaluation", status: "loading" });
+    return accept({ ...state, phase: "evaluation", status: "loading" });
   }
   if (
     event.type === "evaluation_received" &&
-    state.phase === "mock_evaluation" &&
-    state.status === "loading"
+    state.phase === "evaluation" &&
+    state.status === "loading" &&
+    event.evaluation.confirmedTranscriptVersionId ===
+      state.data.confirmation?.transcriptVersionId &&
+    event.evaluation.evaluationId.length > 0
   ) {
     return accept({
       data: { ...state.data, evaluation: event.evaluation },
-      phase: "mock_evaluation",
+      phase: "evaluation",
       status: event.evaluation.outcome === "uncertain" ? "uncertain" : "ready",
     });
   }
   if (
     event.type === "hint_requested" &&
-    ((state.phase === "mock_evaluation" &&
-      (state.status === "ready" || state.status === "uncertain")) ||
+    ((state.phase === "evaluation" && (state.status === "ready" || state.status === "uncertain")) ||
       (state.phase === "hint" && state.status === "ready"))
   ) {
     return accept({ ...state, phase: "hint", status: "loading" });
@@ -338,7 +341,7 @@ export function transitionStaticJourney(
   }
   if (
     event.type === "operation_failed" &&
-    ["planning", "transcription", "mock_evaluation", "hint", "concept"].includes(state.phase)
+    ["planning", "transcription", "evaluation", "hint", "concept"].includes(state.phase)
   ) {
     return accept({
       ...state,
