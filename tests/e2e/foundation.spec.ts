@@ -62,14 +62,20 @@ test("invited learner completes the deterministic multi-exam student journey", a
     await page
       .getByRole("button", { name: "Add Synthetic Aurora Mathematics Examination" })
       .click();
-    await expect(page.getByText("Synthetic Aurora Mathematics Examination")).toBeVisible();
+    await expect(
+      page.getByRole("listitem").filter({ hasText: "Synthetic Aurora Mathematics Examination" }),
+    ).toBeVisible();
     await expect(page.getByRole("button", { name: "Build today's combined plan" })).toHaveCount(0);
     await page
       .getByRole("button", { name: "Add Synthetic Harbor Mathematics Examination" })
       .click();
   }
-  await expect(page.getByText("Synthetic Aurora Mathematics Examination")).toBeVisible();
-  await expect(page.getByText("Synthetic Harbor Mathematics Examination")).toBeVisible();
+  await expect(
+    page.getByRole("listitem").filter({ hasText: "Synthetic Aurora Mathematics Examination" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("listitem").filter({ hasText: "Synthetic Harbor Mathematics Examination" }),
+  ).toBeVisible();
 
   const buildPlan = page.getByRole("button", { name: "Build today's combined plan" });
   await buildPlan.focus();
