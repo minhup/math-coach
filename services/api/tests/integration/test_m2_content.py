@@ -213,7 +213,7 @@ async def test_migration_exposes_attempt_version_fk_and_immutable_triggers() -> 
     assert attempt_column == "NO"
     assert "exam_cycle_id" in target_columns
     assert "target_exam_id" not in target_columns
-    assert trigger_count == 13
+    assert trigger_count == 16
 
 
 async def test_content_preview_requires_authentication_and_shows_two_supported_exams(

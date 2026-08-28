@@ -18,6 +18,20 @@ from app.config import Settings, get_settings
 from app.content.preview import content_preview, list_content_previews
 from app.content.preview_schemas import ContentPreviewListResponse, ContentPreviewResponse
 from app.database import get_database_session
+from app.evaluation.provider import StrictEvaluationProvider
+from app.evaluation.schemas import (
+    EvaluationRequest,
+    EvaluationResponse,
+    EvaluationStateResponse,
+    NextHintRequest,
+    NextHintResponse,
+)
+from app.evaluation.service import (
+    evaluate_attempt,
+    evaluation_state,
+    get_evaluation_provider,
+    next_hint,
+)
 from app.profiles import (
     archive_target,
     create_profile,
@@ -47,21 +61,14 @@ from app.schemas import (
     UserResponse,
 )
 from app.security import utc_now
-from app.static_journey.mocks import DeterministicMockBoundary, get_mock_boundary
 from app.static_journey.schemas import (
     AvailableExamCycleListResponse,
     ConceptVersionResponse,
-    MockEvaluationRequest,
-    MockEvaluationResponse,
-    NextHintRequest,
-    NextHintResponse,
     StaticDailyPlanResponse,
 )
 from app.static_journey.service import (
     available_exam_cycles,
     concept_version,
-    mock_evaluation,
-    next_hint,
     static_daily_plan,
 )
 from app.storage import ObjectStorage, get_object_storage
@@ -158,30 +165,43 @@ async def get_static_daily_plan(
 
 
 @router.post(
-    "/attempts/{attempt_id}/mock-evaluation",
-    response_model=MockEvaluationResponse,
-    tags=["static-journey"],
+    "/attempts/{attempt_id}/evaluation",
+    response_model=EvaluationResponse,
+    tags=["evaluation"],
 )
-async def post_mock_evaluation(
+async def post_evaluation(
     attempt_id: uuid.UUID,
-    payload: MockEvaluationRequest,
+    payload: EvaluationRequest,
     user: CurrentUser,
     database: Annotated[AsyncSession, Depends(get_database_session)],
-    boundary: Annotated[DeterministicMockBoundary, Depends(get_mock_boundary)],
-) -> MockEvaluationResponse:
-    return await mock_evaluation(
+    provider: Annotated[StrictEvaluationProvider, Depends(get_evaluation_provider)],
+) -> EvaluationResponse:
+    return await evaluate_attempt(
         attempt_id=attempt_id,
         payload=payload,
         user=user,
         database=database,
-        boundary=boundary,
+        provider=provider,
     )
+
+
+@router.get(
+    "/attempts/{attempt_id}/evaluation",
+    response_model=EvaluationStateResponse,
+    tags=["evaluation"],
+)
+async def get_evaluation_state(
+    attempt_id: uuid.UUID,
+    user: CurrentUser,
+    database: Annotated[AsyncSession, Depends(get_database_session)],
+) -> EvaluationStateResponse:
+    return await evaluation_state(attempt_id=attempt_id, user=user, database=database)
 
 
 @router.post(
     "/attempts/{attempt_id}/hints/next",
     response_model=NextHintResponse,
-    tags=["static-journey"],
+    tags=["evaluation"],
 )
 async def post_next_hint(
     attempt_id: uuid.UUID,

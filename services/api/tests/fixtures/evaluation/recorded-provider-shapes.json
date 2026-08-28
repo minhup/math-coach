@@ -1,0 +1,35 @@
+{
+  "readyAlternative": {
+    "outcome": "ready",
+    "reasoningSteps": [
+      {
+        "stepKey": "step-1",
+        "transcriptBlockIds": ["block-1", "block-2"],
+        "summary": "The learner uses a valid symmetry argument.",
+        "judgment": "correct",
+        "errorKind": "none",
+        "dependsOnStepKeys": [],
+        "feedback": "This valid alternative method supports the conclusion."
+      }
+    ],
+    "rubricAwards": [
+      {
+        "rubricCode": "method",
+        "awardedScore": "2.00",
+        "explanation": "The method is valid."
+      },
+      {
+        "rubricCode": "conclusion",
+        "awardedScore": "2.00",
+        "explanation": "The conclusion follows."
+      }
+    ],
+    "overallFeedback": "The confirmed solution is correct.",
+    "nextAction": "Compare this with the coordinate method."
+  },
+  "uncertain": {
+    "outcome": "uncertain",
+    "reason": "The confirmed work contains contradictory conclusions.",
+    "recommendedAction": "manual_review"
+  }
+}

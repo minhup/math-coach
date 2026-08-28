@@ -1,10 +1,7 @@
 import uuid
 
 import pytest
-from app.static_journey.schemas import (
-    MockEvaluationRequest,
-    MockEvaluationResponse,
-)
+from app.evaluation.schemas import EvaluationRequest
 from app.transcription.schemas import TranscriptDocument
 from pydantic import ValidationError
 
@@ -33,38 +30,20 @@ def test_transcript_document_accepts_only_the_flat_strict_correction_contract() 
         TranscriptDocument.model_validate(invalid)
 
 
-def test_evaluation_contract_requires_an_explicit_confirmation_and_typed_feedback() -> None:
+def test_evaluation_request_requires_confirmation_identity_and_server_owned_fields() -> None:
     version_id = uuid.uuid4()
-    request = MockEvaluationRequest(confirmed_transcript_version_id=version_id)
-    response = MockEvaluationResponse.model_validate(
+    request = EvaluationRequest.model_validate(
         {
-            "outcome": "ready",
-            "feedback": [
-                {"id": "feedback-1", "type": "text", "text": "Synthetic structured feedback."}
-            ],
-            "nextSteps": [
-                {"id": "next-1", "type": "text", "text": "Request a hint before retrying."}
-            ],
-            "referenceSolutionsNonExhaustive": True,
-            "transcriptFingerprint": "a" * 64,
-            "metadata": {
-                "provider": "application-owned-synthetic-mock",
-                "modelSnapshot": "m5-static-fixture-v1",
-                "promptVersion": "m5-no-provider-prompt-v1",
-                "schemaVersion": "1.0.0",
-                "latencyMs": 0,
-                "inputTokens": 0,
-                "outputTokens": 0,
-                "costUsd": "0.000000",
-            },
+            "confirmedTranscriptVersionId": str(version_id),
+            "idempotencyKey": str(uuid.uuid4()),
         }
     )
 
     assert request.confirmed_transcript_version_id == version_id
-    assert response.reference_solutions_non_exhaustive is True
-    assert response.feedback[0].type == "text"
-
-    invalid = response.model_dump(by_alias=True)
-    invalid["feedback"] = [{"markdown": "**unvalidated**"}]
     with pytest.raises(ValidationError):
-        MockEvaluationResponse.model_validate(invalid)
+        EvaluationRequest.model_validate(
+            {
+                **request.model_dump(by_alias=True, mode="json"),
+                "score": "4.00",
+            }
+        )

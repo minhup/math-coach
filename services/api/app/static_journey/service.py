@@ -6,7 +6,6 @@ from pydantic import TypeAdapter
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.attempts import owned_attempt
 from app.content.models import (
     Concept,
     ConceptVersion,
@@ -14,20 +13,14 @@ from app.content.models import (
     ExamCycle,
     GeometrySceneVersion,
     Problem,
-    ProblemHint,
 )
 from app.content.preview import content_preview
-from app.content.schemas import ContentBlock, GeometryAction
+from app.content.schemas import ContentBlock
 from app.content.schemas import GeometrySceneVersion as GeometrySceneVersionSchema
 from app.errors import AppError
 from app.models import User
 from app.profile_models import StudentExamTarget
 from app.profiles import owned_active_profile
-from app.static_journey.mocks import (
-    DeterministicMockBoundary,
-    MockPayloadInvalidError,
-    MockSourceError,
-)
 from app.static_journey.planning import (
     FOLLOW_UP_PROBLEM_CODE,
     PRIMARY_PROBLEM_CODE,
@@ -39,33 +32,12 @@ from app.static_journey.schemas import (
     AvailableExamCycleListResponse,
     AvailableExamCycleResponse,
     ConceptVersionResponse,
-    MockEvaluationRequest,
-    MockEvaluationResponse,
-    NextHintRequest,
-    NextHintResponse,
     StaticDailyPlanResponse,
 )
-from app.transcription.models import TranscriptConfirmation, TranscriptVersion
-from app.transcription.schemas import TranscriptDocument, canonical_transcript_hash
 
 CONCEPT_CODE = "SYN-MIDPOINT-COORDINATES"
 blocks_adapter = TypeAdapter(list[ContentBlock])
-actions_adapter = TypeAdapter(list[GeometryAction])
 scene_adapter = TypeAdapter(GeometrySceneVersionSchema)
-
-
-def _mock_source_failure(error: MockSourceError) -> AppError:
-    if error.retryable:
-        return AppError(
-            status_code=503,
-            code="mock_temporarily_unavailable",
-            message="The synthetic mock is temporarily unavailable. Try again.",
-        )
-    return AppError(
-        status_code=502,
-        code="mock_permanent_failure",
-        message="The synthetic mock could not complete this operation.",
-    )
 
 
 async def available_exam_cycles(database: AsyncSession) -> AvailableExamCycleListResponse:
@@ -175,87 +147,6 @@ async def static_daily_plan(
         plan_date=plan_date,
         targets=targets,
         problems=problems,
-        concept_version_id=concept_version_id,
-    )
-
-
-async def mock_evaluation(
-    *,
-    attempt_id: uuid.UUID,
-    payload: MockEvaluationRequest,
-    user: User,
-    database: AsyncSession,
-    boundary: DeterministicMockBoundary,
-) -> MockEvaluationResponse:
-    await owned_attempt(attempt_id, user, database)
-    confirmation = await database.scalar(
-        select(TranscriptConfirmation).where(
-            TranscriptConfirmation.attempt_id == attempt_id,
-            TranscriptConfirmation.transcript_version_id == payload.confirmed_transcript_version_id,
-        )
-    )
-    if confirmation is None:
-        raise AppError(
-            status_code=409,
-            code="transcript_not_confirmed",
-            message="Confirm this exact transcript version before evaluation.",
-        )
-    version = await database.get(TranscriptVersion, confirmation.transcript_version_id)
-    if version is None or version.attempt_id != attempt_id:
-        raise RuntimeError("Confirmed transcript relationship is invalid")
-    transcript = TranscriptDocument.model_validate(version.document_json)
-    if (
-        transcript.attempt_id != attempt_id
-        or canonical_transcript_hash(transcript) != confirmation.transcript_sha256
-        or version.transcript_sha256 != confirmation.transcript_sha256
-    ):
-        raise RuntimeError("Confirmed transcript identity is invalid")
-    try:
-        return boundary.evaluate(transcript)
-    except MockSourceError as error:
-        raise _mock_source_failure(error) from error
-    except MockPayloadInvalidError as error:
-        raise AppError(
-            status_code=502,
-            code="mock_payload_invalid",
-            message="The synthetic evaluation was invalid after one retry.",
-        ) from error
-
-
-async def next_hint(
-    *,
-    attempt_id: uuid.UUID,
-    payload: NextHintRequest,
-    user: User,
-    database: AsyncSession,
-) -> NextHintResponse:
-    attempt = await owned_attempt(attempt_id, user, database)
-    hint = await database.scalar(
-        select(ProblemHint).where(
-            ProblemHint.problem_version_id == attempt.problem_version_id,
-            ProblemHint.hint_level == payload.previous_hint_level + 1,
-        )
-    )
-    if hint is None:
-        raise AppError(
-            status_code=409,
-            code="hint_ladder_exhausted",
-            message="No further curated hint is available.",
-        )
-    concept_version_id = None
-    if hint.concept_id is not None:
-        concept_version_id = await database.scalar(
-            select(Concept.current_version_id).where(
-                Concept.id == hint.concept_id,
-                Concept.status == "synthetic",
-            )
-        )
-    return NextHintResponse(
-        hint_id=hint.id,
-        hint_level=hint.hint_level,
-        content=blocks_adapter.validate_python(hint.content_json),
-        geometry_actions=actions_adapter.validate_python(hint.geometry_actions_json),
-        reveals_complete_solution=hint.reveals_complete_solution,
         concept_version_id=concept_version_id,
     )
 

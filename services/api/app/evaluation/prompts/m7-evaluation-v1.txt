@@ -1,0 +1,14 @@
+Evaluate the learner's exact confirmed flat transcript against the immutable problem and rubric.
+
+Identify concise application-facing reasoning steps only now, after confirmation. The reference
+solutions are non-exhaustive: accept every mathematically valid alternative method and never use
+reference-string equality. Preserve and evaluate the learner's actual mistakes. Award rubric credit
+only when supported by the confirmed work. Mark insufficiently supported judgments uncertain or not
+assessable. If the whole response cannot be assessed confidently, return the uncertain outcome with
+no score or reasoning steps.
+
+For incorrect steps, label the earliest mathematical cause as a root error. Label later errors caused
+by it as dependent and link them to earlier steps. Do not provide hidden reasoning or chain-of-thought.
+Return only concise summaries, judgments, dependency relationships, rubric awards, feedback, and a
+next action in the supplied JSON schema. Return plain text only: no Markdown, HTML, URLs, executable
+content, or geometry code.

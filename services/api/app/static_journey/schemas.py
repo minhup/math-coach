@@ -1,12 +1,11 @@
 import uuid
 from datetime import date
-from decimal import Decimal
 from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 
-from app.content.schemas import ContentBlock, GeometryAction, GeometrySceneVersion
+from app.content.schemas import ContentBlock, GeometrySceneVersion
 
 
 class StaticJourneyModel(BaseModel):
@@ -15,30 +14,6 @@ class StaticJourneyModel(BaseModel):
         extra="forbid",
         populate_by_name=True,
     )
-
-
-class MockRunMetadata(StaticJourneyModel):
-    provider: Literal["application-owned-synthetic-mock"]
-    model_snapshot: Literal["m5-static-fixture-v1"]
-    prompt_version: Literal["m5-no-provider-prompt-v1"]
-    schema_version: Literal["1.0.0"]
-    latency_ms: Annotated[int, Field(ge=0)]
-    input_tokens: Literal[0]
-    output_tokens: Literal[0]
-    cost_usd: Annotated[Decimal, Field(ge=0)]
-
-
-class MockEvaluationRequest(StaticJourneyModel):
-    confirmed_transcript_version_id: uuid.UUID
-
-
-class MockEvaluationResponse(StaticJourneyModel):
-    outcome: Literal["ready", "uncertain"]
-    feedback: Annotated[list[ContentBlock], Field(min_length=1)]
-    next_steps: Annotated[list[ContentBlock], Field(min_length=1)]
-    reference_solutions_non_exhaustive: Literal[True]
-    transcript_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
-    metadata: MockRunMetadata
 
 
 class StaticPlanTarget(StaticJourneyModel):
@@ -106,19 +81,6 @@ class StaticDailyPlanResponse(StaticJourneyModel):
             if not set(item.supported_target_ids) <= known_targets:
                 raise ValueError("Plan item support must reference plan target records")
         return self
-
-
-class NextHintRequest(StaticJourneyModel):
-    previous_hint_level: Annotated[int, Field(ge=0, le=5)]
-
-
-class NextHintResponse(StaticJourneyModel):
-    hint_id: uuid.UUID
-    hint_level: Annotated[int, Field(ge=1, le=5)]
-    content: Annotated[list[ContentBlock], Field(min_length=1)]
-    geometry_actions: list[GeometryAction]
-    reveals_complete_solution: bool
-    concept_version_id: uuid.UUID | None
 
 
 class ConceptVersionResponse(StaticJourneyModel):

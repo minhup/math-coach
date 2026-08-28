@@ -9,12 +9,6 @@ from app.main import app
 from app.models import PilotInvite
 from app.scripts.seed_content import seed_content
 from app.security import digest_secret, utc_now
-from app.static_journey.mocks import (
-    DeterministicMockBoundary,
-    FailedFixtureSource,
-    UncertainFixtureSource,
-    get_mock_boundary,
-)
 
 pytestmark = pytest.mark.integration
 
@@ -94,7 +88,7 @@ async def create_confirmed_transcript(
     assert transcription.status_code == 200
     initial = transcription.json()["transcriptVersion"]
     document = initial["document"]
-    document["blocks"][0]["text"] += " Confirmed synthetic correction."
+    document["blocks"][0]["text"] += f" SYNTHETIC-EVAL:{suffix}"
     corrected = await client.post(
         f"/api/v1/attempts/{attempt_id}/transcripts",
         json={"baseTranscriptVersionId": initial["id"], "document": document},
@@ -212,8 +206,11 @@ async def test_owned_attempt_upload_confirmation_hint_retry_and_concept_form_one
     transcript_version = transcription.json()["transcriptVersion"]
     transcript = transcript_version["document"]
     unconfirmed = await client.post(
-        f"/api/v1/attempts/{attempt_id}/mock-evaluation",
-        json={"confirmedTranscriptVersionId": transcript_version["id"]},
+        f"/api/v1/attempts/{attempt_id}/evaluation",
+        json={
+            "confirmedTranscriptVersionId": transcript_version["id"],
+            "idempotencyKey": str(uuid.uuid4()),
+        },
     )
     transcript["blocks"][0]["text"] += " Corrected by the synthetic learner."
     corrected = await client.post(
@@ -231,16 +228,19 @@ async def test_owned_attempt_upload_confirmation_hint_retry_and_concept_form_one
         },
     )
     evaluation = await client.post(
-        f"/api/v1/attempts/{attempt_id}/mock-evaluation",
-        json={"confirmedTranscriptVersionId": corrected.json()["id"]},
+        f"/api/v1/attempts/{attempt_id}/evaluation",
+        json={
+            "confirmedTranscriptVersionId": corrected.json()["id"],
+            "idempotencyKey": str(uuid.uuid4()),
+        },
     )
     hint = await client.post(
         f"/api/v1/attempts/{attempt_id}/hints/next",
-        json={"previousHintLevel": 0},
+        json={"idempotencyKey": str(uuid.uuid4())},
     )
     second_hint = await client.post(
         f"/api/v1/attempts/{attempt_id}/hints/next",
-        json={"previousHintLevel": 1},
+        json={"idempotencyKey": str(uuid.uuid4())},
     )
     concept = await client.get(f"/api/v1/concept-versions/{CONCEPT_VERSION_ID}")
     retry = await client.post(
@@ -260,7 +260,7 @@ async def test_owned_attempt_upload_confirmation_hint_retry_and_concept_form_one
     assert evaluation.status_code == 200
     assert evaluation.json()["outcome"] == "ready"
     assert evaluation.json()["referenceSolutionsNonExhaustive"] is True
-    assert len(evaluation.json()["transcriptFingerprint"]) == 64
+    assert evaluation.json()["run"]["provider"] == "application-owned-deterministic-fake"
     assert hint.status_code == 200
     assert hint.json()["hintLevel"] == 1
     assert hint.json()["geometryActions"][0]["type"] == "highlight"
@@ -280,7 +280,7 @@ async def test_owned_attempt_upload_confirmation_hint_retry_and_concept_form_one
     assert retry.json()["problemVersionId"] == M4_PROBLEM_VERSION_ID
 
 
-async def test_mock_evaluation_failure_and_uncertainty_never_fabricate_ready_feedback(
+async def test_evaluation_uncertainty_never_fabricates_ready_feedback(
     client: httpx.AsyncClient,
 ) -> None:
     await seed_content(CONTENT_ROOT)
@@ -295,33 +295,20 @@ async def test_mock_evaluation_failure_and_uncertainty_never_fabricate_ready_fee
     confirmed_version_id = await create_confirmed_transcript(
         client,
         attempt_id,
-        suffix="m5-evaluation-states",
+        suffix="unreadable",
     )
-    request = {"confirmedTranscriptVersionId": confirmed_version_id}
-
-    try:
-        app.dependency_overrides[get_mock_boundary] = lambda: DeterministicMockBoundary(
-            UncertainFixtureSource()
-        )
-        uncertain = await client.post(
-            f"/api/v1/attempts/{attempt_id}/mock-evaluation",
-            json=request,
-        )
-        app.dependency_overrides[get_mock_boundary] = lambda: DeterministicMockBoundary(
-            FailedFixtureSource(retryable=True)
-        )
-        failed = await client.post(
-            f"/api/v1/attempts/{attempt_id}/mock-evaluation",
-            json=request,
-        )
-    finally:
-        app.dependency_overrides.pop(get_mock_boundary, None)
+    uncertain = await client.post(
+        f"/api/v1/attempts/{attempt_id}/evaluation",
+        json={
+            "confirmedTranscriptVersionId": confirmed_version_id,
+            "idempotencyKey": str(uuid.uuid4()),
+        },
+    )
 
     assert uncertain.status_code == 200
     assert uncertain.json()["outcome"] == "uncertain"
-    assert failed.status_code == 503
-    assert failed.json()["error"]["code"] == "mock_temporarily_unavailable"
-    assert "feedback" not in failed.json()
+    assert "score" not in uncertain.json()
+    assert "reasoningSteps" not in uncertain.json()
 
 
 async def test_mock_journey_resources_are_isolated_between_authenticated_learners(
@@ -352,12 +339,15 @@ async def test_mock_journey_resources_are_isolated_between_authenticated_learner
             },
         )
         hidden_evaluation = await other_client.post(
-            f"/api/v1/attempts/{attempt_id}/mock-evaluation",
-            json={"confirmedTranscriptVersionId": str(uuid.uuid4())},
+            f"/api/v1/attempts/{attempt_id}/evaluation",
+            json={
+                "confirmedTranscriptVersionId": str(uuid.uuid4()),
+                "idempotencyKey": str(uuid.uuid4()),
+            },
         )
         hidden_hint = await other_client.post(
             f"/api/v1/attempts/{attempt_id}/hints/next",
-            json={"previousHintLevel": 0},
+            json={"idempotencyKey": str(uuid.uuid4())},
         )
         hidden_plan = await other_client.get("/api/v1/plans/today")
     finally:

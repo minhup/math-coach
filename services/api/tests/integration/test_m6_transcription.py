@@ -189,8 +189,11 @@ async def test_owned_verified_image_creates_durable_version_and_exact_confirmati
     )
     state = await client.get(f"/api/v1/attempts/{attempt_id}/transcription")
     evaluation = await client.post(
-        f"/api/v1/attempts/{attempt_id}/mock-evaluation",
-        json={"confirmedTranscriptVersionId": corrected.json()["id"]},
+        f"/api/v1/attempts/{attempt_id}/evaluation",
+        json={
+            "confirmedTranscriptVersionId": corrected.json()["id"],
+            "idempotencyKey": str(uuid.uuid4()),
+        },
     )
 
     assert confirmed.status_code == 200
@@ -201,7 +204,7 @@ async def test_owned_verified_image_creates_durable_version_and_exact_confirmati
     assert state.json()["status"] == "ready"
     assert state.json()["confirmation"]["transcriptVersionId"] == corrected.json()["id"]
     assert evaluation.status_code == 200
-    assert evaluation.json()["metadata"]["provider"] == "application-owned-synthetic-mock"
+    assert evaluation.json()["run"]["provider"] == "application-owned-deterministic-fake"
 
     async with session_factory() as database:
         assert await database.scalar(select(func.count()).select_from(AttemptAsset)) == 1

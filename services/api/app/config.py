@@ -11,6 +11,11 @@ APPROVED_TRANSCRIPTION_MODELS = {
     "anthropic": frozenset({"claude-sonnet-5"}),
 }
 
+APPROVED_EVALUATION_MODELS = {
+    "fake": frozenset({"m7-evaluation-fixture-v1"}),
+    "gemini": frozenset({"gemini-3.5-flash-lite", "gemini-3.5-flash"}),
+}
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -39,6 +44,9 @@ class Settings(BaseSettings):
     transcription_provider: Literal["fake", "gemini", "openai", "anthropic"] = "fake"
     transcription_model_snapshot: str = "m6-transcription-fixture-v1"
     transcription_timeout_seconds: int = Field(default=60, ge=5, le=180)
+    evaluation_provider: Literal["fake", "gemini"] = "fake"
+    evaluation_model_snapshot: str = "m7-evaluation-fixture-v1"
+    evaluation_timeout_seconds: int = Field(default=60, ge=5, le=180)
     gemini_api_key: SecretStr | None = None
     openai_api_key: SecretStr | None = None
     anthropic_api_key: SecretStr | None = None
@@ -50,6 +58,11 @@ class Settings(BaseSettings):
             not in APPROVED_TRANSCRIPTION_MODELS[self.transcription_provider]
         ):
             raise ValueError("Transcription requires the exact model approved for its provider")
+        if (
+            self.evaluation_model_snapshot
+            not in APPROVED_EVALUATION_MODELS[self.evaluation_provider]
+        ):
+            raise ValueError("Evaluation requires the exact model approved for its provider")
         selected_keys = {
             "gemini": self.gemini_api_key,
             "openai": self.openai_api_key,
@@ -59,6 +72,10 @@ class Settings(BaseSettings):
             selected_key = selected_keys[self.transcription_provider]
             if selected_key is None or not selected_key.get_secret_value().strip():
                 raise ValueError("The selected transcription provider requires a server API key")
+        if self.evaluation_provider == "gemini" and (
+            self.gemini_api_key is None or not self.gemini_api_key.get_secret_value().strip()
+        ):
+            raise ValueError("The selected evaluation provider requires a server API key")
         if self.environment == "production":
             if self.development_invite_code.get_secret_value() == "MATH-COACH-LOCAL":
                 raise ValueError("Production requires a non-default invite bootstrap path")
@@ -68,6 +85,8 @@ class Settings(BaseSettings):
                 raise ValueError("Production requires secure session cookies")
             if self.transcription_provider == "fake":
                 raise ValueError("Production requires an explicitly configured real provider")
+            if self.evaluation_provider == "fake":
+                raise ValueError("Production requires an explicitly configured evaluation provider")
         return self
 
 
