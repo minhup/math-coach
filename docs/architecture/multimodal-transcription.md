@@ -1,8 +1,9 @@
 # Multimodal transcription architecture
 
 Milestone 6 replaces the Milestone 5 in-memory mock transcript with an authenticated, durable,
-provider-shaped transcription path. It does not add production grading. The existing evaluation,
-hint, retry, and concept flow remains visibly deterministic and synthetic.
+provider-shaped transcription path. It does not itself grade work. Milestone 7 consumes only the
+exact durable confirmation through its separate evaluation adapter; transcription remains a flat
+document boundary and never identifies reasoning steps.
 
 ## Ownership and request flow
 
@@ -123,12 +124,13 @@ GET  /api/v1/attempts/{attempt_id}/transcription
 POST /api/v1/attempts/{attempt_id}/transcripts
 POST /api/v1/attempts/{attempt_id}/confirm-transcript
 POST /api/v1/uploads/{upload_id}/download-url
-POST /api/v1/attempts/{attempt_id}/mock-evaluation
+POST /api/v1/attempts/{attempt_id}/evaluation
 ```
 
-The last endpoint now accepts only `confirmedTranscriptVersionId`; the backend loads the exact
-confirmed durable version. It remains a deterministic synthetic M5 evaluator and never becomes
-production grading merely because its input came from a real transcription adapter.
+The last endpoint belongs to M7 and accepts only `confirmedTranscriptVersionId` plus an idempotency
+UUID; the backend reloads and hashes the exact durable version. Its adapter, prompt, run metadata,
+and schemas remain separate from transcription. See the
+[evaluation architecture](evaluation-scoring-and-progressive-hints.md).
 
 ## Idempotency, concurrency, and failure states
 

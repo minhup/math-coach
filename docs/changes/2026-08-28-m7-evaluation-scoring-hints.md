@@ -137,7 +137,7 @@ owned upload
   -> one durable curated hint release per request
 ```
 
-`POST /evaluate` accepts only the exact confirmed transcript version ID plus an idempotency UUID.
+`POST /evaluation` accepts only the exact confirmed transcript version ID plus an idempotency UUID.
 The server reloads the immutable confirmation and document, verifies all three stored/canonical
 hashes, and loads the exact attempt problem version. The browser never sends reasoning steps,
 reference solutions, rubric awards, provider/model/prompt/schema selection, score, or hint level.
@@ -146,7 +146,7 @@ reference solutions, rubric awards, provider/model/prompt/schema selection, scor
 
 Provider input is an immutable application-owned value containing the stored typed problem
 statement, exact confirmed flat transcript, all expert-verified non-exhaustive reference examples,
-ordered rubric items and maxima, method labels, linked skills, and already released hint levels.
+and ordered rubric items with codes, maxima, descriptions, method labels, and linked skills.
 
 Provider output is a strict discriminated union with `extra="forbid"`:
 
@@ -163,7 +163,7 @@ and only once. Correct, uncertain, and not-assessable steps have no error relati
 incorrect step is classified root or dependent; roots have no dependency, and dependent errors
 must reach an earlier root through an acyclic dependency graph.
 
-Provider rubric awards name stored rubric codes and supporting provider step keys. Application code
+Provider rubric awards name stored rubric codes and concise explanations. Application code
 requires every stored rubric exactly once, checks `0 <= award <= stored maximum`, maps it to the
 immutable rubric item/skill IDs, and calculates score and maximum itself with Decimal arithmetic.
 The model never supplies the final total or a maximum. Application-generated UUID step IDs replace
@@ -176,10 +176,10 @@ stored, or exposed.
 
 The application response is another strict union:
 
-- ready: evaluation/run identity, confirmed version/hash, decimal score/max, ordered typed steps,
+- ready: evaluation/run identity, confirmed version, decimal score/max, ordered typed steps,
   typed rubric breakdown, typed overall feedback, non-exhaustive-reference literal, and next action;
-- uncertain: evaluation/run identity, confirmed version/hash, typed uncertainty explanation,
-  non-exhaustive-reference literal, and `manual_review`, with score/steps/rubric absent.
+- uncertain: evaluation/run identity, confirmed version, typed uncertainty explanation and
+  `manual_review`, with score/steps/rubric absent.
 
 ### Provider boundary and repair policy
 
@@ -205,7 +205,7 @@ permanent. No terminal failure persists or returns a score, steps, evaluation, o
 
 ### Idempotency and concurrency
 
-`POST /evaluate` uses a globally unique idempotency UUID and an application fingerprint over attempt,
+`POST /evaluation` uses a globally unique idempotency UUID and an application fingerprint over attempt,
 exact confirmation/hash, provider/model, prompt hash, and schema. Repeating the same key returns the
 same terminal result or in-progress conflict. A new key replays a completed success/uncertainty/
 permanent/invalid-schema result for the same fingerprint without another provider call. A new key
@@ -262,19 +262,20 @@ Owned files are recorded before shared-contract edits.
   constraints, indexes, and immutable/status triggers.
 - `services/api/app/evaluation/` — strict schemas, models, provider protocol, fake, Gemini adapter,
   prompt/schema guidance, evaluation service, and hint service.
-- `services/api/app/evaluation/prompts/m7-structured-evaluation-v1.txt` — reviewed fixed prompt.
+- `services/api/app/evaluation/prompts/m7-evaluation-v1.txt` — reviewed fixed prompt.
 - `services/api/tests/fixtures/evaluation/recorded-provider-shapes.json` — hand-authored synthetic
   envelope shapes with no real provider data.
 - `services/api/tests/unit/test_evaluation_schemas.py`, `test_evaluation_provider.py`,
-  `test_evaluation_adapter.py`, and `test_evaluation_gold.py` — strict, retry, adapter, fake/gold
+  `test_evaluation_adapters.py`, `test_evaluation_geometry_hints.py`, and
+  `test_evaluation_gold.py` — strict, retry, adapter, geometry, and fake/gold
   coverage.
 - `services/api/tests/integration/test_m7_evaluation.py` — auth, confirmation, idempotency,
   persistence, scoring, hints, geometry, and migration coverage.
 - `apps/student-web/lib/evaluation-api.ts` and test — generated types plus strict runtime guards.
 - `evals/grading/m7-gold-corpus.json` — original synthetic confirmed-transcript evaluation cases.
-- `services/api/app/scripts/run_evaluation_gold.py` — deterministic, no-network gold runner.
-- `docs/architecture/evaluation-scoring-and-hints.md` — permanent final architecture.
-- `docs/evaluation/m7-evaluation-gold-report.md` — measured deterministic corpus results without a
+- `services/api/app/scripts/evaluate_gold_corpus.py` — deterministic, no-network gold runner.
+- `docs/architecture/evaluation-scoring-and-progressive-hints.md` — permanent final architecture.
+- `docs/evaluation/m7-gold-evaluation-report.md` — measured deterministic corpus results without a
   release threshold.
 - `docs/evaluation/m7-evaluation-device-report.md` — five-project automated/manual evidence.
 
@@ -286,10 +287,10 @@ Owned files are recorded before shared-contract edits.
 - `services/api/app/config.py` — finite evaluation provider/model settings and production safety.
 - `services/api/app/api.py` — replace mock evaluation, add evaluation state, and change next-hint
   request seam.
-- `services/api/migrations/env.py` and integration truncation fixture — M7 model registration and
-  test isolation.
-- `services/api/app/static_journey/schemas.py`, `mocks.py`, and `service.py` — remove obsolete mock
-  evaluation while retaining plan/concept behavior; hint ownership moves to M7.
+- `services/api/migrations/env.py` and the migration trigger-count regression — M7 model
+  registration and schema accounting.
+- `services/api/app/static_journey/schemas.py` and `service.py` — remove obsolete mock evaluation
+  while retaining plan/concept behavior; hint ownership moves to M7.
 - `services/api/tests/integration/test_m5_static_journey.py` and M5 unit tests — preserve plan/retry/
   concept regressions through M7 production-shaped fake.
 - `packages/api-client/openapi.json` and `packages/api-client/src/schema.d.ts` — generated only.
@@ -305,8 +306,9 @@ Owned files are recorded before shared-contract edits.
 
 ### Delete
 
-- None planned. Obsolete M5 mock symbols/routes will be removed from their files, not by deleting
-  historical documentation or tests wholesale.
+- `services/api/app/static_journey/mocks.py` and
+  `services/api/tests/unit/test_static_journey_mocks.py` — obsolete M5 mock-evaluation boundary and
+  its superseded boundary-only test. Historical documentation remains intact.
 
 No dependency or content-package change is planned. Existing immutable rubric/reference/hint/scene
 records are sufficient.
@@ -314,7 +316,7 @@ records are sufficient.
 ## API and schema changes
 
 - Replace `POST /api/v1/attempts/{attempt_id}/mock-evaluation` with
-  `POST /api/v1/attempts/{attempt_id}/evaluate`.
+  `POST /api/v1/attempts/{attempt_id}/evaluation`.
 - Evaluation request: strict `{confirmedTranscriptVersionId: UUID, idempotencyKey: UUID}`.
 - Evaluation response: strict ready/uncertain discriminated union described in Design.
 - Add `GET /api/v1/attempts/{attempt_id}/evaluation` returning not-started, processing, ready,
@@ -336,9 +338,10 @@ Migration `20260828_0004` adds only M7 tables:
   prompt/schema/pricing identity; unique idempotency key; request fingerprint; bounded state,
   schema-attempt, latency/token/cost/error metadata; processing partial unique index; terminal
   transition trigger.
-- `attempt_steps`: immutable run/attempt/confirmed-version, contiguous position, validated transcript
-  block IDs JSON, typed summary JSON, and unique run/position.
-- `evaluations`: immutable one-to-one run, attempt, confirmed-version, ready/uncertain outcome,
+- `attempt_steps`: immutable run-bound contiguous position, validated transcript block IDs JSON,
+  typed summary/feedback JSON, judgments/dependencies, and unique run/position. Attempt and exact
+  confirmed-version identity remain normalized on the referenced run.
+- `evaluations`: immutable one-to-one run, ready/uncertain outcome,
   nullable score/max constrained together, complete validated application result JSON, and timestamp.
 - `hint_events`: immutable attempt/evaluation/hint identity, unique idempotency key, unique
   attempt/level, level 1–5 constraint, and timestamp.
@@ -413,7 +416,8 @@ does not invent a deletion period.
   contradictory/unreadable work routes to score-free uncertainty.
 - Server-owned ordered hints 1–5, duplicate request replay, exhausted ladder, ready/uncertain
   evaluation prerequisite, and no browser-selected level.
-- Valid geometry hint actions persist/reload; corrupted unknown action is rejected without hint event.
+- Valid geometry hint actions persist/reload; focused action validation rejects unknown curated IDs,
+  invalid animation targets, non-selectable choices, and invalid correct/allowed subsets.
 - Upgrade/downgrade/re-upgrade and existing M6 row compatibility.
 
 ### API/generated contract
@@ -521,8 +525,8 @@ Commits may be split further to keep them coherent and testable; they will not b
 
 ## Conflict coordination
 
-Owned shared files are the migration head, Alembic model imports, `config.py`, `api.py`, M5 static
-journey schemas/mock/service, integration truncation fixture, generated API artifacts, root
+Owned shared files are the migration head, Alembic model imports, `config.py`, `api.py`, the M5
+static-journey schemas/service and retired mock boundary, migration regressions, generated API artifacts, root
 Makefile/package/README, static journey API/state/component/CSS, foundation E2E, MVP and permanent
 architecture docs. The new evaluation package, tests, fixtures, eval corpus, and M7 documents are
 exclusive to this branch.
@@ -563,16 +567,21 @@ checks.
 - [x] Repository inspected
 - [x] Plan reviewed and authorized by the project owner
 - [x] Branch created from current main
-- [ ] Tests written or updated
-- [ ] Implementation complete
-- [ ] Documentation updated
-- [ ] Relevant checks pass
+- [x] Tests written or updated
+- [x] Implementation complete
+- [x] Documentation updated
+- [x] Relevant checks pass
 - [ ] Diff reviewed
 - [ ] Branch rebased on current main
 - [ ] Conflict resolution re-tested
 - [ ] Handoff summary written
 
 ## Decisions
+
+- The M5 mock-evaluation endpoint, boundary module, schemas, and boundary-only unit test are removed
+  because M7 replaces that public/product seam with the durable strict evaluation adapter. Keeping
+  the unreachable mock would create a second incompatible grading contract; its obsolete behavior
+  is covered by the new evaluation provider, schema, integration, frontend, and gold tests.
 
 - 2026-08-28: The required completed M6 commit is the current published `origin/main` tip, so M7 may
   proceed.
@@ -591,6 +600,10 @@ checks.
 - 2026-08-28: Runtime hints select reviewed immutable content; M7 does not ask the provider to
   generate a hint.
 - 2026-08-28: No numeric release threshold or paid provider benchmark is authorized.
+- 2026-08-28: Hint responses include both durable event and evaluation IDs so a browser cannot
+  mistake a released level for an unbound transient hint.
+- 2026-08-28: Provider-visible prose rejects Markdown constructs, HTML, common URL forms, and
+  executable URI schemes before typed `TextBlock` conversion.
 
 ## Discoveries
 
@@ -604,6 +617,8 @@ checks.
   rather than be relabeled.
 - The current M6 browser journey already supplies the exact confirmed version ID needed by M7 and
   has explicit generic failure variants that can be extended without altering the editor.
+- Hint events already normalize the evaluation relationship, so attempt/confirmation identity does
+  not need to be duplicated in step/evaluation rows; every read follows the immutable run.
 
 ## Verification evidence
 
@@ -612,13 +627,32 @@ checks.
   `e3e6d13f9913d94b851c8f5b149eaf8482b65173`.
 - `git merge-base --is-ancestor e3e6d13f9913d94b851c8f5b149eaf8482b65173 origin/main` — exit 0.
 - `git worktree add -b feat/m7-evaluation-scoring-hints
-  /home/minh/dev/math-coach-m7-evaluation origin/main` — succeeded at the M6 commit.
+/home/minh/dev/math-coach-m7-evaluation origin/main` — succeeded at the M6 commit.
 - Required documentation, applicable instructions, authentication/profile/target/content/attempt/
   upload/transcription/mock-evaluation/hint/geometry/provider/API/database/migration/frontend/
   generated-contract/package/Playwright source and relevant tests were read before this file was
   created.
 - `git status --short` before this ChangePlan — empty.
-- All further commands and exact results will be appended; no check result is claimed yet.
+- `make format-check` — passed; Prettier and Ruff reported every configured file formatted.
+- `make lint` — passed; ESLint and Ruff reported no issues.
+- `make typecheck` — passed; both TypeScript workspaces passed and mypy reported no issues in 58
+  backend source files.
+- `make api-contract-check` — passed after generating OpenAPI and TypeScript declarations.
+- Focused provider/schema/geometry/gold backend tests — passed before the final aggregate run.
+- Focused `services/api/tests/integration/test_m7_evaluation.py` — 13 passed, including auth,
+  ownership, exact confirmation, idempotency, concurrency, safe terminal failures, scoring,
+  uncertainty, hints, and populated downgrade behavior.
+- `make evaluation-gold` — six of six original synthetic fixtures matched; every case used one
+  schema attempt, zero tokens, and `0.000000` USD; release threshold remained null.
+- `VISUAL_QA=1 make test-e2e` — production build passed and all 15 cases passed across the five
+  configured projects in 22.5 seconds. Ten M7 screenshots were inspected at original resolution;
+  exact hashes are in the device report.
+- `make check` before rebase — passed in full: formatting; ESLint/Ruff; TypeScript/mypy; generated
+  API drift; two content packages; six-of-six gold fixtures; production build; 153 frontend unit
+  tests; 131 backend non-integration tests; two base-to-head migration cycles; 52 backend integration
+  tests; and 15 Playwright cases across all five projects.
+- No provider key was read, no live or paid provider call was made, and every fixture was synthetic
+  and non-personal.
 
 ## Result
 

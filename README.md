@@ -1,6 +1,6 @@
 # Math Coach
 
-Math Coach is an interaction-first MVP for helping students move from a photographed paper solution to a confirmed transcript and useful mathematical feedback. Milestones 1 through 6 supply the internal engineering foundation, invite login, responsive phone/tablet shell, verified synthetic-image upload, multi-exam study-profile contracts, strictly validated versioned synthetic content, controlled mathematical rendering, the visual-correction editor, the curated interactive geometry engine, a complete deterministic student journey, and server-owned multimodal transcription. Production grading, learner state, and adaptive coaching arrive in later milestones.
+Math Coach is an interaction-first MVP for helping students move from a photographed paper solution to a confirmed transcript and useful mathematical feedback. Milestones 1 through 7 supply the internal engineering foundation, invite login, responsive phone/tablet shell, verified synthetic-image upload, multi-exam study-profile contracts, strictly validated versioned synthetic content, controlled mathematical rendering, the visual-correction editor, the curated interactive geometry engine, server-owned multimodal transcription, post-confirmation evaluation, rubric scoring, uncertainty, and progressive hints. Learner state and adaptive coaching arrive in later milestones.
 
 Use synthetic or non-personal images only. The local credentials are development defaults, not production configuration.
 
@@ -29,9 +29,9 @@ static image on invalid data or renderer failure. See
 [the interactive geometry architecture](docs/architecture/interactive-geometry-engine.md) and
 [the five-project geometry report](docs/evaluation/m4-geometry-device-report.md).
 
-Milestone 5 connects invitation sign-in, one profile with multiple active examination targets, a
-deterministic combined plan, immutable problem attempts, geometry, synthetic upload, strict mock
-transcription, visual correction, explicit confirmation, strict mock evaluation, progressive hints,
+Milestone 5 originally connected invitation sign-in, one profile with multiple active examination
+targets, a deterministic combined plan, immutable problem attempts, geometry, synthetic upload,
+mock transcription/evaluation, visual correction, confirmation, progressive hints,
 retry, concept review, and deterministic summary. Every plan item names its exact supporting target
 records. The application owns the transition and summary state; the mocks supply only validated
 synthetic transcript/evaluation payloads. See the
@@ -43,10 +43,19 @@ strict Pydantic schemas, persists immutable run/transcript/confirmation records,
 continuous text/math correction document with warnings and source regions. Gemini
 `gemini-3.5-flash-lite` is the first lower-cost real configuration and `gemini-3.5-flash` remains an
 exact higher-cost option; exact OpenAI and Anthropic alternatives plus a deterministic fake use the
-same server boundary. The existing evaluation remains clearly mocked.
+same server boundary. Milestone 7 consumes only its exact durable confirmation.
 See the [multimodal transcription architecture](docs/architecture/multimodal-transcription.md),
 [deferred benchmark report](docs/evaluation/m6-transcription-benchmark-report.md), and
 [five-project device report](docs/evaluation/m6-transcription-device-report.md).
+
+Milestone 7 derives reasoning steps only after confirmation through a separate strict evaluation
+adapter. It accepts non-exhaustive alternative solutions, validates root/dependent error graphs,
+computes exact rubric totals in application code, persists safe run/result metadata, exposes explicit
+uncertainty without fabricated scoring, and releases one durable curated hint level at a time. The
+browser renders only validated `ContentBlock[]` and finite existing-ID geometry actions. See the
+[evaluation architecture](docs/architecture/evaluation-scoring-and-progressive-hints.md),
+[synthetic gold report](docs/evaluation/m7-gold-evaluation-report.md), and
+[five-project device report](docs/evaluation/m7-evaluation-device-report.md).
 
 ## Local setup
 
@@ -72,12 +81,15 @@ path. MinIO's local console is at
 `http://localhost:9001`. Stop infrastructure without deleting its volumes with
 `make services-down`.
 
-Local development and every automated test default to the deterministic M6 fake. To use Gemini later,
+Local development and every automated test default to the deterministic M6 transcription and M7
+evaluation fakes. To use Gemini later,
 create an untracked root `.env` (or use a deployment secret manager) with:
 
 ```dotenv
 MATH_COACH_TRANSCRIPTION_PROVIDER=gemini
 MATH_COACH_TRANSCRIPTION_MODEL_SNAPSHOT=gemini-3.5-flash-lite
+MATH_COACH_EVALUATION_PROVIDER=gemini
+MATH_COACH_EVALUATION_MODEL_SNAPSHOT=gemini-3.5-flash-lite
 MATH_COACH_GEMINI_API_KEY=replace-with-your-server-secret
 ```
 
@@ -102,6 +114,7 @@ make test-integration      test migrations, PostgreSQL, auth, and real MinIO upl
 make test-e2e              run the browser journey in containerized phone/tablet emulations
 make content-validate      validate packages and generated content schema without importing
 make transcription-benchmark  run the separately approved, paid synthetic benchmark with explicit arguments
+make evaluation-gold         run the local no-network M7 synthetic grading regression
 make test                  run unit, integration, and browser tests
 make check                 run every non-destructive review check
 ```
@@ -147,6 +160,19 @@ uv run --project services/api pytest services/api/tests/unit/test_static_journey
 The M5 E2E flow runs the complete invite-to-summary journey in all five configured projects. Each
 project uses a separate synthetic development invite identity so its profile and target records can
 run in parallel safely.
+
+Focused Milestone 7 checks can be run with:
+
+```bash
+make evaluation-gold
+cd services/api
+uv run pytest tests/unit/test_evaluation_*.py
+cd ../..
+./scripts/run_e2e.sh tests/e2e/foundation.spec.ts
+```
+
+The M7 browser flow runs post-confirmation reasoning steps, root/dependent feedback, rubric scoring,
+and server-owned geometry-assisted hints in all five configured projects.
 
 ## Repository map
 

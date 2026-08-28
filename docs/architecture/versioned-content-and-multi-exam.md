@@ -176,7 +176,7 @@ POST           /api/v1/attempts/{attempt_id}/transcribe
 GET            /api/v1/attempts/{attempt_id}/transcription
 POST           /api/v1/attempts/{attempt_id}/transcripts
 POST           /api/v1/attempts/{attempt_id}/confirm-transcript
-POST           /api/v1/attempts/{attempt_id}/mock-evaluation
+POST|GET       /api/v1/attempts/{attempt_id}/evaluation
 POST           /api/v1/attempts/{attempt_id}/hints/next
 GET            /api/v1/concept-versions/{concept_version_id}
 ```
@@ -203,7 +203,11 @@ Milestone 9 planner, or predict an examination outcome. The complete boundary is
 Milestone 6 attempt assets, model runs, transcript versions, and confirmations always join through
 the attempt and therefore its exact immutable problem version and owning study profile. They contain
 no exam-target foreign key or singular exam projection. Transcription does not change the deterministic
-plan or target relevance. See the [multimodal transcription architecture](multimodal-transcription.md).
+plan or shared skill model. Milestone 7 evaluation runs, post-confirmation steps, results, and hint
+events follow the same attempt-owned relationship. Rubric skill IDs remain immutable content
+references and do not create learner evidence or per-exam duplication.
+See the [multimodal transcription architecture](multimodal-transcription.md) and
+[evaluation architecture](evaluation-scoring-and-progressive-hints.md).
 
 ## Migration and rollback
 

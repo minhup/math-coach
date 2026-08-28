@@ -115,6 +115,11 @@ stores the independent snapshot, and is the only phase from which the determinis
 request is permitted. Editing after confirmation and evaluation before confirmation are rejected
 instead of silently changing or skipping state.
 
+Milestone 7 replaces that M5 mock request with the durable authenticated evaluation endpoint. It
+reloads the exact immutable confirmation and flat transcript before deriving application-facing
+reasoning steps. Those steps are result-only records and are never inserted into this correction
+editor or treated as canonical transcript structure.
+
 ## Authenticated correction route and responsive layout
 
 `/internal/math-correction` calls the existing authenticated-session endpoint before rendering its

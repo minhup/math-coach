@@ -1195,9 +1195,10 @@ POST   /attempts/{attempt_id}/assets/presign
 POST   /attempts/{attempt_id}/transcribe
 POST   /attempts/{attempt_id}/transcripts
 POST   /attempts/{attempt_id}/confirm-transcript
-POST   /attempts/{attempt_id}/evaluate
+POST   /attempts/{attempt_id}/evaluation
+GET    /attempts/{attempt_id}/evaluation
 POST   /attempts/{attempt_id}/retry
-POST   /attempts/{attempt_id}/hints
+POST   /attempts/{attempt_id}/hints/next
 
 GET    /concepts/{concept_id}
 GET    /progress/shared
@@ -1401,6 +1402,20 @@ geometry-assisted hints
 uncertainty route
 gold evaluation report
 ```
+
+Implemented on 2026-08-28 as an authenticated post-confirmation evaluation pipeline. The exact M6
+flat confirmed transcript remains authoritative; reasoning steps are derived only after confirmation.
+A separate strict evaluation adapter validates ready/uncertain structured output, repairs one schema
+failure at most, accepts valid alternative methods, classifies root/dependent errors, and lets the
+application compute exact rubric totals. Durable run/result/step/hint-event records preserve provider,
+exact model snapshot, prompt/schema/pricing versions, latency, token use, cost, retry count, and safe
+terminal state. The browser validates generated contracts again and renders score, breakdown,
+typed feedback, uncertainty, and application-owned one-level-at-a-time curated hints on all five
+configured projects. The synthetic gold corpus records measured behavior without claiming a release
+threshold or production grading quality. See the
+[evaluation architecture](architecture/evaluation-scoring-and-progressive-hints.md),
+[gold report](evaluation/m7-gold-evaluation-report.md), and
+[device report](evaluation/m7-evaluation-device-report.md).
 
 The project owner must confirm numeric gates before an external pilot. Internal thresholds may evolve from measured benchmark and usability evidence; do not present provisional values as validated release claims.
 
