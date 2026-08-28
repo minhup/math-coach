@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0.0",
+  "provenance": {
+    "classification": "original_synthetic_non_personal",
+    "createdAt": "2026-08-28",
+    "personalData": false,
+    "realLearnerWork": false,
+    "providerResponse": false
+  },
+  "fixtures": [
+    {
+      "name": "correct-standard",
+      "category": "correct_standard_solution",
+      "marker": "correct-standard",
+      "expectedOutcome": "ready",
+      "expectedScore": "4.00",
+      "expectedJudgments": ["correct"],
+      "expectedErrorKinds": ["none"]
+    },
+    {
+      "name": "correct-alternative",
+      "category": "valid_alternative_solution",
+      "marker": "correct-alternative",
+      "expectedOutcome": "ready",
+      "expectedScore": "4.00",
+      "expectedJudgments": ["correct"],
+      "expectedErrorKinds": ["none"]
+    },
+    {
+      "name": "subtle-midpoint-error",
+      "category": "subtle_mathematical_error",
+      "marker": "subtle-error",
+      "expectedOutcome": "ready",
+      "expectedScore": "0.00",
+      "expectedJudgments": ["incorrect", "incorrect"],
+      "expectedErrorKinds": ["root", "dependent"]
+    },
+    {
+      "name": "incomplete-solution",
+      "category": "incomplete_solution",
+      "marker": "incomplete",
+      "expectedOutcome": "ready",
+      "expectedScore": "0.00",
+      "expectedJudgments": ["not_assessable"],
+      "expectedErrorKinds": ["none"]
+    },
+    {
+      "name": "contradictory-work",
+      "category": "contradictory_work",
+      "marker": "contradictory",
+      "expectedOutcome": "uncertain",
+      "expectedScore": null,
+      "expectedJudgments": [],
+      "expectedErrorKinds": []
+    },
+    {
+      "name": "unreadable-confirmed-work",
+      "category": "unreadable_work",
+      "marker": "unreadable",
+      "expectedOutcome": "uncertain",
+      "expectedScore": null,
+      "expectedJudgments": [],
+      "expectedErrorKinds": []
+    }
+  ]
+}
