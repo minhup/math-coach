@@ -6,8 +6,9 @@
 loaded, and the measured-result fields below remain intentionally empty. This report does not approve
 any provider for real learner data or production use.
 
-The selected first integration is Google Gemini `gemini-3.5-flash`. Server-configured alternatives
-are OpenAI `gpt-5.4-2026-03-05` and Anthropic `claude-sonnet-5`. All implementation contract tests use
+The selected first lower-cost integration is Google Gemini `gemini-3.5-flash-lite`, with
+`gemini-3.5-flash` retained as an exact server-configured option. Other provider alternatives are
+OpenAI `gpt-5.4-2026-03-05` and Anthropic `claude-sonnet-5`. All implementation contract tests use
 hand-authored synthetic response envelopes through `httpx.MockTransport`, never recorded real
 provider responses.
 
@@ -15,7 +16,7 @@ provider responses.
 
 | Field                         | Value                                                              |
 | ----------------------------- | ------------------------------------------------------------------ |
-| provider/model                | `google-gemini` / `gemini-3.5-flash`                               |
+| provider/model                | `google-gemini` / `gemini-3.5-flash-lite`                          |
 | prompt version                | `m6-faithful-transcription-v1`                                     |
 | prompt SHA-256                | `d487b2f47b769380002a80fa31316bf8e238b3db15f34a7cff0c560473e0ad89` |
 | provider schema               | `m6-provider-transcript-v1`                                        |
@@ -31,9 +32,10 @@ The originally proposed 10-fixture, at-most-20-call Gemini run was explicitly de
 manifest contains 11 fixtures because warnings/source regions have a dedicated visual fixture. Its
 worst-case adapter call count is 22: one initial call plus at most one schema repair for each fixture.
 Using the documented planning assumption of at most 10,000 input tokens and the hard 3,000 output
-tokens per call, the conservative Gemini estimate is `$0.924000`; the deferred 20-call estimate is
-`$0.840000`. Image tokenization is provider-controlled, so these are budget estimates rather than a
-guaranteed invoice ceiling. Tax, region, service-tier, and future pricing changes are excluded.
+tokens per call, the conservative Flash-Lite estimate is `$0.231000`; its deferred 20-call estimate
+is `$0.210000`. The retained Flash option is `$0.924000` for 22 calls and `$0.840000` for 20 calls.
+Image tokenization is provider-controlled, so these are budget estimates rather than a guaranteed
+invoice ceiling. Tax, region, service-tier, and future pricing changes are excluded.
 
 ## Repository-owned synthetic fixtures
 
@@ -75,9 +77,9 @@ make transcription-benchmark BENCHMARK_ARGS='\
   --fixture-root tests/fixtures/transcription \
   --output ../../artifacts/m6-gemini-benchmark.json \
   --approved-provider google-gemini \
-  --approved-model gemini-3.5-flash \
+  --approved-model gemini-3.5-flash-lite \
   --approved-fixture-count 11 \
-  --approved-max-cost-usd 0.924000 \
+  --approved-max-cost-usd 0.231000 \
   --acknowledge-synthetic-only \
   --acknowledge-paid-network-calls'
 ```
@@ -88,11 +90,13 @@ network run. The output must then be reviewed and transcribed into this committe
 
 ## Provider data-handling facts
 
-- Google documents `gemini-3.5-flash` as accepting image input and supporting structured output, at
-  `$1.50` per million input tokens and `$9.00` per million output tokens. Paid-service prompts,
-  images, and responses are not used to improve Google products, but abuse-monitoring/stateful
-  retention conditions still exist; free/unpaid service handling differs. Sources:
-  [model](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash),
+- Google documents `gemini-3.5-flash-lite` as accepting image input and supporting structured output,
+  at `$0.30` per million input tokens and `$2.50` per million output tokens. The retained
+  `gemini-3.5-flash` option is `$1.50`/`$9.00`. Paid-service prompts, images, and responses are not
+  used to improve Google products, but abuse-monitoring/stateful retention conditions still exist;
+  free/unpaid service handling differs. Sources:
+  [Flash-Lite model](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite),
+  [Flash model](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash),
   [pricing](https://ai.google.dev/gemini-api/docs/pricing),
   [ZDR/data handling](https://ai.google.dev/gemini-api/docs/zdr), and
   [terms](https://ai.google.dev/gemini-api/terms).

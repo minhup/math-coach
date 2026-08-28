@@ -31,16 +31,19 @@ identity exactly matches the configured adapter.
 
 The owner-approved server choices are:
 
-| Setting     | Stored provider                        | Exact model                   | Pricing identity              |
-| ----------- | -------------------------------------- | ----------------------------- | ----------------------------- |
-| `gemini`    | `google-gemini`                        | `gemini-3.5-flash`            | `gemini-3.5-flash-2026-08-27` |
-| `openai`    | `openai`                               | `gpt-5.4-2026-03-05`          | `gpt-5.4-2026-08-27`          |
-| `anthropic` | `anthropic`                            | `claude-sonnet-5`             | `claude-sonnet-5-2026-08-27`  |
-| `fake`      | `application-owned-deterministic-fake` | `m6-transcription-fixture-v1` | `fake-zero-v1`                |
+| Setting     | Stored provider                        | Exact model                   | Pricing identity                   |
+| ----------- | -------------------------------------- | ----------------------------- | ---------------------------------- |
+| `gemini`    | `google-gemini`                        | `gemini-3.5-flash-lite`       | `gemini-3.5-flash-lite-2026-08-28` |
+| `gemini`    | `google-gemini`                        | `gemini-3.5-flash`            | `gemini-3.5-flash-2026-08-27`      |
+| `openai`    | `openai`                               | `gpt-5.4-2026-03-05`          | `gpt-5.4-2026-08-27`               |
+| `anthropic` | `anthropic`                            | `claude-sonnet-5`             | `claude-sonnet-5-2026-08-27`       |
+| `fake`      | `application-owned-deterministic-fake` | `m6-transcription-fixture-v1` | `fake-zero-v1`                     |
 
-Gemini is the first/default real integration; the deterministic fake remains the development/test
-default and traverses the same API, service, persistence, and frontend boundaries. Production startup
-rejects fake mode. Exact model validation rejects aliases or browser overrides.
+Flash-Lite is the first lower-cost Gemini configuration and Flash remains an exact server option.
+The deterministic fake remains the development/test default and traverses the same API, service,
+persistence, and frontend boundaries. Production startup rejects fake mode. Exact model validation
+rejects other Gemini IDs, aliases, or browser overrides. Self-hosted, DeepSeek, Qwen, and generalized
+model configuration are deferred to a later change.
 
 The adapters use direct `httpx==0.28.1` calls instead of provider SDKs. Every request caps visible
 output at 3,000 tokens and supplies the same strict JSON schema. OpenAI uses the Responses API with

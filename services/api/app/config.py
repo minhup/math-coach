@@ -4,6 +4,13 @@ from typing import Literal
 from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+APPROVED_TRANSCRIPTION_MODELS = {
+    "fake": frozenset({"m6-transcription-fixture-v1"}),
+    "gemini": frozenset({"gemini-3.5-flash-lite", "gemini-3.5-flash"}),
+    "openai": frozenset({"gpt-5.4-2026-03-05"}),
+    "anthropic": frozenset({"claude-sonnet-5"}),
+}
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -38,13 +45,10 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def reject_development_defaults_in_production(self) -> "Settings":
-        expected_models = {
-            "fake": "m6-transcription-fixture-v1",
-            "gemini": "gemini-3.5-flash",
-            "openai": "gpt-5.4-2026-03-05",
-            "anthropic": "claude-sonnet-5",
-        }
-        if self.transcription_model_snapshot != expected_models[self.transcription_provider]:
+        if (
+            self.transcription_model_snapshot
+            not in APPROVED_TRANSCRIPTION_MODELS[self.transcription_provider]
+        ):
             raise ValueError("Transcription requires the exact model approved for its provider")
         selected_keys = {
             "gemini": self.gemini_api_key,

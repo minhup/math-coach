@@ -83,6 +83,7 @@ def get_transcription_provider() -> StrictTranscriptionProvider:
         key = _required_key(settings.gemini_api_key)
         return GeminiTranscriptionProvider(
             api_key=key,
+            model_snapshot=settings.transcription_model_snapshot,
             timeout_seconds=settings.transcription_timeout_seconds,
         )
     if settings.transcription_provider == "openai":

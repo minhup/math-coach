@@ -41,8 +41,9 @@ synthetic transcript/evaluation payloads. See the
 Milestone 6 loads only an owned verified image, validates one complete provider response through
 strict Pydantic schemas, persists immutable run/transcript/confirmation records, and presents one
 continuous text/math correction document with warnings and source regions. Gemini
-`gemini-3.5-flash` is the first real adapter; exact OpenAI and Anthropic alternatives plus a
-deterministic fake use the same server boundary. The existing evaluation remains clearly mocked.
+`gemini-3.5-flash-lite` is the first lower-cost real configuration and `gemini-3.5-flash` remains an
+exact higher-cost option; exact OpenAI and Anthropic alternatives plus a deterministic fake use the
+same server boundary. The existing evaluation remains clearly mocked.
 See the [multimodal transcription architecture](docs/architecture/multimodal-transcription.md),
 [deferred benchmark report](docs/evaluation/m6-transcription-benchmark-report.md), and
 [five-project device report](docs/evaluation/m6-transcription-device-report.md).
@@ -76,16 +77,17 @@ create an untracked root `.env` (or use a deployment secret manager) with:
 
 ```dotenv
 MATH_COACH_TRANSCRIPTION_PROVIDER=gemini
-MATH_COACH_TRANSCRIPTION_MODEL_SNAPSHOT=gemini-3.5-flash
+MATH_COACH_TRANSCRIPTION_MODEL_SNAPSHOT=gemini-3.5-flash-lite
 MATH_COACH_GEMINI_API_KEY=replace-with-your-server-secret
 ```
 
 Never put the key in a `NEXT_PUBLIC_` variable, browser request, commit, screenshot, log, or chat
-message. Restart the API after changing server settings. The two optional exact alternatives use
-`openai` / `gpt-5.4-2026-03-05` / `MATH_COACH_OPENAI_API_KEY`, or `anthropic` /
-`claude-sonnet-5` / `MATH_COACH_ANTHROPIC_API_KEY`. Configuration availability does not approve real
-learner data; use only clearly synthetic/non-personal images until privacy and provider suitability
-are separately approved.
+message. Restart the API after changing server settings. To use the higher-cost Gemini option, change
+only the exact model to `gemini-3.5-flash`. The two optional provider alternatives use `openai` /
+`gpt-5.4-2026-03-05` / `MATH_COACH_OPENAI_API_KEY`, or `anthropic` / `claude-sonnet-5` /
+`MATH_COACH_ANTHROPIC_API_KEY`. Self-hosted, DeepSeek, Qwen, and arbitrary model IDs are not part of
+this M6 configuration. Configuration availability does not approve real learner data; use only
+clearly synthetic/non-personal images until privacy and provider suitability are separately approved.
 
 ## Root command contract
 

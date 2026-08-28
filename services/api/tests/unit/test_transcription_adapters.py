@@ -5,6 +5,7 @@ from pathlib import Path
 import httpx
 import pytest
 from app.config import Settings
+from app.transcription import service as transcription_service
 from app.transcription.anthropic_provider import AnthropicTranscriptionProvider
 from app.transcription.fake_provider import DeterministicFakeTranscriptionProvider
 from app.transcription.gemini_provider import GeminiTranscriptionProvider
@@ -38,7 +39,22 @@ def request() -> ProviderRequest:
 
 
 @pytest.mark.asyncio
-async def test_gemini_uses_exact_server_model_image_and_structured_schema() -> None:
+@pytest.mark.parametrize(
+    ("model_snapshot", "pricing_version", "expected_cost"),
+    [
+        (
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-flash-lite-2026-08-28",
+            "0.010500",
+        ),
+        ("gemini-3.5-flash", "gemini-3.5-flash-2026-08-27", "0.042000"),
+    ],
+)
+async def test_gemini_uses_selected_exact_server_model_image_and_structured_schema(
+    model_snapshot: str,
+    pricing_version: str,
+    expected_cost: str,
+) -> None:
     seen: list[httpx.Request] = []
 
     def handler(http_request: httpx.Request) -> httpx.Response:
@@ -46,13 +62,20 @@ async def test_gemini_uses_exact_server_model_image_and_structured_schema() -> N
         return httpx.Response(200, json=recorded_shapes()["providerEnvelopes"]["gemini"])
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
-        provider = GeminiTranscriptionProvider(api_key="server-secret", client=client)
+        provider = GeminiTranscriptionProvider(
+            api_key="server-secret",
+            model_snapshot=model_snapshot,
+            client=client,
+        )
         result = await provider.transcribe(request())
 
-    assert result.identity.model_snapshot == "gemini-3.5-flash"
+    assert result.identity.model_snapshot == model_snapshot
+    assert result.identity.pricing_version == pricing_version
+    assert str(provider.cost(input_tokens=10_000, output_tokens=3_000)) == expected_cost
     assert result.transcript is not None
     assert result.transcript.blocks[1].latex == "x=-2"
     assert len(seen) == 1
+    assert f"/models/{model_snapshot}:generateContent" in str(seen[0].url)
     assert seen[0].headers["x-goog-api-key"] == "server-secret"
     assert "server-secret" not in str(seen[0].url)
     body = json.loads(seen[0].content)
@@ -130,7 +153,11 @@ async def test_rate_limit_is_safe_retryable_and_is_not_automatically_retried() -
         return httpx.Response(429, json={"error": {"message": "raw provider secret detail"}})
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
-        provider = GeminiTranscriptionProvider(api_key="server-secret", client=client)
+        provider = GeminiTranscriptionProvider(
+            api_key="server-secret",
+            model_snapshot="gemini-3.5-flash-lite",
+            client=client,
+        )
         with pytest.raises(ProviderTransportError) as caught:
             await provider.transcribe(request())
 
@@ -146,6 +173,13 @@ def test_server_configuration_requires_exact_model_and_selected_secret() -> None
         gemini_api_key="secret",
     )
     assert gemini.transcription_model_snapshot == "gemini-3.5-flash"
+
+    flash_lite = Settings(
+        transcription_provider="gemini",
+        transcription_model_snapshot="gemini-3.5-flash-lite",
+        gemini_api_key="secret",
+    )
+    assert flash_lite.transcription_model_snapshot == "gemini-3.5-flash-lite"
 
     with pytest.raises(ValueError, match="exact model"):
         Settings(
@@ -164,3 +198,23 @@ def test_server_configuration_requires_exact_model_and_selected_secret() -> None
             transcription_model_snapshot="gemini-3.5-flash",
             gemini_api_key="   ",
         )
+
+
+def test_provider_factory_uses_server_selected_gemini_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    settings = Settings(
+        transcription_provider="gemini",
+        transcription_model_snapshot="gemini-3.5-flash-lite",
+        gemini_api_key="secret",
+    )
+    monkeypatch.setattr(transcription_service, "get_settings", lambda: settings)
+    transcription_service.get_transcription_provider.cache_clear()
+
+    try:
+        provider = transcription_service.get_transcription_provider()
+    finally:
+        transcription_service.get_transcription_provider.cache_clear()
+
+    assert provider.identity.model_snapshot == "gemini-3.5-flash-lite"
+    assert provider.identity.pricing_version == "gemini-3.5-flash-lite-2026-08-28"
