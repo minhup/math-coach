@@ -2,7 +2,7 @@
 
 ## Metadata
 
-- Status: complete; ready for owner review
+- Status: complete; owner-selected lower-cost Gemini model added and verified
 - Owner: project owner and Codex
 - Branch: `feat/m6-multimodal-transcription`
 - Base commit: `dbfd8162a27f2f63fecfcdbe63759d64eab56c24`
@@ -34,6 +34,14 @@ client dependency, but explicitly deferred the real benchmark. Therefore all thr
 implemented and contract-tested without network access; no key was loaded and no provider call was
 made.
 
+On 2026-08-28, after the first handoff, the owner requested that the Gemini adapter support both exact
+stable model IDs, with lower-cost `gemini-3.5-flash-lite` selected first for local testing and
+`gemini-3.5-flash` retained as a server-side option. Google currently documents Flash-Lite as
+multimodal with image input and structured outputs at `$0.30` per million input tokens and `$2.50`
+per million output tokens. A later request for self-hosted, DeepSeek, Qwen, or generic compatible
+models was explicitly deferred and is not part of this extension. The browser still must not choose
+or override the model, and the deferred benchmark remains unauthorized.
+
 ## Goal
 
 An invited learner can use the existing multi-target M5 plan, open an attempt pinned to its immutable
@@ -43,6 +51,13 @@ and MathLive, and explicitly confirm an exact durable transcript version and has
 provider and a deterministic fake share one narrow production-shaped adapter. Every run records
 validated provider/model/prompt/schema/latency/token/cost metadata, and the existing downstream
 evaluation remains conspicuously synthetic and unavailable until confirmation.
+
+For the 2026-08-28 extension, Gemini server configuration accepts exactly
+`gemini-3.5-flash-lite` or `gemini-3.5-flash`. The selected model drives the request URL, persisted
+model snapshot, application-owned pricing identity, cost calculation, and idempotency fingerprint.
+Other Gemini IDs and aliases remain rejected. Local `.env` documents Flash-Lite as the first real
+choice but remains in safe fake mode until the owner supplies the server secret; automated tests
+continue to use the deterministic fake by default.
 
 ## Non-goals
 
@@ -136,6 +151,13 @@ evaluation remains conspicuously synthetic and unavailable until confirmation.
   production dependency. Its wheel is 73,517 bytes and its installed distribution is 295,877 bytes;
   its direct dependencies are AnyIO, Certifi, HTTP Core, and IDNA. The inspected installed set is
   1,683,540 bytes, with some transitive packages already required by the existing runtime stack.
+- The completed M6 settings validator maps `gemini` to only `gemini-3.5-flash`, and
+  `GeminiTranscriptionProvider` hard-codes that model into its identity, pricing, and provider URL.
+  The public API contains no model selector, so broadening the exact server allowlist does not change
+  OpenAPI or frontend contracts.
+- The guarded benchmark calculates its ceiling from the adapter's configured application rates.
+  For 11 fixtures, at most 22 calls, 10,000 estimated input tokens per call, and 3,000 capped output
+  tokens per call, Flash-Lite's conservative estimate is `$0.231000`; no call is authorized.
 
 ## Design
 
@@ -197,6 +219,14 @@ The deterministic fake uses provider `application-owned-deterministic-fake`, mod
 `m6-transcription-fixture-v1`, the same prompt/schema identities, the same service and persistence
 path, and zero usage/cost. Test-only outcome selection is injected server-side in test setup and is
 not accepted from the browser.
+
+The Gemini adapter receives the validated server-configured exact model rather than choosing one
+internally. A finite application-owned map binds each allowed model to its exact request model,
+pricing version, and input/output rates. `gemini-3.5-flash-lite` uses `$0.30`/`$2.50` per million
+input/output tokens and is the documented local-testing choice; `gemini-3.5-flash` retains
+`$1.50`/`$9.00`. Unknown model IDs fail settings validation and adapter construction. This is one
+provider adapter with two reviewed configurations, not a browser-facing model switch or generalized
+model registry.
 
 ### Strict transcript schema
 
@@ -296,15 +326,17 @@ one schema repair per fixture), assumes at most 10,000 billed input tokens and c
 tokens per call, and performs no transport retry. The original 10-fixture/20-call planning estimates
 were:
 
-| Candidate                                                                                   | Published input/output price per 1M tokens | Estimated maximum |
-| ------------------------------------------------------------------------------------------- | ------------------------------------------ | ----------------: |
-| [OpenAI `gpt-5.4-2026-03-05`](https://developers.openai.com/api/docs/models/gpt-5.4)        | $2.50 / $15.00                             |             $1.40 |
-| [Anthropic `claude-sonnet-5`](https://platform.claude.com/docs/en/models/sonnet-5/overview) | $2.00 / $10.00                             |             $1.00 |
-| [Google `gemini-3.5-flash`](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash)  | $1.50 / $9.00                              |             $0.84 |
+| Candidate                                                                                            | Published input/output price per 1M tokens | Estimated maximum |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------ | ----------------: |
+| [OpenAI `gpt-5.4-2026-03-05`](https://developers.openai.com/api/docs/models/gpt-5.4)                 | $2.50 / $15.00                             |             $1.40 |
+| [Anthropic `claude-sonnet-5`](https://platform.claude.com/docs/en/models/sonnet-5/overview)          | $2.00 / $10.00                             |             $1.00 |
+| [Google `gemini-3.5-flash-lite`](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite) | $0.30 / $2.50                              |             $0.21 |
+| [Google `gemini-3.5-flash`](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash)           | $1.50 / $9.00                              |             $0.84 |
 
-The 11-fixture Gemini estimate is `$0.924000`. Actual usage and cost will be recorded from validated
-usage metadata and application pricing when separately approved; these are conservative planning
-estimates, not guaranteed invoices, release gates, or provider approval.
+The 11-fixture estimates are `$0.231000` for Flash-Lite and `$0.924000` for Flash. Actual usage and
+cost will be recorded from validated usage metadata and application pricing when separately approved;
+these are conservative planning estimates, not guaranteed invoices, release gates, or provider
+approval.
 
 ## Multi-exam impact
 
@@ -398,6 +430,15 @@ expansion or contract change must be recorded here before editing.
   without claiming production approval.
 - This ChangePlan — progress, decisions, verification, hashes, costs, and result.
 
+The 2026-08-28 Flash-Lite extension owns only `.env.example`, `README.md`,
+`services/api/app/config.py`, `services/api/app/transcription/gemini_provider.py`,
+`services/api/app/transcription/service.py`, `services/api/tests/unit/test_transcription_adapters.py`,
+`services/api/tests/unit/test_transcription_benchmark.py`, the M6 architecture and benchmark report,
+`tests/e2e/foundation.spec.ts`, and this ChangePlan. The E2E file receives only an exact persisted
+target-list wait required by final verification. The ignored local `.env` is updated without reading
+or printing its secret. No generated contract, migration, frontend product code, package, prompt,
+fixture, or dependency file is owned by this extension.
+
 ### Delete
 
 - None proposed. The public `mock-transcription` route will be removed only after the production-shaped
@@ -424,6 +465,8 @@ expansion or contract change must be recorded here before editing.
 - OpenAPI is authoritative; TypeScript declarations are regenerated. Handwritten browser guards
   validate all nested runtime data before any transcript/warning/region is rendered.
 - Stable errors use the existing safe envelope and the finite codes listed in Design.
+- The Flash-Lite extension changes no request or response schema. Gemini model selection remains a
+  server setting, and the browser still cannot submit a provider or model.
 
 ## Database and migration
 
@@ -472,6 +515,10 @@ populated downgrade, and re-upgrade tests will prove behavior.
 Provider-run, transcript, and upload retention is not yet approved. M6 will not invent a deletion
 window. Records and object references remain until the privacy action list receives an owner-approved
 policy; the benchmark uses repository-owned synthetic data only.
+
+The Flash-Lite extension requires no migration, column, backfill, index, retention, ownership, or
+rollback change. Existing model-run rows preserve the exact model and pricing identity that produced
+them; new rows use whichever of the two exact Gemini models the server selected.
 
 ## Security and privacy
 
@@ -522,6 +569,9 @@ policy; the benchmark uses repository-owned synthetic data only.
 - Configured provider/model/prompt/schema/pricing identity overrides any raw provider claim.
 - Deterministic fake and recorded approved-provider response shapes return the same application type.
 - Idempotency/concurrency decision functions and application-owned cost calculation.
+- Red-green extension: settings accept both exact Gemini model IDs and reject other IDs; each model
+  drives the adapter's exact identity, pricing, request URL, and independently calculated 11-fixture
+  benchmark ceiling (`$0.231000` for Flash-Lite and `$0.924000` for Flash).
 
 ### Integration and database migration
 
@@ -576,7 +626,7 @@ policy; the benchmark uses repository-owned synthetic data only.
 
 - Run only after renewed owner approval and credentials with the guarded command, exact 11-file
   manifest, SHA-256 fixture/prompt/schema hashes, exact model snapshot, and worst-case 22-call/
-  `$0.924000` Gemini estimate approval.
+  model-specific estimate approval (`$0.231000` for Flash-Lite or `$0.924000` for Flash).
 - Record expected and validated flat transcripts, text edits, visual math edits, ordering errors,
   preserved mathematical errors, warnings/regions, schema retries/failures, latency, usage, per-run
   and total cost, documented data-handling facts, limitations, and observed failure modes.
@@ -611,6 +661,10 @@ policy; the benchmark uses repository-owned synthetic data only.
 - Default local/test mode uses the deterministic fake. Real mode requires explicit server-only
   provider, exact model, API key, and timeout. Pricing identity is application-owned. The separate
   benchmark additionally requires exact fixture/cost approval and both paid/synthetic acknowledgements.
+- The ignored local `.env` will select `gemini` / `gemini-3.5-flash-lite` for the owner's manual
+  testing. If its key is absent, startup must fail safely; no fallback real model or fabricated
+  transcript is allowed. Rollback is configuration-only: select exact `gemini-3.5-flash`, or return
+  to the deterministic fake to stop all provider calls.
 - Production startup rejects fake mode, missing secrets, model aliases that are not the approved
   snapshot, development credentials, and insecure sessions. This does not imply provider privacy
   approval; deployment remains blocked by the privacy action list.
@@ -694,14 +748,14 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 - [x] Repository inspected
 - [x] Plan reviewed
 - [x] Branch created from current main
-- [x] Tests written or updated
-- [x] Implementation complete
-- [x] Documentation updated
-- [x] Relevant checks pass
-- [x] Diff reviewed
-- [x] Branch rebased on current main
-- [x] Conflict resolution re-tested (no conflicts occurred)
-- [x] Handoff summary written
+- [x] Tests written or updated for the Flash-Lite extension
+- [x] Flash-Lite extension implementation complete
+- [x] Flash-Lite documentation updated
+- [x] Relevant checks pass after the extension
+- [x] Extension diff reviewed
+- [ ] Branch rebased on current main after the extension
+- [ ] Conflict resolution re-tested after the extension
+- [ ] Updated handoff summary written
 
 ## Decisions
 
@@ -727,6 +781,12 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 - 2026-08-27: The owner explicitly deferred the 10-fixture/20-call Gemini benchmark. No real provider
   network call is authorized in this implementation run. The benchmark report must remain visibly
   `NOT RUN — OWNER DEFERRED`, and the final handoff must explain later server-only API-key setup.
+- 2026-08-28: The owner selected `gemini-3.5-flash-lite` as the first local-testing model to reduce
+  cost and requested continued exact support for `gemini-3.5-flash`. Both remain server-only choices
+  behind the same Gemini adapter. Self-hosted, DeepSeek, Qwen, and generalized model configuration
+  were discussed and explicitly deferred to a later separately planned change. The real benchmark
+  remains deferred, so this extension uses only `httpx.MockTransport` synthetic contract shapes and
+  makes zero provider calls.
 
 ## Discoveries
 
@@ -758,6 +818,11 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 - Complete-diff review found that sequential duplicate correction saves returned `stale` even though
   the plan specified deduplication. A red integration assertion now proves the exact repeat returns
   the same version; attempt-row locks also serialize concurrent correction and confirmation clicks.
+- The post-extension five-project run exposed an existing Chromium-speed race in the M5 E2E setup:
+  `getByText` matched the still-visible “Add exam” button before the first created target entered the
+  list, so the next request reused priority rank 1 and was correctly rejected. Two fresh-database runs
+  reproduced 13 passes and the same two Chromium timeouts. The test now waits for the exact target
+  list item after each creation; no product behavior changes.
 
 ## Verification evidence
 
@@ -776,17 +841,25 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 - Red-green evidence included focused schema/adapter failures before their implementations, a browser
   label regression that failed 1 of 10 component assertions before the source-label seam, and a
   duplicate correction-save integration assertion that failed with HTTP 409 before deduplication and
-  then passed with the same immutable version response.
+  then passed with the same immutable version response. The Flash-Lite extension first failed both
+  parameterized Gemini adapter cases on the fixed Flash identity, then failed Settings validation on
+  the single-model allowlist, and finally failed the provider-factory test because the configured
+  model was not wired into the adapter. Each focused regression passed after the corresponding
+  production change.
 - `make api-generate` — regenerated OpenAPI and TypeScript declarations. Final SHA-256 values are
   `6233de1150f96f4bca6d642c2f5b7310833895a62a99079b2345ca060f693587` for
   `packages/api-client/openapi.json` and
   `f8af1082e874c48bc9963cde68d30c11db98e78dcd8911c423e61b446d14e449` for
   `packages/api-client/src/schema.d.ts`; `scripts/check_api_contract.sh` passed byte comparison.
-- `make check` with isolated web/API ports 3100/8100, task-specific PostgreSQL database
-  `math_coach_m6_e2e`, and ephemeral MinIO ports 9100/9101 — passed: Prettier, Ruff format, ESLint,
-  Ruff lint, TypeScript, mypy on 48 files, generated API contract, two content packages, production
-  Next.js build, 146 frontend unit tests, 100 backend unit tests, two full downgrade/upgrade cycles,
-  39 integration tests, and 15 Playwright cases in 18.7 seconds.
+- The first post-extension `make check` reached the browser suite after every preceding check passed,
+  then reported 13/15 because the two fast Chromium M5 journeys hit the E2E setup race described
+  above. A second fresh-database `make test-e2e` reproduced the same two failures. After the exact
+  target-list-item wait was added, a focused fresh-database run passed 15/15 in 19.9 seconds.
+- Final `make check` with isolated web/API ports 3100/8100, task-specific PostgreSQL database
+  `math_coach_m6_flash_lite_e2e`, and ephemeral MinIO ports 9100/9101 — passed: Prettier, Ruff format,
+  ESLint, Ruff lint, TypeScript, mypy on 48 files, generated API contract, two content packages,
+  production Next.js build, 146 frontend unit tests, 103 backend unit tests, two full
+  downgrade/upgrade cycles, 39 integration tests, and 15 Playwright cases in 20.4 seconds.
 - The 39 integration cases include 11 M6 tests covering authentication and cross-user isolation,
   owned/verified upload enforcement and byte loading, immutable content pinning, run replay and
   in-flight exclusion, timeout/rate-limit/permanent/uncertain/schema failures without transcripts,
@@ -798,8 +871,8 @@ remote shared-contract change first, then M6 migration/API generation, then fron
   `docs/evaluation/m6-transcription-device-report.md`. Automation found no document horizontal
   overflow or escaped audited elements.
 - Frontend coverage: 21 files, 146 tests, 88.13% statements, 82.72% branches, 93.07% functions, and
-  87.96% lines. Backend unit result: 100 passed, 39 integration deselected. Integration result: 39
-  passed, 100 unit deselected.
+  87.96% lines. Backend unit result: 103 passed, 39 integration deselected. Integration result: 39
+  passed, 103 unit deselected.
 - `npm audit --audit-level=high` — 0 vulnerabilities. `uv lock --project services/api --check` — 51
   packages resolved and lock current. The dependency graph adds no package: `httpx==0.28.1` moved
   from the development group to runtime.
@@ -808,8 +881,9 @@ remote shared-contract change first, then M6 migration/API generation, then fron
   `d487b2f47b769380002a80fa31316bf8e238b3db15f34a7cff0c560473e0ad89`; fixture manifest SHA-256 is
   `21c08074e746206f4491cd665ff4897a1164b0aedaf4c7acd8b88423b91aa979`.
 - Real benchmark: **not run by owner direction**. Exact result is 0 provider calls, 0 input/output
-  tokens measured, and `$0.000000` spent. The guarded 11-fixture Gemini estimate is `$0.924000` with
-  at most 22 schema calls. No Gemini/OpenAI/Anthropic key was loaded or network request made.
+  tokens measured, and `$0.000000` spent. The guarded 11-fixture estimate is `$0.231000` for
+  Flash-Lite or `$0.924000` for Flash, with at most 22 schema calls. No Gemini/OpenAI/Anthropic key
+  was loaded or network request made.
 - The task-specific E2E MinIO container and PostgreSQL database were removed after the passing runs;
   unrelated M3 services, the shared development database/object store, and the original checkout's
   untracked corpus/data work were not changed.
@@ -817,8 +891,10 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 ## Result
 
 Implementation, tests, architecture documentation, deferred benchmark report, and five-project
-device evidence are complete. Gemini 3.5 Flash is the first real server adapter; exact OpenAI and
-Anthropic alternatives and the deterministic fake use the same boundary. The M5 multi-target plan
-and clearly mocked downstream path remain intact, and no Milestone 7–9 behavior was introduced. The
-real-provider benchmark remains intentionally deferred: no paid/provider call or production-quality
-claim is part of this result. Final remote rebase verification completed without conflicts.
+device evidence are complete. Gemini 3.5 Flash-Lite is the first lower-cost real configuration and
+Gemini 3.5 Flash remains an exact selectable option behind the same Gemini adapter; exact OpenAI and
+Anthropic alternatives and the deterministic fake continue through the same application boundary.
+Self-hosted, DeepSeek, Qwen, and arbitrary provider/model configuration remain deferred. The M5
+multi-target plan and clearly mocked downstream path remain intact, and no Milestone 7–9 behavior was
+introduced. The real-provider benchmark remains intentionally deferred: no paid/provider call or
+production-quality claim is part of this result.
