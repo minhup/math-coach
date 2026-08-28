@@ -696,6 +696,10 @@ Actual commits before the final documentation-only handoff update:
 2. `1a5d3b3 feat: implement durable multimodal transcription`
 3. `7d02c43 feat: add guarded transcription benchmark`
 4. `f944e23 docs: record Milestone 6 architecture and evidence`
+5. `50f2257 docs: finalize Milestone 6 handoff`
+6. `d3741bb feat: support Gemini Flash-Lite transcription`
+7. `a08a348 test: stabilize multi-exam browser setup`
+8. `73477c1 docs: record Flash-Lite verification`
 
 ## Conflict coordination
 
@@ -753,9 +757,9 @@ remote shared-contract change first, then M6 migration/API generation, then fron
 - [x] Flash-Lite documentation updated
 - [x] Relevant checks pass after the extension
 - [x] Extension diff reviewed
-- [ ] Branch rebased on current main after the extension
-- [ ] Conflict resolution re-tested after the extension
-- [ ] Updated handoff summary written
+- [x] Branch rebased on current main after the extension
+- [x] Conflict resolution re-tested after the extension (no conflicts; no affected rerun required)
+- [x] Updated handoff summary written
 
 ## Decisions
 
@@ -833,7 +837,8 @@ remote shared-contract change first, then M6 migration/API generation, then fron
   resolved `origin/main` to `dbfd8162a27f2f63fecfcdbe63759d64eab56c24`.
 - `git merge-base --is-ancestor dbfd8162a27f2f63fecfcdbe63759d64eab56c24 origin/main` — exit 0.
 - `git rebase origin/main` after the final fetch — reported that the feature branch was already up
-  to date; no conflicts occurred and no implementation changed.
+  to date at `dbfd8162a27f2f63fecfcdbe63759d64eab56c24`; no conflicts occurred and no implementation
+  changed.
 - `git worktree add -b feat/m6-multimodal-transcription
 /home/minh/dev/math-coach-m6-transcription origin/main` — succeeded at the M5 commit.
 - Read-only repository, documentation, migration, configuration, generated-contract, backend,
@@ -897,4 +902,5 @@ Anthropic alternatives and the deterministic fake continue through the same appl
 Self-hosted, DeepSeek, Qwen, and arbitrary provider/model configuration remain deferred. The M5
 multi-target plan and clearly mocked downstream path remain intact, and no Milestone 7–9 behavior was
 introduced. The real-provider benchmark remains intentionally deferred: no paid/provider call or
-production-quality claim is part of this result.
+production-quality claim is part of this result. The final remote fetch and rebase found
+`origin/main` unchanged at `dbfd8162a27f2f63fecfcdbe63759d64eab56c24`, with no conflicts.
