@@ -36,8 +36,8 @@ regression, and the Milestone 4 curated-geometry regression in every project.
 | `ipad-pro-11-portrait-webkit`  | WebKit   | 834 × 1194   | 11.7 s     | 7.5 s           | 4.6 s               |
 | `ipad-pro-11-landscape-webkit` | WebKit   | 1194 × 834   | 9.4 s      | 5.4 s           | 4.7 s               |
 
-The final root `make check` also passed the same 15 cases in **18.7 seconds**, after 146 frontend
-unit tests, 100 backend unit tests, 39 PostgreSQL/MinIO integration tests, two full migration
+The final pre-merge root `make check` also passed the same 15 cases in **17.4 seconds**, after 146
+frontend unit tests, 103 backend unit tests, 39 PostgreSQL/MinIO integration tests, two full migration
 downgrade/upgrade cycles, contract generation verification, type checks, lint, formatting, content
 validation, and the production build.
 

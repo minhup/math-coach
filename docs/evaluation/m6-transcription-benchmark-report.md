@@ -2,9 +2,24 @@
 
 ## Status
 
-**NOT RUN — OWNER DEFERRED.** No Gemini, OpenAI, or Anthropic network request was made, no API key was
-loaded, and the measured-result fields below remain intentionally empty. This report does not approve
+**NOT RUN — OWNER DEFERRED.** The benchmark command made no Gemini, OpenAI, or Anthropic request, and
+the benchmark measured-result fields below remain intentionally empty. This report does not approve
 any provider for real learner data or production use.
+
+After this benchmark was deferred, the owner separately approved bounded adapter diagnosis with the
+repository-owned `clean-handwritten-math.png` fixture. That work is not a benchmark result or release
+gate. Three rejected schema probes used zero tokens and cost `$0.000000`; three successful isolation
+calls used `3,416` input tokens and `528` output tokens and cost `$0.002346` total. The final full
+Flash-Lite request returned a ready six-block transcript that passed authoritative Pydantic
+validation. The 11-fixture benchmark below remains unrun.
+
+The owner's later manual synthetic UI acceptance produced two provider rejections before generation
+(`1,556 ms` and `11,400 ms`, zero tokens and zero cost) and one validated success in `2,825 ms`.
+The successful application run used `1,433` input tokens and `724` output tokens, cost `$0.002240`,
+and persisted one schema attempt with the frozen prompt/schema identities below. Including the
+separate adapter diagnosis, all non-benchmark live generation in this milestone cost `$0.004586`.
+These observations remain diagnostic/acceptance evidence, not benchmark measurements or approval
+for real learner data.
 
 The selected first lower-cost integration is Google Gemini `gemini-3.5-flash-lite`, with
 `gemini-3.5-flash` retained as an exact server-configured option. Other provider alternatives are

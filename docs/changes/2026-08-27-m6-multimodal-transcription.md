@@ -791,6 +791,13 @@ remote shared-contract change first, then M6 migration/API generation, then fron
   were discussed and explicitly deferred to a later separately planned change. The real benchmark
   remains deferred, so this extension uses only `httpx.MockTransport` synthetic contract shapes and
   makes zero provider calls.
+- 2026-08-28: After the owner configured a server-only key, the owner approved two bounded live
+  diagnostic tranches using one repository-owned synthetic fixture. The first permitted at most
+  three generation calls with a `$0.031500` ceiling; all three schema variants returned HTTP 400
+  before token use and cost `$0.000000`. The second permitted three calls that could incur cost. It
+  stopped after baseline image generation, minimal structured output, and the corrected full adapter
+  all returned HTTP 200. The three successful calls cost `$0.002346` in total. This was adapter
+  diagnosis, not the deferred 11-fixture benchmark or production/privacy approval.
 
 ## Discoveries
 
@@ -827,6 +834,29 @@ remote shared-contract change first, then M6 migration/API generation, then fron
   list, so the next request reused priority rank 1 and was correctly rejected. Two fresh-database runs
   reproduced 13 passes and the same two Chromium timeouts. The test now waits for the exact target
   list item after each creation; no product behavior changes.
+- The first owner-run live Flash-Lite upload reached Gemini but ended in `provider_rejected` before a
+  schema attempt, with zero tokens and zero cost. A metadata-only `$0.000000` model request returned
+  HTTP 200 for `models/gemini-3.5-flash-lite` and advertised `generateContent`, ruling out the key,
+  model ID, and project access. Inspection then found that the adapter submitted Pydantic's full JSON
+  Schema—including `$defs`, `$ref`, `oneOf`, `discriminator`, `const`, defaults, string bounds, and
+  exclusive bounds—rather than Gemini's documented supported subset. The provider-facing request
+  schema must be application-owned and Gemini-compatible; authoritative strict Pydantic validation
+  remains unchanged after receipt.
+- Live isolation showed that removing structured output let the same model/key/PNG succeed, and a
+  one-string `responseJsonSchema` also succeeded. Gemini continued to reject both a projected rich
+  schema and a simplified union/constraint schema. The working production request therefore uses
+  minimal schema guidance with only core structural keywords. The full faithful-transcription call
+  returned HTTP 200 and passed the unchanged `ProviderPayload` validator as a ready, six-block flat
+  transcript. This keeps strictness at the authoritative application boundary instead of relying on
+  provider-side conditional-schema enforcement.
+- The first successful owner-run live transcript could not be confirmed unchanged. The succeeded run
+  and provider transcript version 1 were present, but no learner version or confirmation existed.
+  A focused component reproduction proved the browser compared transcript objects with
+  `JSON.stringify`; FastAPI field order differed from `confirmTranscript()` clone order, so equal
+  typed documents were treated as edits and the backend correctly rejected the duplicate version as
+  `transcript_unchanged`. Typed field-by-field equality now ignores object-key order and treats
+  absent/null optional provenance identically. Unchanged documents confirm provider version 1;
+  genuine text/math edits still create a learner version.
 
 ## Verification evidence
 
@@ -886,9 +916,32 @@ remote shared-contract change first, then M6 migration/API generation, then fron
   `d487b2f47b769380002a80fa31316bf8e238b3db15f34a7cff0c560473e0ad89`; fixture manifest SHA-256 is
   `21c08074e746206f4491cd665ff4897a1164b0aedaf4c7acd8b88423b91aa979`.
 - Real benchmark: **not run by owner direction**. Exact result is 0 provider calls, 0 input/output
-  tokens measured, and `$0.000000` spent. The guarded 11-fixture estimate is `$0.231000` for
-  Flash-Lite or `$0.924000` for Flash, with at most 22 schema calls. No Gemini/OpenAI/Anthropic key
-  was loaded or network request made.
+  benchmark tokens measured, and `$0.000000` benchmark spend. Separately approved Flash-Lite adapter
+  diagnosis used one synthetic fixture: three pre-generation HTTP 400 responses at zero cost,
+  followed by successful baseline (`1,080/1` input/output tokens, `$0.000327`), minimal structured
+  output (`1,084/11`, `$0.000353`), and full validated transcription (`1,252/516`, `$0.001666`). Total
+  diagnostic usage was `3,416` input tokens, `528` output tokens, and `$0.002346`. The guarded
+  11-fixture estimate remains `$0.231000` for Flash-Lite or `$0.924000` for Flash, with at most 22
+  schema calls; it was not run.
+- Post-live confirmation regression: `npx vitest run
+features/transcription/transcript-state.test.ts components/journey/static-student-journey.test.tsx
+--coverage=false` passed 16/16. Focused ESLint and `tsc --noEmit` passed. The red journey assertion
+  first proved an unchanged, key-reordered transcript incorrectly called `createTranscriptVersion`;
+  after typed equality it makes zero correction-version calls and confirms the existing version.
+- Final pre-merge `MATH_COACH_TRANSCRIPTION_PROVIDER=fake
+MATH_COACH_TRANSCRIPTION_MODEL_SNAPSHOT=m6-transcription-fixture-v1 make check` passed without a
+  provider network call: Prettier; Ruff formatting; ESLint; Ruff lint; TypeScript; mypy on 48 files;
+  generated API contract verification; two content packages; production Next.js build; 146 frontend
+  unit tests; 103 backend unit tests; two complete downgrade/upgrade cycles; 39 integration tests;
+  and 15 Playwright cases across all five required projects in 17.4 seconds. The first invocation
+  stopped only on Ruff import grouping in the updated adapter test; the mechanical import grouping
+  was corrected and the complete command then passed.
+- The owner's manual real-provider UI acceptance persisted two pre-generation provider rejections at
+  zero tokens/cost (`1,556 ms` and `11,400 ms`) and one successful validated Flash-Lite run. The
+  success took `2,825 ms`, used `1,433` input tokens and `724` output tokens, recorded one schema
+  attempt, and cost `$0.002240`. Together with the three successful adapter-isolation calls, all
+  non-benchmark live generation cost `$0.004586`. The approved 11-fixture benchmark remains unrun
+  and is not converted into a release claim.
 - The task-specific E2E MinIO container and PostgreSQL database were removed after the passing runs;
   unrelated M3 services, the shared development database/object store, and the original checkout's
   untracked corpus/data work were not changed.

@@ -24,7 +24,7 @@ from app.transcription.provider import (
     ProviderRequest,
     StrictTranscriptionProvider,
 )
-from app.transcription.provider_schema import PROVIDER_JSON_SCHEMA
+from app.transcription.provider_schema import GEMINI_PROVIDER_JSON_SCHEMA
 
 
 @dataclass(frozen=True)
@@ -101,7 +101,7 @@ class GeminiTranscriptionProvider(StrictTranscriptionProvider):
             "generationConfig": {
                 "maxOutputTokens": 3_000,
                 "responseMimeType": "application/json",
-                "responseJsonSchema": PROVIDER_JSON_SCHEMA,
+                "responseJsonSchema": GEMINI_PROVIDER_JSON_SCHEMA,
             },
         }
         envelope, latency_ms = await post_provider_json(

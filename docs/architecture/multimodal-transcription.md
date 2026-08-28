@@ -46,7 +46,13 @@ rejects other Gemini IDs, aliases, or browser overrides. Self-hosted, DeepSeek, 
 model configuration are deferred to a later change.
 
 The adapters use direct `httpx==0.28.1` calls instead of provider SDKs. Every request caps visible
-output at 3,000 tokens and supplies the same strict JSON schema. OpenAI uses the Responses API with
+output at 3,000 tokens. OpenAI and Anthropic receive the full provider JSON Schema. Gemini receives
+application-owned minimal schema guidance containing only its live-validated core object, array,
+string, number, integer, enum, properties, required, and items vocabulary; sending Pydantic's richer
+union and constraint schema caused a pre-generation HTTP 400 from Flash-Lite. The Gemini guidance is
+intentionally broader for conditional text/math and ready/uncertain fields, but the response still
+passes through the same strict authoritative Pydantic discriminated unions before persistence or UI
+use. OpenAI uses the Responses API with
 base64 image input, `store: false`, and reasoning effort `none`. Anthropic disables Sonnet 5 adaptive
 thinking for this transcription-only request. No adapter retains or exposes raw error bodies, raw
 responses, internal reasoning, or provider-supplied identity metadata.
@@ -81,8 +87,10 @@ terminal. Transport failures are never automatically retried.
 Learner correction may edit text/math values, reorder or remove existing blocks, and insert new
 blocks. Existing block type and source-region provenance cannot change, new blocks cannot claim a
 source region, and warnings may only be removed—not invented. Saving creates a new immutable version.
-Once confirmed, correction is rejected. Confirmation stores the exact version ID and canonical
-SHA-256, and repeating the same confirmation is idempotent.
+The browser compares typed transcript fields rather than serialized JSON key order: an unchanged
+provider document confirms version 1 directly, while an actual content edit creates a learner
+version. Once confirmed, correction is rejected. Confirmation stores the exact version ID and
+canonical SHA-256, and repeating the same confirmation is idempotent.
 
 ## Persistence and API
 

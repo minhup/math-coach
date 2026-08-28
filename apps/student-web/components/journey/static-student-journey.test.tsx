@@ -107,6 +107,7 @@ const metadata = {
 };
 
 const transcriptDocument = {
+  schemaVersion: "3.0.0" as const,
   attemptId: "attempt-1",
   blocks: [
     {
@@ -124,7 +125,6 @@ const transcriptDocument = {
     },
     { id: "math-1", latex: "M=(2,0", type: "math" as const },
   ],
-  schemaVersion: "3.0.0" as const,
   warnings: [
     {
       blockId: "math-1",
@@ -338,6 +338,7 @@ describe("StaticStudentJourney", () => {
       width: "40%",
     });
     await user.click(screen.getByRole("button", { name: "Confirm exact transcript" }));
+    expect(api.createTranscriptVersion).not.toHaveBeenCalled();
 
     expect(
       await screen.findByRole("heading", { name: "Authoritative evaluation input" }),

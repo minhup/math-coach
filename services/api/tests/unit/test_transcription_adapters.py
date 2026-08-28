@@ -38,6 +38,22 @@ def request() -> ProviderRequest:
     )
 
 
+def schema_keywords(value: object, *, schema_map: bool = False) -> set[str]:
+    if isinstance(value, dict):
+        if schema_map:
+            return {keyword for child in value.values() for keyword in schema_keywords(child)}
+        keywords = set(value)
+        for key, child in value.items():
+            keywords |= schema_keywords(
+                child,
+                schema_map=key in {"$defs", "properties"},
+            )
+        return keywords
+    if isinstance(value, list):
+        return {keyword for child in value for keyword in schema_keywords(child)}
+    return set()
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("model_snapshot", "pricing_version", "expected_cost"),
@@ -80,7 +96,22 @@ async def test_gemini_uses_selected_exact_server_model_image_and_structured_sche
     assert "server-secret" not in str(seen[0].url)
     body = json.loads(seen[0].content)
     assert body["generationConfig"]["responseMimeType"] == "application/json"
-    assert body["generationConfig"]["responseJsonSchema"]["$defs"]
+    assert "responseSchema" not in body["generationConfig"]
+    response_schema = body["generationConfig"]["responseJsonSchema"]
+    assert schema_keywords(response_schema) <= {
+        "enum",
+        "items",
+        "properties",
+        "required",
+        "type",
+    }
+    assert response_schema["type"] == "object"
+    assert response_schema["required"] == ["outcome"]
+    assert response_schema["properties"]["outcome"]["enum"] == ["ready", "uncertain"]
+    block_schema = response_schema["properties"]["blocks"]["items"]
+    assert block_schema["type"] == "object"
+    assert block_schema["required"] == ["type"]
+    assert block_schema["properties"]["type"]["enum"] == ["text", "math"]
     assert body["generationConfig"]["maxOutputTokens"] == 3_000
     assert body["contents"][0]["parts"][1]["inlineData"]["mimeType"] == "image/png"
     assert body["contents"][0]["parts"][1]["inlineData"]["data"]
@@ -166,8 +197,12 @@ async def test_rate_limit_is_safe_retryable_and_is_not_automatically_retried() -
     assert calls == 1
 
 
-def test_server_configuration_requires_exact_model_and_selected_secret() -> None:
+def test_server_configuration_requires_exact_model_and_selected_secret(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("MATH_COACH_GEMINI_API_KEY", raising=False)
     gemini = Settings(
+        _env_file=None,
         transcription_provider="gemini",
         transcription_model_snapshot="gemini-3.5-flash",
         gemini_api_key="secret",
@@ -175,6 +210,7 @@ def test_server_configuration_requires_exact_model_and_selected_secret() -> None
     assert gemini.transcription_model_snapshot == "gemini-3.5-flash"
 
     flash_lite = Settings(
+        _env_file=None,
         transcription_provider="gemini",
         transcription_model_snapshot="gemini-3.5-flash-lite",
         gemini_api_key="secret",
@@ -183,17 +219,20 @@ def test_server_configuration_requires_exact_model_and_selected_secret() -> None
 
     with pytest.raises(ValueError, match="exact model"):
         Settings(
+            _env_file=None,
             transcription_provider="gemini",
             transcription_model_snapshot="gemini-latest",
             gemini_api_key="secret",
         )
     with pytest.raises(ValueError, match="API key"):
         Settings(
+            _env_file=None,
             transcription_provider="gemini",
             transcription_model_snapshot="gemini-3.5-flash",
         )
     with pytest.raises(ValueError, match="API key"):
         Settings(
+            _env_file=None,
             transcription_provider="gemini",
             transcription_model_snapshot="gemini-3.5-flash",
             gemini_api_key="   ",
@@ -204,6 +243,7 @@ def test_provider_factory_uses_server_selected_gemini_model(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     settings = Settings(
+        _env_file=None,
         transcription_provider="gemini",
         transcription_model_snapshot="gemini-3.5-flash-lite",
         gemini_api_key="secret",

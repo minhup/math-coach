@@ -259,3 +259,57 @@ export function confirmTranscript(state: TranscriptState): ConfirmedTranscriptSn
     warnings: state.warnings.map((warning) => ({ ...warning })),
   };
 }
+
+export function transcriptDocumentsEqual(left: TranscriptState, right: TranscriptState): boolean {
+  validateTranscriptState(left);
+  validateTranscriptState(right);
+  if (
+    left.attemptId !== right.attemptId ||
+    left.schemaVersion !== right.schemaVersion ||
+    left.blocks.length !== right.blocks.length ||
+    left.warnings.length !== right.warnings.length
+  ) {
+    return false;
+  }
+  const sameBlocks = left.blocks.every((leftBlock, index) => {
+    const rightBlock = right.blocks[index];
+    if (
+      rightBlock === undefined ||
+      leftBlock.id !== rightBlock.id ||
+      leftBlock.type !== rightBlock.type
+    ) {
+      return false;
+    }
+    const sameValue =
+      leftBlock.type === "text" && rightBlock.type === "text"
+        ? leftBlock.text === rightBlock.text
+        : leftBlock.type === "math" && rightBlock.type === "math"
+          ? leftBlock.latex === rightBlock.latex
+          : false;
+    const leftRegion = leftBlock.sourceRegion;
+    const rightRegion = rightBlock.sourceRegion;
+    const sameRegion =
+      (leftRegion == null && rightRegion == null) ||
+      (leftRegion != null &&
+        rightRegion != null &&
+        leftRegion.attemptAssetId === rightRegion.attemptAssetId &&
+        leftRegion.units === rightRegion.units &&
+        leftRegion.x === rightRegion.x &&
+        leftRegion.y === rightRegion.y &&
+        leftRegion.width === rightRegion.width &&
+        leftRegion.height === rightRegion.height);
+    return sameValue && sameRegion;
+  });
+  return (
+    sameBlocks &&
+    left.warnings.every((leftWarning, index) => {
+      const rightWarning = right.warnings[index];
+      return (
+        rightWarning !== undefined &&
+        leftWarning.code === rightWarning.code &&
+        leftWarning.message === rightWarning.message &&
+        (leftWarning.blockId ?? null) === (rightWarning.blockId ?? null)
+      );
+    })
+  );
+}

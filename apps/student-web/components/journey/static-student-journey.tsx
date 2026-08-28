@@ -9,9 +9,10 @@ import {
   transitionStaticJourney,
   type StaticJourneyEvent,
 } from "../../features/journey/static-journey-state";
-import type {
+import {
   ConfirmedTranscriptSnapshot,
   TranscriptBlock,
+  transcriptDocumentsEqual,
 } from "../../features/transcription/transcript-state";
 import { ApiError } from "../../lib/api";
 import {
@@ -352,10 +353,9 @@ export function StaticStudentJourney({ api = defaultApi }: { api?: StaticJourney
       throw new Error("No validated transcript version is available.");
     }
     try {
-      const selectedVersion =
-        JSON.stringify(transcript) === JSON.stringify(transcriptVersion.document)
-          ? transcriptVersion
-          : await api.createTranscriptVersion(currentAttempt.id, transcriptVersion.id, transcript);
+      const selectedVersion = transcriptDocumentsEqual(transcript, transcriptVersion.document)
+        ? transcriptVersion
+        : await api.createTranscriptVersion(currentAttempt.id, transcriptVersion.id, transcript);
       const confirmed = await api.confirmTranscriptVersion(
         currentAttempt.id,
         selectedVersion.id,
