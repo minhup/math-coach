@@ -571,10 +571,10 @@ checks.
 - [x] Implementation complete
 - [x] Documentation updated
 - [x] Relevant checks pass
-- [ ] Diff reviewed
-- [ ] Branch rebased on current main
-- [ ] Conflict resolution re-tested
-- [ ] Handoff summary written
+- [x] Diff reviewed
+- [x] Branch rebased on current main
+- [x] Conflict resolution re-tested
+- [x] Handoff summary written
 
 ## Decisions
 
@@ -651,9 +651,37 @@ checks.
   API drift; two content packages; six-of-six gold fixtures; production build; 153 frontend unit
   tests; 131 backend non-integration tests; two base-to-head migration cycles; 52 backend integration
   tests; and 15 Playwright cases across all five projects.
+- Final `git fetch origin main` — succeeded; `origin/main` remained
+  `e3e6d13f9913d94b851c8f5b149eaf8482b65173`, exactly the published M6 prerequisite.
+- `git rebase origin/main` — reported the branch already up to date; no conflict occurred and no
+  behavior or public-contract resolution was needed.
+- `git diff --check origin/main...HEAD` and complete name/status/stat review — passed with only the
+  58 documented M7 files, generated contracts, and deliberate obsolete mock deletions.
+- `make check` after rebase — passed again in full with the same counts: 153 frontend unit tests, 131
+  backend non-integration tests, 52 integration tests, two complete migration cycles, six-of-six gold
+  fixtures, and 15 Playwright cases across all five projects, plus all format/lint/type/contract/
+  content/build checks.
 - No provider key was read, no live or paid provider call was made, and every fixture was synthetic
   and non-personal.
 
 ## Result
 
-In progress. No implementation file has been modified and no paid provider call has been made.
+Milestone 7 is implemented on `feat/m7-evaluation-scoring-hints`. The exact M6 confirmed flat
+transcript remains authoritative and the correction editor remains step-free. A separate strict
+evaluation adapter derives application-facing reasoning steps only after confirmation, validates
+root/dependent relationships and all rubric awards, retries invalid schema once, computes exact
+scores in application code, and persists safe run/result metadata or explicit scoreless uncertainty.
+The authenticated API exposes durable evaluation request/state and one-level-at-a-time curated hint
+release; hint geometry is revalidated against the immutable scene before persistence and rendering.
+Generated TypeScript contracts and runtime browser guards reject malformed nested data, and the UI
+covers loading, retryable/permanent/invalid-schema failure, uncertainty, ready scoring, dependencies,
+rubric feedback, and progressive hints.
+
+Migration `20260828_0004` is additive for existing M6 data and has a tested destructive-to-M7-only
+downgrade. Permanent architecture, API/workflow, gold, and five-project device documentation now
+describe the final implementation. The deterministic six-case synthetic corpus matched every
+recorded expectation with no threshold or production-quality claim. Ten generated device screenshots
+were visually inspected; physical-device/true Apple Simulator QA, real-provider calibration,
+production provider/privacy approval, learner-state updates, and adaptive planning remain explicitly
+out of scope. No dependency was added, no conflict occurred, no paid call was made, and no real or
+personal learner data was used.
